@@ -1,13 +1,15 @@
 import fastify from "fastify";
-const Fastify = fastify({logger:true})
-Fastify.get("/hello",function(request,reply){
-    Fastify.log.info("/hello route")
-    reply.send({message:"Hello"})
+
+
+const Server = fastify({logger:true})
+
+Server.get("/ping",function(request,reply){
+    reply.send({message:"Pong"})
 })
-Fastify.listen({port:8080},(error,port)=>{
-    Fastify.log.info(`Server is Lintening on PORT ${port}`)
+
+Server.listen({port:8080},(error,port)=>{
     if(error){
-        Fastify.log.error(`An error occured ${error.message}`)
+        Server.log.error(`An error occured ${error.message}`)
         process.exit(1);
     }
 })
