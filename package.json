@@ -1,0 +1,17 @@
+{
+  "name": "orbitdrive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./Src/server.ts",
+    "dev": "nodemon ./Src/server.ts"
+  },
+  "keywords": [],
+  "author": "Saad Muhammad Bin Ramzan",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "fastify": "^5.12.3"
+  }
+}
