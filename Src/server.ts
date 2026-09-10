@@ -4,7 +4,7 @@ import { responseTimeHook } from "./Hooks/responseTimeHook";
 const server = Fastify({ logger: true });
 server.register(responseTimeHook);
 server.get("/ping", function (request, reply) {
-    return { message: "Pong" };
+    return { message: "pong" };
 })
 
 server.listen({ port: 8080 }, (error, port) => {
