@@ -12,11 +12,18 @@
   "author": "Saad Muhammad Bin Ramzan",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "fastify": "^5.12.3",
-    "fastify-plugin": "^6.0.0"
+    "fastify-plugin": "^6.0.0",
+    "fastify-type-provider-zod": "^7.0.0",
+    "pg": "^8.23.0",
+    "zod": "^4.6.1"
   },
   "devDependencies": {
     "@types/node": "^22.20.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }
