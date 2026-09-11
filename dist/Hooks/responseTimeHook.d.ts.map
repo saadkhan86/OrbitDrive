@@ -1,1 +1,0 @@
-{"version":3,"file":"responseTimeHook.d.ts","sourceRoot":"","sources":["../../Src/Hooks/responseTimeHook.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,SAAS,CAAC;AAG7C,OAAO,QAAQ,SAAS,CAAC;IACvB,UAAU,cAAc;QACtB,SAAS,EAAE,MAAM,CAAC;KACnB;CACF;AAsBD,eAAO,MAAM,gBAAgB,oBAA6B,CAAC"}

@@ -1,3 +1,0 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-export declare const GlobalErrorHandler: (error: any, request: FastifyRequest, reply: FastifyReply) => FastifyReply<import("fastify").RouteGenericInterface, import("fastify").RawServerDefault, import("http").IncomingMessage, import("http").ServerResponse<import("http").IncomingMessage>, unknown, import("fastify").FastifySchema, import("fastify").FastifyTypeProviderDefault, unknown>;
-//# sourceMappingURL=GlobalErrorHandler.d.ts.map
