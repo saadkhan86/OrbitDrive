@@ -5,7 +5,6 @@ import type {
   SignupValidator,
   UpdateValidator,
 } from "../Validators/UserValidator";
-import { send } from "process";
 
 export const UserController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
