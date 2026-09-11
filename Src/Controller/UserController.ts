@@ -3,6 +3,7 @@ import { UserService } from "../Services/User.Service";
 import type {
   LoginValidator,
   SignupValidator,
+  UpdateValidator,
 } from "../Validators/UserValidator";
 
 export const UserController = {
@@ -17,5 +18,11 @@ export const UserController = {
       message: "User logged in successfully",
       user: await UserService.login(request.body as LoginValidator),
     });
+  },
+  update: async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = await UserService.update(
+      request.body as UpdateValidator
+    );
+    return reply.status(200).send({ message: "User updated successfully" });
   },
 };

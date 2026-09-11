@@ -2,6 +2,7 @@ import UserRepo from "../Repositories/UserRepo";
 import type {
   SignupValidator,
   LoginValidator,
+  UpdateValidator,
 } from "../Validators/UserValidator";
 import * as argon2 from "argon2";
 import { CustomError } from "../Errors/CustomError";
@@ -24,4 +25,5 @@ export const UserService = {
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     return user;
   },
+  update: async (data: UpdateValidator) => {},
 };

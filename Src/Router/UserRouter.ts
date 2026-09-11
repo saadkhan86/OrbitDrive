@@ -13,4 +13,9 @@ export async function UserRouter(app: FastifyInstance) {
     { schema: { body: Uservalidator.loginValidator } },
     UserController.login,
   );
+  app.get(
+    "/me",
+    { schema: { body: Uservalidator.updateValidator } },
+    UserController.update,
+  );
 }
