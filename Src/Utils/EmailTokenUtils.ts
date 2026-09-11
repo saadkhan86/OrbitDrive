@@ -1,5 +1,5 @@
 import * as crypto from "node:crypto";
-export const tokenUtils = {
+export const EmailTokenUtils = {
   generateEmailVerificationToken: async (size = 32): Promise<string> => {
     return crypto.randomBytes(size).toString("hex");
   },

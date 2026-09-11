@@ -8,9 +8,10 @@ import type {
 
 export const UserController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
+    await UserService.signup(request.body as SignupValidator);
     return reply.status(201).send({
-      message: "User created successfully",
-      user: await UserService.signup(request.body as SignupValidator),
+      message:
+        "Account created successfully!, Check your email for verification",
     });
   },
   login: async (request: FastifyRequest, reply: FastifyReply) => {

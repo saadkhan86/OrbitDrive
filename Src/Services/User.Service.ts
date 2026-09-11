@@ -14,7 +14,9 @@ export const UserService = {
       throw new CustomError(409, "User already exists", "USER_ALREADY_EXISTS");
     const passwordHash = await argon2.hash(data.password);
     const user = await UserRepo.create({ ...data, passwordHash });
-    return user;
+    // send verification email to user
+    //create a instance in email_verification_tokens
+    return;
   },
   login: async (data: LoginValidator) => {
     const user = await UserRepo.findByEmail(data.email);
