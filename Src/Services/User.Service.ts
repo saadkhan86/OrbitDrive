@@ -25,5 +25,11 @@ export const UserService = {
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     return user;
   },
-  update: async (data: UpdateValidator) => {},
+  update: async (data: UpdateValidator) => {
+    const user = await UserRepo.update(
+      "ec047760-4c16-436c-9a80-17e994a74175",
+      data,
+    );
+    return user;
+  },
 };

@@ -5,10 +5,10 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
-import { checkDatabaseConnection } from "./Database";
-import { CustomError } from "./Errors/CustomError";
 import { config } from "dotenv";
 import { GlobalErrorHandler } from "./Errors/GlobalErrorHandler";
+import { JWTPlugin } from "./Plugin/JWTPlugin";
+import { StartServer } from "./Config/StartServer";
 
 config();
 
@@ -17,6 +17,7 @@ const server = Fastify({
 });
 
 server.register(responseTimeHook);
+server.register(JWTPlugin);
 
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
@@ -31,13 +32,4 @@ server.get("/ping", function (request, reply) {
 
 server.register(Router);
 
-checkDatabaseConnection().then(() => {
-  server.listen({ port: 8080 }, (error, port) => {
-    if (error) {
-      server.log.error(`An error occurred: ${error.message}`);
-      process.exit(1);
-    }
-
-    console.log(`🚀 Server running on ${port}`);
-  });
-});
+StartServer(server);

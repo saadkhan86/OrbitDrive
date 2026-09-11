@@ -5,6 +5,7 @@ import type {
   SignupValidator,
   UpdateValidator,
 } from "../Validators/UserValidator";
+import { send } from "process";
 
 export const UserController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -20,9 +21,14 @@ export const UserController = {
     });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = await UserService.update(
-      request.body as UpdateValidator
-    );
-    return reply.status(200).send({ message: "User updated successfully" });
+    // const { fullName } = request.body as UpdateValidator;
+    // if (!fullName || fullName == undefined || fullName == null)
+    //   return reply
+    //     .status(200)
+    //     .send({ message: "user updated successfully", data: request.user! });
+    const user = await UserService.update(request.body as UpdateValidator);
+    return reply
+      .status(200)
+      .send({ message: "User updated successfully", user });
   },
 };

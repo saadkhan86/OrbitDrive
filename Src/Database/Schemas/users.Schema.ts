@@ -5,7 +5,7 @@ import {
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";
-export const User = pgTable("users", {
+export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   fullName: varchar("fullName", { length: 50 }).notNull(),
   email: varchar("email", { length: 50 }).notNull().unique(),

@@ -22,14 +22,6 @@ export const Uservalidator = {
     password: z.string().min(6).max(30),
   }),
   updateValidator: z.object({
-    id: z
-      .string({
-        error: (issue) =>
-          issue.code === "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
-      .length(24, { message: "id must be of 24 characters" }),
     fullName: z
       .string({
         error: (issue) =>
