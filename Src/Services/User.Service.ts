@@ -8,7 +8,6 @@ import * as argon2 from "argon2";
 import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
 import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
-import { sendEmailVerificationEmail } from "./Email.Service";
 import { db } from "../Database";
 import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
 export const UserService = {
@@ -31,10 +30,11 @@ export const UserService = {
       await EmailTokenUtils.generateEmailVerificationToken();
     const hashedVerificationToken =
       await EmailTokenUtils.hashEmailVerificationToken(verificationToken);
-    const expirationMinuter =
-      process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || 15;
+    const expirationMinutes = Number(
+      process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || 15,
+    );
     const expiresAt = new Date(
-      Date.now() + Number(expirationMinuter) * 60 * 1000,
+      Date.now() + expirationMinutes * 60 * 1000,
     );
     const user = await db.transaction(async (tx) => {
       const createdUser = await UserRepo.create(tx, { ...data, passwordHash });
@@ -49,7 +49,7 @@ export const UserService = {
       email: user!.email,
       fullName: user!.fullName,
       verificationToken,
-      expiresIn: (expiresAt.getTime() - Date.now()) / 1000,
+      expiresIn: expirationMinutes,
     });
     return user;
   },
