@@ -1,4 +1,4 @@
-import transporter from "../Config/Transporter";
+import transporter from "../Config/Transporter.Config";
 
 export async function sendEmailVerificationEmail(
   email: string,

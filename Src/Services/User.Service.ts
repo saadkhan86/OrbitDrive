@@ -6,6 +6,9 @@ import type {
 } from "../Validators/UserValidator";
 import * as argon2 from "argon2";
 import { CustomError } from "../Errors/CustomError";
+import { EmailQueue } from "../Queues/Email.Queue";
+import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
+import { sendEmailVerificationEmail } from "./Email.Service";
 
 export const UserService = {
   signup: async (data: SignupValidator) => {
@@ -14,9 +17,11 @@ export const UserService = {
       throw new CustomError(409, "User already exists", "USER_ALREADY_EXISTS");
     const passwordHash = await argon2.hash(data.password);
     const user = await UserRepo.create({ ...data, passwordHash });
-    // send verification email to user
-    //create a instance in email_verification_tokens
-    return;
+    const emailVerificationToken =
+      await EmailTokenUtils.generateEmailVerificationToken();
+    const emailVerificationHashedToken =
+      await EmailTokenUtils.hashEmailVerificationToken(emailVerificationToken);
+    return user;
   },
   login: async (data: LoginValidator) => {
     const user = await UserRepo.findByEmail(data.email);
