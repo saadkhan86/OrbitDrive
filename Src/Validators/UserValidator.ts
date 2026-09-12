@@ -1,5 +1,5 @@
 import z from "zod";
-export const Uservalidator = {
+export const UserValidator = {
   signupValidator: z.object({
     fullName: z
       .string({

@@ -9,18 +9,48 @@ import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
 import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
 import { sendEmailVerificationEmail } from "./Email.Service";
-
+import { db } from "../Database";
+import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
 export const UserService = {
   signup: async (data: SignupValidator) => {
     const isExist = await UserRepo.findByEmail(data.email);
-    if (isExist)
-      throw new CustomError(409, "User already exists", "USER_ALREADY_EXISTS");
+    if (isExist && !isExist.isEmailVerified)
+      throw new CustomError(
+        409,
+        "Email already exists email verification is pending",
+        "EMAIL_ALREADY_EXISTS",
+      );
+    if (isExist && isExist.isEmailVerified)
+      throw new CustomError(
+        409,
+        "Email already exists",
+        "EMAIL_ALREADY_EXISTS",
+      );
     const passwordHash = await argon2.hash(data.password);
-    const user = await UserRepo.create({ ...data, passwordHash });
-    const emailVerificationToken =
+    const verificationToken =
       await EmailTokenUtils.generateEmailVerificationToken();
-    const emailVerificationHashedToken =
-      await EmailTokenUtils.hashEmailVerificationToken(emailVerificationToken);
+    const hashedVerificationToken =
+      await EmailTokenUtils.hashEmailVerificationToken(verificationToken);
+    const expirationMinuter =
+      process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || 15;
+    const expiresAt = new Date(
+      Date.now() + Number(expirationMinuter) * 60 * 1000,
+    );
+    const user = await db.transaction(async (tx) => {
+      const createdUser = await UserRepo.create(tx, { ...data, passwordHash });
+      await EmailVerificationRepo.create(tx, {
+        userId: createdUser!.id,
+        tokenHash: hashedVerificationToken,
+        expiresAt,
+      });
+      return createdUser;
+    });
+    await EmailQueue.add("verify-email", {
+      email: user!.email,
+      fullName: user!.fullName,
+      verificationToken,
+      expiresIn: (expiresAt.getTime() - Date.now()) / 1000,
+    });
     return user;
   },
   login: async (data: LoginValidator) => {

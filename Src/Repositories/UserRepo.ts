@@ -16,11 +16,14 @@ class UserRepo {
     const user = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return user[0];
   }
-  public async create(data: {
-    fullName: string;
-    email: string;
-    passwordHash: string;
-  }) {
+  public async create(
+    tx: any,
+    data: {
+      fullName: string;
+      email: string;
+      passwordHash: string;
+    },
+  ) {
     const result = await db
       .insert(users)
       .values({

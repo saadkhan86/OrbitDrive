@@ -5,8 +5,8 @@ export const RedisConfig = new Redis({
   maxRetriesPerRequest: null,
 });
 RedisConfig.on("connect", () => {
-  console.log("Redis Connected");
+  console.log("✅ Redis Connected");
 });
 RedisConfig.on("error", () => {
-  console.log("Redis Error");
+  console.log("❌ Redis Error");
 });

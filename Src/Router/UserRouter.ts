@@ -1,21 +1,21 @@
 import type { FastifyInstance } from "fastify";
 import { UserController } from "../Controller/UserController";
-import { Uservalidator } from "../Validators/UserValidator";
+import { UserValidator } from "../Validators/UserValidator";
 
 export async function UserRouter(app: FastifyInstance) {
   app.post(
     "/signup",
-    { schema: { body: Uservalidator.signupValidator } },
+    { schema: { body: UserValidator.signupValidator } },
     UserController.signup,
   );
   app.post(
     "/login",
-    { schema: { body: Uservalidator.loginValidator } },
+    { schema: { body: UserValidator.loginValidator } },
     UserController.login,
   );
   app.patch(
     "/update",
-    { schema: { body: Uservalidator.updateValidator } },
+    { schema: { body: UserValidator.updateValidator } },
     UserController.update,
   );
 }

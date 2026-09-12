@@ -9,7 +9,7 @@ import { GlobalErrorHandler } from "./Errors/GlobalErrorHandler";
 import { JWTPlugin } from "./Plugin/JWTPlugin";
 import { StartServer } from "./Config/StartServer.Config";
 import "dotenv/config";
-
+import "./Workers/Email.Worker";
 const server = Fastify({
   logger: true,
 });
