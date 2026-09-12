@@ -28,6 +28,6 @@ server.get("/ping", async function (request, reply) {
   };
 });
 
-server.register(Router);
+server.register(Router, { prefix: "/api/v1" });
 
 StartServer(server);

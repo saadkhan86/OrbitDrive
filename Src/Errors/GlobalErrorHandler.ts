@@ -38,7 +38,7 @@ export const GlobalErrorHandler = (
       },
     });
   }
-
+  console.log("error", error);
   request.log.error("Something went wrong", error);
   return reply.code(500).send({
     success: false,

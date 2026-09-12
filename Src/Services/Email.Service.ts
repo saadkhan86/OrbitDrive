@@ -6,7 +6,7 @@ export async function sendEmailVerificationEmail(
   expiresIn: number,
   fullName: string,
 ) {
-  const verificationUrl = `${process.env.BACKEND_URL}/api/v1/user/verify-email/${verificationToken}`;
+  const verificationUrl = `${process.env.BACKEND_URL}/api/v1/token/verify-email-token/${verificationToken}`;
 
   await transporter.sendMail({
     from: `"OrbitDrive" <${process.env.EMAIL_USER}>`,
@@ -33,7 +33,7 @@ This verification link will expire in ${expiresIn} minutes.
           This verification link will expire in
           <strong>${expiresIn} minutes</strong>.
         </p>
-        <div style="text-align: center; margin: 25px 0;">
+        <div style="text-align: center; margin: 25px 25px 25px 0px;">
           <a
             href="${verificationUrl}"
             style="

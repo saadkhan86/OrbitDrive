@@ -34,6 +34,6 @@ export const UserValidator = {
       .optional(),
   }),
 };
-export type SignupValidator = z.infer<typeof Uservalidator.signupValidator>;
-export type LoginValidator = z.infer<typeof Uservalidator.loginValidator>;
-export type UpdateValidator = z.infer<typeof Uservalidator.updateValidator>;
+export type SignupValidator = z.infer<typeof UserValidator.signupValidator>;
+export type LoginValidator = z.infer<typeof UserValidator.loginValidator>;
+export type UpdateValidator = z.infer<typeof UserValidator.updateValidator>;

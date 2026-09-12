@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { UserController } from "../Controller/UserController";
 import { UserValidator } from "../Validators/UserValidator";
 
-export async function UserRouter(app: FastifyInstance) {
+export const UserRouter = async (app: FastifyInstance) => {
   app.post(
     "/signup",
     { schema: { body: UserValidator.signupValidator } },
@@ -18,4 +18,4 @@ export async function UserRouter(app: FastifyInstance) {
     { schema: { body: UserValidator.updateValidator } },
     UserController.update,
   );
-}
+};
