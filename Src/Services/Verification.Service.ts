@@ -85,7 +85,10 @@ export const VerificationService = {
     });
     return true;
   },
-  sendPasswordResetEmail: async (email: string) => {
+  sendPasswordResetEmail: async (
+    email: string,
+    tokenGenerator: (id: string) => string,
+  ) => {
     const user = await UserRepo.findByEmail(email);
     if (!user)
       throw new CustomError(
@@ -99,6 +102,7 @@ export const VerificationService = {
         "User email is not verified",
         "EMAIL_NOT_VERIFIED",
       );
+    const token = tokenGenerator(user.id);
     await EmailQueue.add("verify-email", {
       email: user.email,
       fullName: user.fullName,

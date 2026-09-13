@@ -29,6 +29,7 @@ export const VerificationController = {
   ) => {
     await VerificationService.sendPasswordResetEmail(
       (request.body as EmailValidator).email,
+      (await request.server.jwtUtils).generatePasswordResetToken
     );
     return reply
       .status(201)
