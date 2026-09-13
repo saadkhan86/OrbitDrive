@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { TokenValidator } from "../Validators/TokenValidator";
-import { TokenController } from "../Controller/TokenController";
+import { VerificationController } from "../Controller/VerificationController";
 import { EmailValidator } from "../Validators/EmailValidator";
 
-export const TokenRouter = async (app: FastifyInstance) => {
+export const VerificationRouter = async (app: FastifyInstance) => {
   app.get(
     "/verify-email-token/:token",
     {
@@ -11,13 +11,20 @@ export const TokenRouter = async (app: FastifyInstance) => {
         params: TokenValidator.tokenSchema,
       },
     },
-    TokenController.verifyEmail,
+    VerificationController.verifyEmail,
   );
   app.post(
     "/resend-verification-email",
     {
       schema: { body: EmailValidator.emailSchema },
     },
-    TokenController.resendVerificationEmail,
+    VerificationController.resendVerificationEmail,
+  );
+  app.post(
+    "/password-reset-email",
+    {
+      schema: { body: EmailValidator.emailSchema },
+    },
+    VerificationController.sendPasswordResetEmail,
   );
 };

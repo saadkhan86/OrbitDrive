@@ -4,13 +4,13 @@ import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
 import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
 import UserRepo from "../Repositories/UserRepo";
-import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
+import { VerificationTokenUtils } from "../Utils/VerificationTokenUtils";
 import type { TokenValidator } from "../Validators/TokenValidator";
 
-export const EmailVerificationService = {
+export const VerificationService = {
   emailVerificationUpdate: async (data: TokenValidator) => {
     await db.transaction(async (tx) => {
-      const tokenHash = await EmailTokenUtils.hashEmailVerificationToken(
+      const tokenHash = await VerificationTokenUtils.hashVerificationToken(
         data.token,
       );
       const emailVerification = await EmailVerificationRepo.findByTokenHash(
@@ -66,11 +66,10 @@ export const EmailVerificationService = {
         "something went wrong while processing your request",
         "SOMETHING_WENT_WRONG",
       );
-    const token = await EmailTokenUtils.generateEmailVerificationToken();
-    const tokenHash = await EmailTokenUtils.hashEmailVerificationToken(token);
+    const token = await VerificationTokenUtils.generateVerificationToken();
+    const tokenHash = await VerificationTokenUtils.hashVerificationToken(token);
     const expiresAt = new Date(
-      Date.now() +
-        Constants.emailVerificationTokenExpirationMinutes * 60 * 1000,
+      Date.now() + Constants.tokenExpireTime * 60 * 1000,
     );
     await EmailVerificationRepo.update(db, {
       id: isTokenAlreadyExists.id,
@@ -82,7 +81,29 @@ export const EmailVerificationService = {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,
-      expiresIn: Constants.emailVerificationTokenExpirationMinutes,
+      expiresIn: Constants.tokenExpireTime,
+    });
+    return true;
+  },
+  sendPasswordResetEmail: async (email: string) => {
+    const user = await UserRepo.findByEmail(email);
+    if (!user)
+      throw new CustomError(
+        404,
+        "User not found associated with this email",
+        "USER_NOT_FOUND",
+      );
+    if (!user?.isEmailVerified)
+      throw new CustomError(
+        403,
+        "User email is not verified",
+        "EMAIL_NOT_VERIFIED",
+      );
+    await EmailQueue.add("verify-email", {
+      email: user.email,
+      fullName: user.fullName,
+      verificationToken: token,
+      expiresIn: Constants.tokenExpireTime,
     });
     return true;
   },
