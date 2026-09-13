@@ -3,6 +3,8 @@ import email_verification_tokens from "../Database/Schemas/email_verification_to
 import { IEmail } from "../Interfaces/IEmail";
 import type { TokenValidator } from "../Validators/TokenValidator";
 import { eq } from "drizzle-orm";
+import { any } from "zod";
+import { db } from "../Database";
 
 class EmailVerificationRepo {
   public async create(tx: NodePgDatabase<any>, data: IEmail.create) {
@@ -18,12 +20,38 @@ class EmailVerificationRepo {
     return token[0];
   }
   public async findByTokenHash(tx: NodePgDatabase<any>, tokenHash: string) {
-    const doesExist = await tx
+    const token = await tx
       .select()
       .from(email_verification_tokens)
       .where(eq(email_verification_tokens.tokenHash, tokenHash))
       .limit(1);
-    return doesExist[0];
+    return token[0];
   }
+  public async findByUserId(userId: string) {
+    const token = await db
+      .select()
+      .from(email_verification_tokens)
+      .where(eq(email_verification_tokens.userId, userId))
+      .limit(1);
+    return token[0];
+  }
+  public async update(tx: NodePgDatabase<any>, data: IEmail.update) {
+    let newData: Record<string, any> = {};
+    if (data.tokenHash || data.tokenHash === null)
+      newData.tokenHash = data.tokenHash;
+    if (data.expiresAt || data.expiresAt === null)
+      newData.expiresAt = data.expiresAt;
+    if (data.claimedAt) newData.claimedAt = data.claimedAt;
+    const updatedToken = await tx
+      .update(email_verification_tokens)
+      .set(newData)
+      .where(eq(email_verification_tokens.id, data.id))
+      .returning();
+    return updatedToken[0];
+  }
+  public async resendVerificationEmail(
+    tx: NodePgDatabase<any>,
+    email: string,
+  ) {}
 }
 export default new EmailVerificationRepo();

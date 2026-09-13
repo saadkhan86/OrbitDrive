@@ -6,7 +6,7 @@ export async function sendEmailVerificationEmail(
   expiresIn: number,
   fullName: string,
 ) {
-  const verificationUrl = `${process.env.BACKEND_URL}/api/v1/token/verify-email-token/${verificationToken}`;
+  const verificationUrl = `${process.env.EMAIL_VERIFICATION_URL}/${verificationToken}`;
   const minutes = Math.round(expiresIn);
 
   await transporter.sendMail({

@@ -1,8 +1,9 @@
 import { users } from "../Database/Schemas/users.Schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { UpdateValidator } from "../Validators/UserValidator";
 import { email } from "zod";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 class UserRepo {
   public async findByEmail(email: string) {
     const user = await db
@@ -51,8 +52,15 @@ class UserRepo {
         email: users.email,
         updatedAt: users.updatedAt,
       });
-    console.log(user);
     return user[0];
+  }
+  public async updatedIsEmailVerified(tx: NodePgDatabase<any>, id: string) {
+    const user = await tx
+      .update(users)
+      .set({ isEmailVerified: true })
+      .where(and(eq(users.id, id), eq(users.isEmailVerified, false)))
+      .returning({ isEmailVerified: users.isEmailVerified });
+    return user[0]?.isEmailVerified;
   }
 }
 

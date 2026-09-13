@@ -4,5 +4,5 @@ import { TokenRouter } from "./TokenRouter";
 
 export const Router = async (app: FastifyInstance) => {
   app.register(UserRouter, { prefix: "/user" });
-  app.register(TokenRouter, { prefix: "/token" });
+  app.register(TokenRouter, { prefix: "/verification" });
 };

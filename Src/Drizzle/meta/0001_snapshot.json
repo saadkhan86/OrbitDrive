@@ -1,6 +1,6 @@
 {
-  "id": "c9615bd0-5e32-46f4-822b-46731a34ddad",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a3559606-ab6e-4b50-b152-807272bf3a38",
+  "prevId": "c9615bd0-5e32-46f4-822b-46731a34ddad",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -31,7 +31,7 @@
           "name": "expires_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "claimed_at": {
           "name": "claimed_at",

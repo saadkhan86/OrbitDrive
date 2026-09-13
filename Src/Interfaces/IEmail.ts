@@ -10,4 +10,10 @@ export declare namespace IEmail {
     expiresIn: number;
     fullName: string;
   }
+  interface update {
+    id: string;
+    tokenHash?: string | null;
+    expiresAt?: Date | null;
+    claimedAt?: Date;
+  }
 }

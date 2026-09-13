@@ -1,11 +1,12 @@
 import { Queue } from "bullmq";
-import { RedisConfig } from "../Config/Redis.Config";
+import { redisConnection } from "../Config/Redis.Config";
 import { IEmail } from "../Interfaces/IEmail";
 
 export const EmailQueue = new Queue<IEmail.EmailVerificationJob>("email", {
-  connection: RedisConfig,
+  connection: redisConnection,
   defaultJobOptions: {
-    attempts: 3,
+    attempts: 5,
+    removeOnComplete: true,
     backoff: {
       type: "exponential",
       delay: 1000,

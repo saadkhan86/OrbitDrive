@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { TokenValidator } from "../Validators/TokenValidator";
+import { TokenController } from "../Controller/TokenController";
+import { EmailValidator } from "../Validators/EmailValidator";
 
 export const TokenRouter = async (app: FastifyInstance) => {
   app.get(
@@ -9,8 +11,13 @@ export const TokenRouter = async (app: FastifyInstance) => {
         params: TokenValidator.tokenSchema,
       },
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.status(200).send({ message: "token received" });
+    TokenController.verifyEmail,
+  );
+  app.post(
+    "/resend-verification-email",
+    {
+      schema: { body: EmailValidator.emailSchema },
     },
+    TokenController.resendVerificationEmail,
   );
 };

@@ -10,6 +10,7 @@ import { EmailQueue } from "../Queues/Email.Queue";
 import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
 import { db } from "../Database";
 import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
+import { Constants } from "../Constants/Constants";
 export const UserService = {
   signup: async (data: SignupValidator) => {
     const isExist = await UserRepo.findByEmail(data.email);
@@ -30,11 +31,9 @@ export const UserService = {
       await EmailTokenUtils.generateEmailVerificationToken();
     const hashedVerificationToken =
       await EmailTokenUtils.hashEmailVerificationToken(verificationToken);
-    const expirationMinutes = Number(
-      process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN || 15,
-    );
     const expiresAt = new Date(
-      Date.now() + expirationMinutes * 60 * 1000,
+      Date.now() +
+        Constants.emailVerificationTokenExpirationMinutes * 60 * 1000,
     );
     const user = await db.transaction(async (tx) => {
       const createdUser = await UserRepo.create(tx, { ...data, passwordHash });
@@ -49,7 +48,7 @@ export const UserService = {
       email: user!.email,
       fullName: user!.fullName,
       verificationToken,
-      expiresIn: expirationMinutes,
+      expiresIn: Constants.emailVerificationTokenExpirationMinutes,
     });
     return user;
   },
@@ -57,6 +56,12 @@ export const UserService = {
     const user = await UserRepo.findByEmail(data.email);
     if (!user)
       throw new CustomError(401, "User does not exist", "USER_NOT_FOUND");
+    if (!user.isEmailVerified)
+      throw new CustomError(
+        403,
+        "Email verification is pending.Verify your email first",
+        "EMAIL_VERIFICATION_PENDING",
+      );
     const isMatch = await argon2.verify(user.passwordHash, data.password);
     if (!isMatch)
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");

@@ -1,12 +1,13 @@
 import { Worker } from "bullmq";
 import { IEmail } from "../Interfaces/IEmail";
 import { sendEmailVerificationEmail } from "../Services/Email.Service";
-import { RedisConfig } from "../Config/Redis.Config";
+import { redisConnection } from "../Config/Redis.Config";
+import { EmailQueue } from "../Queues/Email.Queue";
 
-const EmailWorker = new Worker(
+export const EmailWorker = new Worker(
   "email",
   async (job) => {
-    console.log(`Processing job: ${job.name} `);
+    console.log(`⏳ [RUNNING] Job ID: ${job.id} | Name: ${job.name} started processing`);
     const data: IEmail.EmailVerificationJob = job.data;
     switch (job.name) {
       case "verify-email":
@@ -22,18 +23,35 @@ const EmailWorker = new Worker(
     }
   },
   {
-    connection: RedisConfig,
+    connection: redisConnection,
     concurrency: Number(process.env.EMAIL_JOB_CONCURRENCY) || 5,
+    lockDuration: 60000,
+    maxStalledCount: 2,
+    stalledInterval: 30000,
   },
 );
-EmailWorker.on("completed", (job) => {
-  console.log(`Job completed: ${job.id} with name: ${job.name}`);
-}); 
-EmailWorker.on("failed", (job, err) => {
-  console.log(
-    `Job failed: ${job?.id} with name: ${job?.name} and error: ${err.message}`,
-  );
+
+EmailWorker.on("completed", async (job) => {
+  console.log(`✅ [COMPLETED] Job ID: ${job.id} with name: ${job.name}`);
+
+  const counts = await EmailQueue.getJobCounts("active", "waiting", "delayed");
+  if (counts.active === 0 && counts.waiting === 0 && counts.delayed === 0) {
+    console.log("🎉 All jobs completed and Redis queue is clear!");
+  }
 });
+
+EmailWorker.on("failed", async (job, err) => {
+  console.log(
+    `❌ [FAILED] Job ID: ${job?.id} with name: ${job?.name} and error: ${err.message}`,
+  );
+
+  const counts = await EmailQueue.getJobCounts("active", "waiting", "delayed");
+  if (counts.active === 0 && counts.waiting === 0 && counts.delayed === 0) {
+    console.log("🎉 All jobs processed and Redis queue is clear!");
+  }
+});
+
 EmailWorker.on("error", (err) => {
   console.log(`Worker error: ${err.message}`);
 });
+
