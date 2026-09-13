@@ -35,12 +35,6 @@ export const UserValidator = {
     passwordHash: z.string().optional(),
   }),
   passwordResetValidator: z.object({
-    token: z.string({
-      error: (issue) =>
-        issue.code === "invalid_type"
-          ? `This ${issue.path} should be of type ${issue.expected}`
-          : `Token is required`,
-    }),
     password: z
       .string()
       .min(6, { message: "password must be greater than 5 characters" })

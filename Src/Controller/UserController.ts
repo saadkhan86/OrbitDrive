@@ -10,7 +10,6 @@ import { CustomError } from "../Errors/CustomError";
 
 export const UserController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
-    await request.jwtVerify();
     await UserService.signup(request.body as SignupValidator);
     return reply.status(201).send({
       message:
@@ -24,20 +23,18 @@ export const UserController = {
     });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { token, password } = request.body as PasswordResetValidator;
-    const decoded = request.server.jwtUtils.verifyPasswordResetToken(token);
-    if (!decoded || decoded.type !== "password-reset") {
-      throw new CustomError(400, "Invalid token", "INVALID_TOKEN");
-    }
-    await UserService.passwordReset(decoded.id, { password });
+    await UserService.passwordReset(request.user.userId, {
+      password: (request.body as PasswordResetValidator).password,
+    });
     return reply.status(200).send({ message: "Password reset successfully" });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    //   const userId = request.user?.id;
-    //   const user = await UserService.update(
-    //     userId,
-    //     request.body as UpdateValidator,
-    //   );
-    return reply.status(200).send({ message: "User updated successfully" });
+    const user = await UserService.update(
+      request.user.userId,
+      request.body as UpdateValidator,
+    );
+    return reply
+      .status(200)
+      .send({ message: "User updated successfully", user });
   },
 };

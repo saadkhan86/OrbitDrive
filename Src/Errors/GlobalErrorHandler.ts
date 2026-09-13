@@ -19,12 +19,28 @@ export const GlobalErrorHandler = (
     });
   }
   if (error instanceof CustomError) {
-    request.log.error({ err: error }, "Custom error occurred");
+    request.log.error(
+      { err: error },
+      "-----------------Custom error occurred-----------",
+    );
     return reply.code(error.statusCode).send({
       success: false,
       error: {
         code: error.code,
         message: error.message,
+      },
+    });
+  }
+  if (error.code?.startsWith("FST_JWT")) {
+    request.log.error(
+      { err: error },
+      "-----------JWT error occurred----------",
+    );
+    return reply.code(error.statusCode || 401).send({
+      success: false,
+      error: {
+        code: error.code || "JWT_ERROR",
+        message: error.message || "Invalid or expired token",
       },
     });
   }
@@ -38,7 +54,6 @@ export const GlobalErrorHandler = (
       },
     });
   }
-  console.log("-------------error-------", error);
   request.log.error("Something went wrong", error);
   return reply.code(error.status || 500).send({
     success: false,
