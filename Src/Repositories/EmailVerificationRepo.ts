@@ -41,7 +41,8 @@ class EmailVerificationRepo {
       newData.tokenHash = data.tokenHash;
     if (data.expiresAt || data.expiresAt === null)
       newData.expiresAt = data.expiresAt;
-    if (data.claimedAt) newData.claimedAt = data.claimedAt;
+    if (data.claimedAt || data.claimedAt == null)
+      newData.claimedAt = data.claimedAt;
     const updatedToken = await tx
       .update(email_verification_tokens)
       .set(newData)

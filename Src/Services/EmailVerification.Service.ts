@@ -4,7 +4,6 @@ import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
 import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
 import UserRepo from "../Repositories/UserRepo";
-import { TokenRouter } from "../Router/TokenRouter";
 import { EmailTokenUtils } from "../Utils/EmailTokenUtils";
 import type { TokenValidator } from "../Validators/TokenValidator";
 

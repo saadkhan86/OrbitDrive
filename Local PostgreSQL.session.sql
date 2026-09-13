@@ -1,1 +1,1 @@
-SELECT * FROM email_verification_tokens WHERE token_hash = 'b3db2b9f7330fda0bed2f4edd5357dce6b4e9ba963cbb084593ac173983c93f9';
+SELECT * FROM users;
