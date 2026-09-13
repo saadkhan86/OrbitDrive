@@ -5,9 +5,21 @@ export async function authenticate(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  await request.jwtVerify();
+  try {
+    await request.jwtVerify();
 
-  if (request.user.type !== "access") {
-    throw new CustomError(401, "invalid access token", "INVALID_ACCESS_TOKEN");
+    if (request.user.type !== "access") {
+      throw new CustomError(
+        401,
+        "invalid access token",
+        "INVALID_ACCESS_TOKEN",
+      );
+    }
+  } catch (error) {
+    if (error instanceof CustomError) {
+      throw error;
+    }
+
+    throw new CustomError(401, "invalid or expired token", "UNAUTHORIZED");
   }
 }
