@@ -2,12 +2,15 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { UserService } from "../Services/User.Service";
 import type {
   LoginValidator,
+  PasswordResetValidator,
   SignupValidator,
   UpdateValidator,
 } from "../Validators/UserValidator";
+import { CustomError } from "../Errors/CustomError";
 
 export const UserController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
+    await request.jwtVerify();
     await UserService.signup(request.body as SignupValidator);
     return reply.status(201).send({
       message:
@@ -21,10 +24,12 @@ export const UserController = {
     });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { token } = request.params as { token: string };
-    const { password } = request.body as { password: string };
-    const userId = request.server.jwtUtils.verifyPasswordResetToken(token).id;
-    await UserService.passwordReset(userId, { password });
+    const { token, password } = request.body as PasswordResetValidator;
+    const decoded = request.server.jwtUtils.verifyPasswordResetToken(token);
+    if (!decoded || decoded.type !== "password-reset") {
+      throw new CustomError(400, "Invalid token", "INVALID_TOKEN");
+    }
+    await UserService.passwordReset(decoded.id, { password });
     return reply.status(200).send({ message: "Password reset successfully" });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {

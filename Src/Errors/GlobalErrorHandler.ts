@@ -38,13 +38,13 @@ export const GlobalErrorHandler = (
       },
     });
   }
-  console.log("error", error);
+  console.log("-------------error-------", error);
   request.log.error("Something went wrong", error);
-  return reply.code(500).send({
+  return reply.code(error.status || 500).send({
     success: false,
     error: {
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Something went wrong",
+      code: error.code || "INTERNAL_SERVER_ERROR",
+      message: `Something went wrong || ${error.message}`,
     },
   });
 };

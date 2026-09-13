@@ -64,7 +64,8 @@ export const UserService = {
     const isMatch = await argon2.verify(user.passwordHash, data.password);
     if (!isMatch)
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
-    return user;
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   },
   update: async (userId: string, data: UpdateValidator) => {
     const user = await UserRepo.update(userId, data);

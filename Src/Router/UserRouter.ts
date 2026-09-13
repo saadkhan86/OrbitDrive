@@ -1,8 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { UserController } from "../Controller/UserController";
 import { UserValidator } from "../Validators/UserValidator";
-import { string } from "zod";
-
 export const UserRouter = async (app: FastifyInstance) => {
   app.post(
     "/signup",
@@ -20,12 +18,9 @@ export const UserRouter = async (app: FastifyInstance) => {
     UserController.update,
   );
   app.patch(
-    "/reset-password/:token",
+    "/password-reset",
     {
-      schema: {
-        body: { password: string().min(6).max(32) },
-        params: { token: string() },
-      },
+      schema: { body: UserValidator.passwordResetValidator },
     },
     UserController.passwordReset,
   );

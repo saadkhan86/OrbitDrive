@@ -32,13 +32,24 @@ export const UserValidator = {
       .min(3, { message: `fullName must be greater than 3 characters` })
       .max(50, { message: "fullName must be smaller than 50 characters" })
       .optional(),
-    passwordHash: z
+    passwordHash: z.string().optional(),
+  }),
+  passwordResetValidator: z.object({
+    token: z.string({
+      error: (issue) =>
+        issue.code === "invalid_type"
+          ? `This ${issue.path} should be of type ${issue.expected}`
+          : `Token is required`,
+    }),
+    password: z
       .string()
       .min(6, { message: "password must be greater than 5 characters" })
-      .max(30, { message: "password must be smaller than 30 characters" })
-      .optional(),
+      .max(30, { message: "password must be smaller than 30 characters" }),
   }),
 };
 export type SignupValidator = z.infer<typeof UserValidator.signupValidator>;
 export type LoginValidator = z.infer<typeof UserValidator.loginValidator>;
 export type UpdateValidator = z.infer<typeof UserValidator.updateValidator>;
+export type PasswordResetValidator = z.infer<
+  typeof UserValidator.passwordResetValidator
+>;

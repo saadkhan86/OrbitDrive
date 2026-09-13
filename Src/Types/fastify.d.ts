@@ -5,3 +5,16 @@ declare module "fastify" {
     jwtUtils: JWTUtils;
   }
 }
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    payload: {
+      userId: string;
+      type: "access" | "refresh" | "password-reset";
+    };
+
+    user: {
+      userId: string;
+      type: "access" | "refresh" | "password-reset";
+    };
+  }
+}

@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { responseTimeHook } from "./Hooks/responseTimeHook";
+import { ResponseTimeHook } from "./Hooks/ResponseTimeHook";
 import { Router } from "./Router/Router";
 import {
   serializerCompiler,
@@ -14,7 +14,7 @@ const server = Fastify({
   logger: true,
 });
 
-server.register(responseTimeHook);
+server.register(ResponseTimeHook);
 server.register(JWTPlugin);
 
 server.setValidatorCompiler(validatorCompiler);
