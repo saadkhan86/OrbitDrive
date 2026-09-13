@@ -1,4 +1,4 @@
-import { JWTUtils } from "../Utils/JWTUtils";
+import type { JWTUtils } from "../Utils/JWTUtils";
 
 declare module "fastify" {
   interface FastifyInstance {

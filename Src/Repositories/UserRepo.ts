@@ -4,6 +4,7 @@ import { db } from "../Database";
 import { UpdateValidator } from "../Validators/UserValidator";
 import { email } from "zod";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+
 class UserRepo {
   public async findByEmail(email: string) {
     const user = await db
@@ -41,10 +42,13 @@ class UserRepo {
       });
     return result[0];
   }
-  public async update(id: string, data: UpdateValidator) {
+  public async update(id: string, data: Partial<UpdateValidator>) {
+    const newData: Partial<UpdateValidator> = {};
+    if (data.fullName) newData.fullName = data.fullName;
+    if (data.passwordHash) newData.passwordHash = data.passwordHash;
     const user = await db
       .update(users)
-      .set({ fullName: data.fullName })
+      .set(newData)
       .where(eq(users.id, id))
       .returning({
         id: users.id,
@@ -54,7 +58,7 @@ class UserRepo {
       });
     return user[0];
   }
-  public async updatedIsEmailVerified(tx: NodePgDatabase<any>, id: string) {
+  public async updateIsEmailVerified(tx: NodePgDatabase<any>, id: string) {
     const user = await tx
       .update(users)
       .set({ isEmailVerified: true })

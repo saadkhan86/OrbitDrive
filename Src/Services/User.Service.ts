@@ -43,7 +43,7 @@ export const UserService = {
       });
       return createdUser;
     });
-    await EmailQueue.add("verify-email", {
+    await EmailQueue.add("email-verification", {
       email: user!.email,
       fullName: user!.fullName,
       verificationToken,
@@ -66,11 +66,13 @@ export const UserService = {
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     return user;
   },
-  update: async (data: UpdateValidator) => {
-    const user = await UserRepo.update(
-      "ec047760-4c16-436c-9a80-17e994a74175",
-      data,
-    );
+  update: async (userId: string, data: UpdateValidator) => {
+    const user = await UserRepo.update(userId, data);
     return user;
+  },
+  passwordReset: async (userId: string, password: { password: string }) => {
+    const passwordHash = await argon2.hash(password.password);
+    await UserRepo.update(userId, { passwordHash });
+    return true;
   },
 };

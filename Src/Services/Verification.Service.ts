@@ -32,7 +32,7 @@ export const VerificationService = {
         tokenHash: null,
         expiresAt: null,
       });
-      const updatedUser = await UserRepo.updatedIsEmailVerified(
+      const updatedUser = await UserRepo.updateIsEmailVerified(
         tx,
         emailVerification.userId,
       );
@@ -77,7 +77,7 @@ export const VerificationService = {
       expiresAt,
       claimedAt: null,
     });
-    await EmailQueue.add("verify-email", {
+    await EmailQueue.add("email-verification", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,
@@ -103,7 +103,7 @@ export const VerificationService = {
         "EMAIL_NOT_VERIFIED",
       );
     const token = tokenGenerator(user.id);
-    await EmailQueue.add("verify-email", {
+    await EmailQueue.add("password-reset", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,

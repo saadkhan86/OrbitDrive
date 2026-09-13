@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { IEmail } from "../Interfaces/IEmail";
-import { sendEmailVerificationEmail } from "../Services/Email.Service";
+import { sendEmailService } from "../Services/Email.Service";
 import { redisConnection } from "../Config/Redis.Config";
 import { EmailQueue } from "../Queues/Email.Queue";
 
@@ -12,8 +12,18 @@ export const EmailWorker = new Worker(
     );
     const data: IEmail.EmailVerificationJob = job.data;
     switch (job.name) {
-      case "verify-email":
-        await sendEmailVerificationEmail(
+      case "email-verification":
+        await sendEmailService(
+          "email-verification",
+          data.email,
+          data.verificationToken,
+          data.expiresIn,
+          data.fullName,
+        );
+        break;
+      case "password-reset":
+        await sendEmailService(
+          "password-reset",
           data.email,
           data.verificationToken,
           data.expiresIn,

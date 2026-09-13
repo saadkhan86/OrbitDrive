@@ -20,10 +20,19 @@ export const UserController = {
       user: await UserService.login(request.body as LoginValidator),
     });
   },
+  passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
+    const { token } = request.params as { token: string };
+    const { password } = request.body as { password: string };
+    const userId = request.server.jwtUtils.verifyPasswordResetToken(token).id;
+    await UserService.passwordReset(userId, { password });
+    return reply.status(200).send({ message: "Password reset successfully" });
+  },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = await UserService.update(request.body as UpdateValidator);
-    return reply
-      .status(200)
-      .send({ message: "User updated successfully", user });
+    //   const userId = request.user?.id;
+    //   const user = await UserService.update(
+    //     userId,
+    //     request.body as UpdateValidator,
+    //   );
+    return reply.status(200).send({ message: "User updated successfully" });
   },
 };

@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Constants } from "../Constants/Constants";
 
-export const CreateJWTUtils = async (app: FastifyInstance) => {
+export const CreateJWTUtils = (app: FastifyInstance) => {
   return {
     generateAccessToken: (id: string) => {
       return app.jwt.sign({ id: id, type: "access" }, { expiresIn: "12h" });
@@ -14,6 +14,9 @@ export const CreateJWTUtils = async (app: FastifyInstance) => {
         { id, type: "password-reset" },
         { expiresIn: `${Constants.tokenExpireTime}m` },
       );
+    },
+    verifyPasswordResetToken: (token: string) => {
+      return app.jwt.verify<{ id: string; type: "password-reset" }>(token);
     },
   };
 };

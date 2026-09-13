@@ -32,6 +32,11 @@ export const UserValidator = {
       .min(3, { message: `fullName must be greater than 3 characters` })
       .max(50, { message: "fullName must be smaller than 50 characters" })
       .optional(),
+    passwordHash: z
+      .string()
+      .min(6, { message: "password must be greater than 5 characters" })
+      .max(30, { message: "password must be smaller than 30 characters" })
+      .optional(),
   }),
 };
 export type SignupValidator = z.infer<typeof UserValidator.signupValidator>;

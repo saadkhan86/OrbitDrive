@@ -5,7 +5,7 @@ import { EmailValidator } from "../Validators/EmailValidator";
 
 export const VerificationRouter = async (app: FastifyInstance) => {
   app.get(
-    "/verify-email-token/:token",
+    "/email-verification/:token",
     {
       schema: {
         params: TokenValidator.tokenSchema,
@@ -21,7 +21,7 @@ export const VerificationRouter = async (app: FastifyInstance) => {
     VerificationController.resendVerificationEmail,
   );
   app.post(
-    "/password-reset-email",
+    "/password-reset",
     {
       schema: { body: EmailValidator.emailSchema },
     },

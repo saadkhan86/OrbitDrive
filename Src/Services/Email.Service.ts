@@ -1,61 +1,28 @@
 import transporter from "../Config/Transporter.Config";
+import { Constants } from "../Constants/Constants";
 
-export async function sendEmailVerificationEmail(
+export async function sendEmailService(
+  type: "email-verification" | "password-reset",
   email: string,
   verificationToken: string,
   expiresIn: number,
   fullName: string,
 ) {
-  const verificationUrl = `${process.env.EMAIL_VERIFICATION_URL}/${verificationToken}`;
+  const verificationUrl = `${process.env.VERIFICATION_URL}/${type}/${verificationToken}`;
   const minutes = Math.round(expiresIn);
-
+  let content;
+  if (type === "password-reset") {
+    content = Constants.passwordReset;
+  } else {
+    content = Constants.emailVerification;
+  }
   await transporter.sendMail({
     from: `"OrbitDrive" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: `${fullName} | Verify your OrbitDrive email`,
+    subject: content.subject(fullName),
 
-    text: `
-Please verify your email by clicking this link:
+    text: content.text(verificationUrl, minutes),
 
-${verificationUrl}
-
-This verification link will expire in ${minutes} minutes.
-    `,
-
-    html: `
-      <div>
-        <h2>Welcome to OrbitDrive!</h2>
-
-        <p>
-          Please verify your email address to activate your account.
-        </p>
-
-        <p>
-          This verification link will expire in
-          <strong>${minutes} minutes</strong>.
-        </p>
-        <div style="text-align: center; margin: 25px 25px 25px 0px;">
-          <a
-            href="${verificationUrl}"
-            style="
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #000000;
-              color: #ffffff;
-              text-decoration: none;
-              border-radius: 6px;
-              font-size: 16px;
-              font-weight: 600;
-            "
-          >
-            Verify Email
-          </a>
-        </div>
-
-        <p>
-          If you did not create this account, you can safely ignore this email.
-        </p>
-      </div>
-    `,
+    html: content.html(verificationUrl, minutes),
   });
 }
