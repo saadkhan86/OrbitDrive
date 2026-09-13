@@ -14,6 +14,6 @@ export declare namespace IEmail {
     id: string;
     tokenHash?: string | null;
     expiresAt?: Date | null;
-    claimedAt?: Date;
+    claimedAt?: Date | null;
   }
 }
