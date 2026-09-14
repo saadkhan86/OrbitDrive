@@ -44,7 +44,7 @@ export const authController = {
   },
   refresh: async (request: FastifyRequest, reply: FastifyReply) => {
     const { refreshToken, userId } = await authService.refresh(
-      (request.body as refreshTokenValidator).token,
+      (request.query as refreshTokenValidator).token,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken(userId);
     return reply.status(200).send({
