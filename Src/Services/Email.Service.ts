@@ -2,13 +2,18 @@ import transporter from "../Config/Transporter.Config";
 import { Constants } from "../Constants/Constants";
 
 export async function sendEmailService(
-  type: "email-verification" | "password-reset",
+  type: "email" | "password-reset",
   email: string,
   verificationToken: string,
   expiresIn: number,
   fullName: string,
 ) {
-  const verificationUrl = `${process.env.VERIFICATION_URL}/${type}/${verificationToken}`;
+  let verificationUrl;
+  if (type == "password-reset") {
+    verificationUrl = `${process.env.VERIFICATION_URL}/auth/${type}/${verificationToken}`;
+  } else {
+    verificationUrl = `${process.env.VERIFICATION_URL}/verification/${type}/${verificationToken}`;
+  }
   const minutes = Math.round(expiresIn);
   let content;
   if (type === "password-reset") {
@@ -17,7 +22,7 @@ export async function sendEmailService(
     content = Constants.emailVerification;
   }
   await transporter.sendMail({
-    from: `"OrbitDrive" <${process.env.EMAIL_USER}>`,
+    from: `"Orbit Drive" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: content.subject(fullName),
 

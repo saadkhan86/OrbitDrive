@@ -1,0 +1,25 @@
+CREATE TABLE "email_verification_tokens" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"token_hash" varchar(64),
+	"expires_at" timestamp with time zone,
+	"claimed_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "email_verification_tokens_token_hash_unique" UNIQUE("token_hash")
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"fullName" varchar(50) NOT NULL,
+	"provider" "auth_provider" DEFAULT 'password' NOT NULL,
+	"provider_user_id" varchar(255),
+	"email" varchar(50) NOT NULL,
+	"passwordHash" varchar(255) NOT NULL,
+	"isEmailVerified" boolean DEFAULT false NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
+	CONSTRAINT "provider_user_unique" UNIQUE("provider","provider_user_id")
+);
+--> statement-breakpoint
+ALTER TABLE "email_verification_tokens" ADD CONSTRAINT "email_verification_tokens_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

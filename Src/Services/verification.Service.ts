@@ -17,13 +17,25 @@ export const verificationService = {
         tokenHash,
       );
       if (!emailVerification)
-        throw new CustomError(400, "invalid token", "INVALID_TOKEN");
+        throw new CustomError(
+          400,
+          "already used or expired token",
+          "INVALID_TOKEN",
+        );
 
       if (emailVerification.claimedAt != null)
-        throw new CustomError(400, "token already used", "TOKEN_ALREADY_USED");
+        throw new CustomError(
+          400,
+          "already used or expired token",
+          "TOKEN_ALREADY_USED",
+        );
 
       if (Date.now() > emailVerification.expiresAt!.getTime())
-        throw new CustomError(400, "token expired", "TOKEN_EXPIRED");
+        throw new CustomError(
+          400,
+          "already used or expired token",
+          "TOKEN_EXPIRED",
+        );
 
       await EmailVerificationRepo.update(tx, {
         id: emailVerification.id,
@@ -76,7 +88,7 @@ export const verificationService = {
       expiresAt,
       claimedAt: null,
     });
-    await EmailQueue.add("email-verification", {
+    await EmailQueue.add("email", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,

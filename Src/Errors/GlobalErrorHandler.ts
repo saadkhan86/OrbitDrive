@@ -54,12 +54,12 @@ export const GlobalErrorHandler = (
       },
     });
   }
-  request.log.error("Something went wrong", error);
+  request.log.error(error, "Something went wrong");
   return reply.code(error.status || 500).send({
     success: false,
     error: {
       code: error.code || "INTERNAL_SERVER_ERROR",
-      message: `Something went wrong || ${error.message}`,
+      message: error.message || "Something went wrong",
     },
   });
 };
