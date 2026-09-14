@@ -1,1 +1,1 @@
-UPDATE users SET "isEmailVerified" = false WHERE email = 'sk8613013@gmail.com'
+SELECT "refreshToken" from users WHERE email='sk8613013@gmail.com'

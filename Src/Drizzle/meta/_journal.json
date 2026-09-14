@@ -15,6 +15,13 @@
       "when": 1789378606518,
       "tag": "0001_rare_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789411653804,
+      "tag": "0002_icy_may_parker",
+      "breakpoints": true
     }
   ]
 }

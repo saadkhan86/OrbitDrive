@@ -41,7 +41,7 @@ export const authService = {
       });
       return createdUser;
     });
-    await EmailQueue.add("email-verification", {
+    await EmailQueue.add("email", {
       email: user!.email,
       fullName: user!.fullName,
       verificationToken,
@@ -64,7 +64,10 @@ export const authService = {
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     const { passwordHash, ...userWithoutPassword } = user;
     const refreshToken = await tokenUtils.generateToken();
-    await AuthRepo.updateRefreshToken(refreshToken, user.id);
+    const userWithToken = await AuthRepo.updateRefreshToken(
+      user.id,
+      refreshToken,
+    );
     return { refreshToken, userId: user.id };
   },
   forgotPassword: async (

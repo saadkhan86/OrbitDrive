@@ -38,10 +38,12 @@ class AuthRepo {
     return user[0]?.isEmailVerified;
   }
   public async updateRefreshToken(userId: string, refreshToken: string) {
-    return await db
+    const user = await db
       .update(users)
-      .set({ refreshToken })
-      .where(eq(users.id, userId));
+      .set({ refreshToken: refreshToken })
+      .where(eq(users.id, userId))
+      .returning();
+    return user[0];
   }
   public async findByRefreshToken(token: string) {
     const user = await db

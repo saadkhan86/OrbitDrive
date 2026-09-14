@@ -47,11 +47,9 @@ export const authController = {
       (request.body as refreshTokenValidator).token,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken(userId);
-    return reply
-      .status(200)
-      .send({
-        message: "Token refreshed successfully",
-        data: { refreshToken, accessToken },
-      });
+    return reply.status(200).send({
+      message: "Token refreshed successfully",
+      data: { refreshToken, accessToken },
+    });
   },
 };
