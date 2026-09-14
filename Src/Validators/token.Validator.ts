@@ -8,12 +8,16 @@ export const tokenValidator = {
   }),
 };
 export const refreshTokenSchema = z.object({
-  token: z.string({
-    error: (issue) =>
-      issue.code === "invalid_type"
-        ? "Token must be a string"
-        : "Token is required",
-  }),
+  token: z
+    .string({
+      error: (issue) =>
+        issue.code === "invalid_type"
+          ? "Token must be a string"
+          : "Token is required",
+    })
+    .length(64, {
+      message: "Refresh Token must be 64 characters long",
+    }),
 });
 export type tokenValidator = z.infer<typeof tokenValidator.tokenSchema>;
 export type refreshTokenValidator = z.infer<typeof refreshTokenSchema>;
