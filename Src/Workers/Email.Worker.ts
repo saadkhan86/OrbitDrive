@@ -12,9 +12,9 @@ export const EmailWorker = new Worker(
     );
     const data: IEmail.EmailVerificationJob = job.data;
     switch (job.name) {
-      case "email-verification":
+      case "email":
         await sendEmailService(
-          "email-verification",
+          "email",
           data.email,
           data.verificationToken,
           data.expiresIn,

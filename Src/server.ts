@@ -9,7 +9,7 @@ import { JWTPlugin } from "./Plugin/JWTPlugin";
 import { StartServer } from "./Config/StartServer.Config";
 import "dotenv/config";
 import { EmailWorker } from "./Workers/Email.Worker";
-import { router } from "./Router/Router";
+import { router } from "./Router/router";
 const server = Fastify({
   logger: true,
 });
