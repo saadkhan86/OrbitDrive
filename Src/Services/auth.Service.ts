@@ -8,6 +8,7 @@ import { loginValidator, signupValidator } from "../Validators/user.Validator";
 import * as argon2 from "argon2";
 import VerificationRepo from "../Repositories/Verification.Repo";
 import AuthRepo from "../Repositories/Auth.Repo";
+import { authRouter } from "../Router/auth.Router";
 
 export const authService = {
   signup: async (data: signupValidator) => {
@@ -62,7 +63,9 @@ export const authService = {
     if (!isMatch)
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     const { passwordHash, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const refreshToken = await tokenUtils.generateToken();
+    await AuthRepo.updateRefreshToken(refreshToken, user.id);
+    return { refreshToken, userId: user.id };
   },
   forgotPassword: async (
     email: string,
@@ -90,9 +93,21 @@ export const authService = {
     });
     return true;
   },
-  passwordReset: async (userId: string, password: { password: string }) => {
-    const passwordHash = await argon2.hash(password.password);
+  passwordReset: async (userId: string, password: string) => {
+    const passwordHash = await argon2.hash(password);
     await UserRepo.update(userId, { passwordHash });
     return true;
+  },
+  refresh: async (token: string) => {
+    const user = await AuthRepo.findByRefreshToken(token);
+    if (!user)
+      throw new CustomError(
+        400,
+        "Invalid Token! try to login",
+        "INVALID_TOKEN",
+      );
+    const refreshToken = await tokenUtils.generateToken();
+    await AuthRepo.updateRefreshToken(user?.id, refreshToken);
+    return { refreshToken, userId: user.id };
   },
 };

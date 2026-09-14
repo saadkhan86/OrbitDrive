@@ -7,11 +7,7 @@ export const authenticate = {
       await request.jwtVerify();
 
       if (!["access", "password-reset"].includes(request.user.type)) {
-        throw new CustomError(
-          401,
-          "Invalid access token",
-          "INVALID_ACCESS_TOKEN",
-        );
+        throw new CustomError(401, "Invalid Token", "INVALID_TOKEN");
       }
     } catch (error) {
       throw error;

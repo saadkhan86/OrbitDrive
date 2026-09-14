@@ -37,5 +37,18 @@ class AuthRepo {
       .returning({ isEmailVerified: users.isEmailVerified });
     return user[0]?.isEmailVerified;
   }
+  public async updateRefreshToken(userId: string, refreshToken: string) {
+    return await db
+      .update(users)
+      .set({ refreshToken })
+      .where(eq(users.id, userId));
+  }
+  public async findByRefreshToken(token: string) {
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.refreshToken, token));
+    return user ? user[0] : null;
+  }
 }
 export default new AuthRepo();

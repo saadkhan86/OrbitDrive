@@ -7,6 +7,7 @@ import {
   pgEnum,
   unique,
 } from "drizzle-orm/pg-core";
+import { string } from "zod";
 export const authProviderEnum = pgEnum("auth_provider", ["password", "google"]);
 export const users = pgTable(
   "users",
@@ -18,6 +19,7 @@ export const users = pgTable(
     email: varchar("email", { length: 50 }).notNull().unique(),
     passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
     isEmailVerified: boolean("isEmailVerified").default(false).notNull(),
+    refreshToken: varchar("refreshToken").default(""),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
