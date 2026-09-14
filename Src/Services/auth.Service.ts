@@ -1,18 +1,16 @@
-import UserRepo from "../Repositories/UserRepo";
-import type {
-  SignupValidator,
-  LoginValidator,
-  UpdateValidator,
-} from "../Validators/UserValidator";
-import * as argon2 from "argon2";
+import { Constants } from "../Constants/Constants";
+import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
-import { VerificationTokenUtils } from "../Utils/VerificationTokenUtils";
-import { db } from "../Database";
-import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
-import { Constants } from "../Constants/Constants";
-export const UserService = {
-  signup: async (data: SignupValidator) => {
+import UserRepo from "../Repositories/User.Repo";
+import { tokenUtils } from "../Utils/authTokenUtils";
+import { loginValidator, signupValidator } from "../Validators/user.Validator";
+import * as argon2 from "argon2";
+import VerificationRepo from "../Repositories/Verification.Repo";
+import AuthRepo from "../Repositories/Auth.Repo";
+
+export const authService = {
+  signup: async (data: signupValidator) => {
     const isExist = await UserRepo.findByEmail(data.email);
     if (isExist && !isExist.isEmailVerified)
       throw new CustomError(
@@ -27,16 +25,15 @@ export const UserService = {
         "EMAIL_ALREADY_EXISTS",
       );
     const passwordHash = await argon2.hash(data.password);
-    const verificationToken =
-      await VerificationTokenUtils.generateVerificationToken();
+    const verificationToken = await tokenUtils.generateToken();
     const hashedVerificationToken =
-      await VerificationTokenUtils.hashVerificationToken(verificationToken);
+      await tokenUtils.hashToken(verificationToken);
     const expiresAt = new Date(
       Date.now() + Constants.tokenExpireTime * 60 * 1000,
     );
     const user = await db.transaction(async (tx) => {
-      const createdUser = await UserRepo.create(tx, { ...data, passwordHash });
-      await EmailVerificationRepo.create(tx, {
+      const createdUser = await AuthRepo.signup(tx, { ...data, passwordHash });
+      await VerificationRepo.create(tx, {
         userId: createdUser!.id,
         tokenHash: hashedVerificationToken,
         expiresAt,
@@ -51,7 +48,7 @@ export const UserService = {
     });
     return user;
   },
-  login: async (data: LoginValidator) => {
+  login: async (data: loginValidator) => {
     const user = await UserRepo.findByEmail(data.email);
     if (!user)
       throw new CustomError(401, "User does not exist", "USER_NOT_FOUND");
@@ -67,9 +64,31 @@ export const UserService = {
     const { passwordHash, ...userWithoutPassword } = user;
     return userWithoutPassword;
   },
-  update: async (userId: string, data: UpdateValidator) => {
-    const user = await UserRepo.update(userId, data);
-    return user;
+  forgotPassword: async (
+    email: string,
+    tokenGenerator: (id: string) => string,
+  ) => {
+    const user = await UserRepo.findByEmail(email);
+    if (!user)
+      throw new CustomError(
+        404,
+        "User not found associated with this email",
+        "USER_NOT_FOUND",
+      );
+    if (!user?.isEmailVerified)
+      throw new CustomError(
+        403,
+        "User email is not verified",
+        "EMAIL_NOT_VERIFIED",
+      );
+    const token = tokenGenerator(user.id);
+    await EmailQueue.add("password-reset", {
+      email: user.email,
+      fullName: user.fullName,
+      verificationToken: token,
+      expiresIn: Constants.tokenExpireTime,
+    });
+    return true;
   },
   passwordReset: async (userId: string, password: { password: string }) => {
     const passwordHash = await argon2.hash(password.password);

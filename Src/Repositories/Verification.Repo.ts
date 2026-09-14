@@ -1,12 +1,10 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import email_verification_tokens from "../Database/Schemas/email_verification_tokens.Schema";
 import { IEmail } from "../Interfaces/IEmail";
-import type { TokenValidator } from "../Validators/TokenValidator";
 import { eq } from "drizzle-orm";
-import { any } from "zod";
 import { db } from "../Database";
 
-class EmailVerificationRepo {
+class VerificationRepo {
   public async create(tx: NodePgDatabase<any>, data: IEmail.create) {
     const token = await tx
       .insert(email_verification_tokens)
@@ -55,4 +53,4 @@ class EmailVerificationRepo {
     email: string,
   ) {}
 }
-export default new EmailVerificationRepo();
+export default new VerificationRepo();

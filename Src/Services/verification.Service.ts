@@ -2,17 +2,16 @@ import { Constants } from "../Constants/Constants";
 import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import { EmailQueue } from "../Queues/Email.Queue";
-import EmailVerificationRepo from "../Repositories/EmailVerificationRepo";
-import UserRepo from "../Repositories/UserRepo";
-import { VerificationTokenUtils } from "../Utils/VerificationTokenUtils";
-import type { TokenValidator } from "../Validators/TokenValidator";
+import EmailVerificationRepo from "../Repositories/Verification.Repo";
+import UserRepo from "../Repositories/User.Repo";
+import { tokenUtils } from "../Utils/authTokenUtils";
+import type { tokenValidator } from "../Validators/token.Validator";
+import AuthRepo from "../Repositories/Auth.Repo";
 
-export const VerificationService = {
-  emailVerificationUpdate: async (data: TokenValidator) => {
+export const verificationService = {
+  verifyEmailVerification: async (data: tokenValidator) => {
     await db.transaction(async (tx) => {
-      const tokenHash = await VerificationTokenUtils.hashVerificationToken(
-        data.token,
-      );
+      const tokenHash = await tokenUtils.hashToken(data.token);
       const emailVerification = await EmailVerificationRepo.findByTokenHash(
         tx,
         tokenHash,
@@ -32,7 +31,7 @@ export const VerificationService = {
         tokenHash: null,
         expiresAt: null,
       });
-      const updatedUser = await UserRepo.updateIsEmailVerified(
+      const updatedUser = await AuthRepo.updateIsEmailVerified(
         tx,
         emailVerification.userId,
       );
@@ -46,7 +45,7 @@ export const VerificationService = {
 
     return true;
   },
-  resendVerificationEmail: async (email: string) => {
+  resendEmailVerification: async (email: string) => {
     const user = await UserRepo.findByEmail(email);
     if (!user)
       throw new CustomError(
@@ -66,8 +65,8 @@ export const VerificationService = {
         "something went wrong while processing your request",
         "SOMETHING_WENT_WRONG",
       );
-    const token = await VerificationTokenUtils.generateVerificationToken();
-    const tokenHash = await VerificationTokenUtils.hashVerificationToken(token);
+    const token = await tokenUtils.generateToken();
+    const tokenHash = await tokenUtils.hashToken(token);
     const expiresAt = new Date(
       Date.now() + Constants.tokenExpireTime * 60 * 1000,
     );
@@ -78,32 +77,6 @@ export const VerificationService = {
       claimedAt: null,
     });
     await EmailQueue.add("email-verification", {
-      email: user.email,
-      fullName: user.fullName,
-      verificationToken: token,
-      expiresIn: Constants.tokenExpireTime,
-    });
-    return true;
-  },
-  sendPasswordResetEmail: async (
-    email: string,
-    tokenGenerator: (id: string) => string,
-  ) => {
-    const user = await UserRepo.findByEmail(email);
-    if (!user)
-      throw new CustomError(
-        404,
-        "User not found associated with this email",
-        "USER_NOT_FOUND",
-      );
-    if (!user?.isEmailVerified)
-      throw new CustomError(
-        403,
-        "User email is not verified",
-        "EMAIL_NOT_VERIFIED",
-      );
-    const token = tokenGenerator(user.id);
-    await EmailQueue.add("password-reset", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,

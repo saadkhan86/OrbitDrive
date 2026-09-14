@@ -1,8 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { UserRouter } from "./UserRouter";
-import { VerificationRouter } from "./VerificationRouter";
+import { userRouter } from "./user.Router";
+import { authRouter } from "./auth.Router";
+import { verificationRouter } from "./verification.Router";
 
-export const Router = async (app: FastifyInstance) => {
-  app.register(UserRouter, { prefix: "/user" });
-  app.register(VerificationRouter, { prefix: "/verification" });
+export const router = async (app: FastifyInstance) => {
+  app.register(authRouter, { prefix: "/auth" });
+  app.register(userRouter, { prefix: "/user" });
+  app.register(verificationRouter, { prefix: "/verification" });
 };

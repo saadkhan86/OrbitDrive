@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { ResponseTimeHook } from "./Hooks/ResponseTimeHook";
-import { Router } from "./Router/Router";
+import { router } from "./Router/router";
 import {
   serializerCompiler,
   validatorCompiler,
@@ -28,7 +28,7 @@ server.get("/ping", async function (request, reply) {
   };
 });
 
-server.register(Router, { prefix: "/api/v1" });
+server.register(router, { prefix: "/api/v1" });
 
 const shutdown = async (signal: string) => {
   server.log.info(`Received ${signal}. Shutting down gracefully...`);

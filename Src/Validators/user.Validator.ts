@@ -1,5 +1,5 @@
 import z from "zod";
-export const UserValidator = {
+export const userValidator = {
   signupValidator: z.object({
     fullName: z
       .string({
@@ -41,9 +41,9 @@ export const UserValidator = {
       .max(30, { message: "password must be smaller than 30 characters" }),
   }),
 };
-export type SignupValidator = z.infer<typeof UserValidator.signupValidator>;
-export type LoginValidator = z.infer<typeof UserValidator.loginValidator>;
-export type UpdateValidator = z.infer<typeof UserValidator.updateValidator>;
-export type PasswordResetValidator = z.infer<
-  typeof UserValidator.passwordResetValidator
+export type signupValidator = z.infer<typeof userValidator.signupValidator>;
+export type loginValidator = z.infer<typeof userValidator.loginValidator>;
+export type updateValidator = z.infer<typeof userValidator.updateValidator>;
+export type passwordResetValidator = z.infer<
+  typeof userValidator.passwordResetValidator
 >;
