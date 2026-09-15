@@ -12,6 +12,7 @@ export const authController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
     await authService.signup(request.body as signupValidator);
     return reply.status(201).send({
+      success: true,
       message:
         "Account created successfully!, Check your email for verification",
     });
@@ -22,8 +23,9 @@ export const authController = {
     );
     const accessToken = request.server.jwtUtils.generateAccessToken(userId);
     return reply.status(200).send({
+      success: true,
       message: "User logged in successfully",
-      data: { accessToken, refreshToken },
+      data: { tokens: { accessToken, refreshToken } },
     });
   },
   forgotPassword: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -40,7 +42,9 @@ export const authController = {
       request.user.userId,
       (request.body as passwordResetValidator).password,
     );
-    return reply.status(200).send({ message: "Password reset successfully" });
+    return reply
+      .status(200)
+      .send({ success: true, message: "Password reset successfully" });
   },
   refresh: async (request: FastifyRequest, reply: FastifyReply) => {
     const { refreshToken, userId } = await authService.refresh(
@@ -48,8 +52,9 @@ export const authController = {
     );
     const accessToken = request.server.jwtUtils.generateAccessToken(userId);
     return reply.status(200).send({
+      success: true,
       message: "Token refreshed successfully",
-      data: { refreshToken, accessToken },
+      data: { tokens: { refreshToken, accessToken } },
     });
   },
 };

@@ -18,13 +18,19 @@ class UserRepo {
     return user[0];
   }
 
-  public async update(id: string, data: Partial<updateValidator>) {
-    const newData: Partial<updateValidator> = {};
+  public async update(
+    id: string,
+    data: { passwordHash?: string; fullName?: string },
+  ) {
+    const newData: Partial<typeof users.$inferInsert> = {};
     if (data.fullName) newData.fullName = data.fullName;
     if (data.passwordHash) newData.passwordHash = data.passwordHash;
     const user = await db
       .update(users)
-      .set(newData)
+      .set({
+        ...newData,
+        updatedAt: new Date(),
+      })
       .where(eq(users.id, id))
       .returning({
         id: users.id,
