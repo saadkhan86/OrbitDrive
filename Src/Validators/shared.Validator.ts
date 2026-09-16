@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const sharedValidator = {
-  idValidator: z
+  id: z
     .string({
       error: (issue) =>
         issue.code == "invalid_type"
@@ -15,4 +15,4 @@ export const sharedValidator = {
           : undefined,
     }),
 };
-export type idValidator = z.infer<typeof sharedValidator.idValidator>;
+export type idValidator = z.infer<typeof sharedValidator.id>;

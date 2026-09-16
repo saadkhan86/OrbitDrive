@@ -2,29 +2,23 @@ import { FastifyInstance } from "fastify";
 import { organizationController } from "../Controller/organization.Controller";
 import { organizationValidator } from "../Validators/organization.Validator";
 import { authenticate } from "../Hooks/AuthenticationHook";
-import { sharedValidator } from "../Validators/shared.Validator";
 
 export const organizationRouter = async (app: FastifyInstance) => {
+  app.addHook("preHandler", authenticate.user);
   app.post(
     "/",
     {
       schema: {
         body: organizationValidator.createValidator,
       },
-      preHandler: authenticate.user,
     },
     organizationController.create,
   );
-  app.get(
-    "/",
-    { preHandler: authenticate.user },
-    organizationController.getAll,
-  );
+  app.get("/", organizationController.getAll);
   app.get(
     "/:id",
     {
-      schema: { params: sharedValidator.idValidator },
-      preHandler: authenticate.user,
+      schema: { params: organizationValidator.organizationIdValidator },
     },
     organizationController.getById,
   );
@@ -33,14 +27,16 @@ export const organizationRouter = async (app: FastifyInstance) => {
     {
       schema: {
         body: organizationValidator.createValidator,
+        params: organizationValidator.organizationIdValidator,
       },
-      preHandler: authenticate.user,
     },
     organizationController.update,
   );
   app.delete(
     "/:id",
-    { schema: { params: idValidator } },
+    {
+      schema: { params: organizationValidator.organizationIdValidator },
+    },
     organizationController.delete,
   );
 };

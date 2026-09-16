@@ -4,13 +4,10 @@ import { Constants } from "../Constants/Constants";
 export const CreateJWTUtils = (app: FastifyInstance) => {
   return {
     generateAccessToken: (id: string) => {
-      return app.jwt.sign({ userId: id, type: "access" }, { expiresIn: "12h" });
+      return app.jwt.sign({ userId: id, type: "access" }, { expiresIn: "1d" });
     },
     generateRefreshToken: (id: string) => {
-      return app.jwt.sign(
-        { userId: id, type: "refresh" },
-        { expiresIn: "30d" },
-      );
+      return app.jwt.sign({ userId: id, type: "refresh" }, { expiresIn: "7d" });
     },
     generatePasswordResetToken: (id: string) => {
       return app.jwt.sign(
