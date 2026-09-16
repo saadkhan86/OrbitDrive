@@ -9,12 +9,15 @@ export const GlobalErrorHandler = (
   reply: FastifyReply,
 ) => {
   if (error instanceof DatabaseError) {
-    request.log.error({ err: error }, "Database error occurred");
+    request.log.error(
+      { err: error },
+      "-------------------------Database error occurred---------------------",
+    );
     return reply.code(500).send({
       success: false,
       error: {
-        code: "DATABASE_ERROR",
-        message: "Database error",
+        code: error.code || "DATABASE_ERROR",
+        message: error.message || "Database error",
       },
     });
   }
@@ -54,7 +57,10 @@ export const GlobalErrorHandler = (
       },
     });
   }
-  request.log.error(error, "Something went wrong");
+  request.log.error(
+    error,
+    "-------------------Something went wrong------------",
+  );
   return reply.code(error.status || 500).send({
     success: false,
     error: {

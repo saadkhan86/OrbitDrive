@@ -1,1 +1,1 @@
-SELECT "refreshToken" from users WHERE email='sk8613013@gmail.com'
+SELECT "id" FROM users
