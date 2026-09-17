@@ -34,7 +34,7 @@ class OrganizationRepo {
         )
     )[0];
   }
-  public async getAll(ownerId: string) {
+  public async getAllByOwnerId(ownerId: string) {
     return await db
       .select()
       .from(organizations)

@@ -18,8 +18,8 @@ export const organizationService = {
     }
     return await OrganizationRepo.create(ownerId, data);
   },
-  getAll: async (ownerId: idValidator) => {
-    return await OrganizationRepo.getAll(ownerId);
+  getAllByOwnerId: async (ownerId: idValidator) => {
+    return await OrganizationRepo.getAllByOwnerId(ownerId);
   },
   getById: async (ownerId: idValidator, id: idValidator) => {
     const organization = await OrganizationRepo.getById(ownerId, id);

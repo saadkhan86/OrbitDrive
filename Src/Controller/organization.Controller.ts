@@ -53,12 +53,14 @@ export const organizationController = {
       },
     });
   },
-  getAll: async (request: FastifyRequest, reply: FastifyReply) => {
+  getAllByOwnerId: async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.status(200).send({
       success: true,
       message: "Organizations fetched successfully",
       data: {
-        organizations: await organizationService.getAll(request.user.userId),
+        organizations: await organizationService.getAllByOwnerId(
+          request.user.userId,
+        ),
       },
     });
   },

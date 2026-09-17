@@ -14,7 +14,7 @@ export const organizationRouter = async (app: FastifyInstance) => {
     },
     organizationController.create,
   );
-  app.get("/", organizationController.getAll);
+  app.get("/", organizationController.getAllByOwnerId);
   app.get(
     "/:id",
     {
