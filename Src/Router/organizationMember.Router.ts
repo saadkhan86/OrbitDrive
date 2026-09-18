@@ -5,7 +5,7 @@ import { organizationMemberController } from "../Controller/organizationMember.C
 
 export const organizationMemberRouter = async (app: FastifyInstance) => {
   app.addHook("preHandler", authenticate.user);
-  app.get("/:organizationId/members", organizationMemberController.getAll);
+  app.get("/:organizationId/members", organizationMemberController.getAllByOwnerId);
   app.get(
     "/:organizationId/members/:organizationMemberId",
     organizationMemberController.getByUserId,
