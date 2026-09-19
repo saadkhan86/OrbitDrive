@@ -33,7 +33,7 @@ export const organizationService = {
     return organization;
   },
   update: async (
-    ownerId: idValidator,
+    userId: idValidator,
     id: idValidator,
     data: createOrganizationValidator,
   ) => {

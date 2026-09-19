@@ -13,12 +13,12 @@ export const organizationMemberService = {
   updateOrganizationMember: async (
     organizationId: idValidator,
     organizationMemberId: idValidator,
-    role: organizationMemberRoleValidator,
+    data: organizationMemberRoleValidator,
   ) => {
     return await OrganizationMembersRepo.updateOrganizationMember(
       organizationId,
       organizationMemberId,
-      role,
+      data.role,
     );
   },
   deleteOrganizationMember: async (

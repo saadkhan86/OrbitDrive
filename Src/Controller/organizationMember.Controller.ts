@@ -1,17 +1,21 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { organizationMemberService } from "../Services/organizationMember.Service";
+import {
+  organizationMemberOrganizationIdValidator,
+  organizationMemberOrganizationMemberIdValidator,
+  organizationMemberRoleValidator,
+} from "../Validators/organizationMember.Validator";
 import { idValidator } from "../Validators/shared.Validator";
 
-type OrgIdParams = { organizationId: idValidator };
-
 export const organizationMemberController = {
-  getAllByOwnerId: async (
-    request: FastifyRequest<{ Params: OrgIdParams }>,
+  getAllByOrganizationId: async (
+    request: FastifyRequest,
     reply: FastifyReply,
   ) => {
     const organizationMembers =
       await organizationMemberService.getAllByOrganizationId(
-        request.params.organizationId,
+        (request.params as organizationMemberOrganizationIdValidator)
+          .organizationId,
       );
     return reply.status(200).send({
       success: true,
@@ -20,8 +24,38 @@ export const organizationMemberController = {
     });
   },
   getByUserId: async (request: FastifyRequest, reply: FastifyReply) => {
-    return await organizatio.getByUserId();
+    return await organizationMemberService.getByUserId(
+      request.user.userId as idValidator,
+    );
   },
-  update: async (request: FastifyRequest, reply: FastifyReply) => {},
-  delete: async (request: FastifyRequest, reply: FastifyReply) => {},
+  update: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organizationMember =
+      await organizationMemberService.updateOrganizationMember(
+        (request.params as organizationMemberOrganizationMemberIdValidator)
+          .organizationMemberId,
+        (request.params as organizationMemberOrganizationMemberIdValidator)
+          .organizationId,
+        request.body as organizationMemberRoleValidator,
+      );
+    return reply.status(200).send({
+      success: true,
+      message: "Organization Member updated successfully",
+      data: organizationMember,
+    });
+  },
+
+  delete: async (request: FastifyRequest, reply: FastifyReply) => {
+    await organizationMemberService.deleteOrganizationMember(
+      (request.params as organizationMemberOrganizationMemberIdValidator)
+        .organizationId,
+      (request.params as organizationMemberOrganizationMemberIdValidator)
+        .organizationMemberId,
+    );
+    return reply
+      .status(200)
+      .send({
+        success: true,
+        message: "Organization Member deleted successfully",
+      });
+  },
 };

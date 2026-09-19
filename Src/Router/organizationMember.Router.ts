@@ -9,18 +9,34 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     {
       schema: { params: organizationMemberValidator.organizationId },
     },
-    organizationMemberController.getAllByOwnerId,
+    organizationMemberController.getAllByOrganizationId,
   );
   app.get(
     "/:organizationId/members/:organizationMemberId",
+    {
+      schema: {
+        params: organizationMemberValidator.organizationMemberId,
+      },
+    },
     organizationMemberController.getByUserId,
   );
   app.patch(
     "/:organizationId/members/:organizationMemberId",
+    {
+      schema: {
+        params: organizationMemberValidator.organizationMemberId,
+        body: organizationMemberValidator.role,
+      },
+    },
     organizationMemberController.update,
   );
   app.delete(
     "/:organizationId/members/:organizationMemberId",
-    organizationMemberController.remove,
+    {
+      schema: {
+        params: organizationMemberValidator.organizationMemberId,
+      },
+    },
+    organizationMemberController.delete,
   );
 };
