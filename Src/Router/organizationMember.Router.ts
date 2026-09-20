@@ -2,12 +2,14 @@ import { FastifyInstance } from "fastify";
 import { authenticate } from "../Hooks/AuthenticationHook";
 import { organizationMemberController } from "../Controller/organizationMember.Controller";
 import { organizationMemberValidator } from "../Validators/organizationMember.Validator";
+import { authorize } from "../Hooks/authorization.Hook";
 export const organizationMemberRouter = async (app: FastifyInstance) => {
   app.addHook("preHandler", authenticate.user);
   app.get(
     "/:organizationId/members",
     {
       schema: { params: organizationMemberValidator.organizationId },
+      preHandler: [authorize.role(["ADMIN", "MEMBER", "OWNER", "VIEWER"])],
     },
     organizationMemberController.getAllByOrganizationId,
   );
@@ -17,6 +19,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
       },
+      preHandler: [authorize.role(["ADMIN", "MEMBER", "OWNER", "VIEWER"])],
     },
     organizationMemberController.getByUserId,
   );
@@ -27,6 +30,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
         params: organizationMemberValidator.organizationMemberId,
         body: organizationMemberValidator.role,
       },
+      preHandler: [authorize.role(["ADMIN", "OWNER"])],
     },
     organizationMemberController.update,
   );
@@ -36,6 +40,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
       },
+      preHandler: [authorize.role(["ADMIN", "OWNER"])],
     },
     organizationMemberController.delete,
   );

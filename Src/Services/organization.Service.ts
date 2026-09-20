@@ -37,7 +37,7 @@ export const organizationService = {
     id: idValidator,
     data: createOrganizationValidator,
   ) => {
-    let organization: any = await OrganizationRepo.getById(ownerId, id);
+    let organization: any = await OrganizationRepo.getById(userId, id);
     if (!organization) {
       throw new CustomError(
         404,
@@ -46,7 +46,7 @@ export const organizationService = {
       );
     }
     organization = await OrganizationRepo.findByOwnerAndSlug(
-      ownerId,
+      userId,
       data.slug,
     );
     if (organization) {

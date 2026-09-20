@@ -1,7 +1,8 @@
 import z from "zod";
+import { organizationRoles } from "../Types/organization";
 export const organizationMemberValidator = {
   role: z.object({
-    role: z.enum(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
+    role: z.enum(organizationRoles),
   }),
   organizationId: z.object({
     organizationId: z.string().uuid("Invalid Organization Id"),

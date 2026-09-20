@@ -9,12 +9,17 @@ class OrganizationMembers {
       .from(organization_members)
       .where(eq(organization_members.organizationId, organizationId));
   }
-  public async getByUserId(userId: string) {
+  public async getByUserId(userId: string, organizationId: string) {
     return (
       await db
         .select()
         .from(organization_members)
-        .where(eq(organization_members.userId, userId))
+        .where(
+          and(
+            eq(organization_members.userId, userId),
+            eq(organization_members.organizationId, organizationId),
+          ),
+        )
     )[0];
   }
   public async updateOrganizationMember(
@@ -37,7 +42,7 @@ class OrganizationMembers {
     organizationId: string,
     organizationMemberId: string,
   ) {
-    return await db
+    await db
       .delete(organization_members)
       .where(
         and(
@@ -45,6 +50,7 @@ class OrganizationMembers {
           eq(organization_members.id, organizationMemberId),
         ),
       );
+    return;
   }
 }
 export default new OrganizationMembers();

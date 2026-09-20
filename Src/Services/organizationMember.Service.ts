@@ -6,7 +6,6 @@ export const organizationMemberService = {
   getAllByOrganizationId: async (organizationId: idValidator) => {
     return await OrganizationMembersRepo.getAllByOrganizationId(organizationId);
   },
-
   getByUserId: async (userId: idValidator) => {
     return await OrganizationMembersRepo.getByUserId(userId);
   },
