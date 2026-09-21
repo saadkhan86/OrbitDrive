@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
-import { organization_members } from "../Database/Schemas/organization_members";
+import { organization_members } from "../Database/Schemas/organization_members.Schema";
 
 class OrganizationMembers {
   public async getAllByOrganizationId(organizationId: string) {
