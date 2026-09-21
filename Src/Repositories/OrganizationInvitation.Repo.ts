@@ -49,7 +49,15 @@ class OrganizationInvitationRepo {
 
     return invitation;
   }
+  public async getByTokenHash(tokenHash: string) {
+    const [invitation] = await db
+      .select()
+      .from(organization_invitations)
+      .where(eq(organization_invitations.tokenHash, tokenHash))
+      .limit(1);
 
+    return invitation;
+  }
   public async accept(invitationId: string) {
     const [invitation] = await db
       .update(organization_invitations)
