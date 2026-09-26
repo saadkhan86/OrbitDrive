@@ -2,7 +2,7 @@ import transporter from "../Config/Transporter.Config";
 import { Constants } from "../Constants/Constants";
 
 export async function sendEmailService(
-  type: "email" | "password-reset",
+  type: "email" | "password-reset" | "organization-invitation",
   email: string,
   verificationToken: string,
   expiresIn: number,

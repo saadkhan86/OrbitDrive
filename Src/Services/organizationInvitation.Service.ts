@@ -10,6 +10,7 @@ import { OrganizationInvitationCreateInput } from "../Validators/organizationInv
 import OrganizationInvitationRepo from "../Repositories/OrganizationInvitation.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
+import { EmailQueue } from "../Queues/Email.Queue";
 
 function generateInvitationToken() {
   return crypto.randomBytes(32).toString("hex");
@@ -25,53 +26,16 @@ export const organizationInvitationService = {
     createdBy: string,
     data: OrganizationInvitationCreateInput,
   ) {
-    const email = data.email.toLowerCase();
-
-    // Find user by email
-    const user = await UserRepo.findByEmail(email);
-
-    if (!user) {
-      throw new CustomError(
-        404,
-        "User with this email does not exist",
-
-        "USER_NOT_FOUND",
-      );
-    }
-
-    // Check existing membership
-    const existingMember = await OrganizationMembersRepo.getByUserId(
-      organizationId,
-      user.id,
-    );
-
-    if (existingMember) {
-      throw new CustomError(
-        409,
-        "User is already a member of this organization",
-
-        "ALREADY_ORGANIZATION_MEMBER",
-      );
-    }
-
-    // Check pending invitation
+    const email = data.email.trim().toLowerCase();
     const existingInvitation =
       await OrganizationInvitationRepo.getPendingByEmail(organizationId, email);
-
-    if (
-      existingInvitation &&
-      !existingInvitation.acceptedAt &&
-      existingInvitation.expiresAt != null &&
-      existingInvitation.expiresAt > new Date()
-    ) {
+    if (!existingInvitation && ) {
       throw new CustomError(
-        409,
-
-        "A pending invitation already exists for this email",
+        404,
+        "An invitation ha been already sent to this email",
         "INVITATION_ALREADY_EXISTS",
       );
     }
-
     const token = generateInvitationToken();
     const tokenHash = hashInvitationToken(token);
 
@@ -85,7 +49,12 @@ export const organizationInvitationService = {
       expiresAt,
       createdBy,
     });
-
+    await EmailQueue.add("organization-invitation", {
+      email,
+      verificationToken: token,
+      expiresIn: 24,
+      fullName: "",
+    });
     return {
       invitation,
       token,
@@ -159,10 +128,11 @@ export const organizationInvitationService = {
       );
     }
 
-    const existingMember = await OrganizationMembersRepo.getByUserId(
-      invitation.organizationId,
-      userId,
-    );
+    const existingMember =
+      await OrganizationMembersRepo.getByOrganizationAndUserId(
+        invitation.organizationId,
+        userId,
+      );
 
     if (existingMember) {
       throw new CustomError(
@@ -174,21 +144,14 @@ export const organizationInvitationService = {
 
     // Membership + invitation update must happen together
     const member = await db.transaction(async (tx) => {
-      const [createdMember] = await tx
-        .insert(organization_members)
-        .values({
+      const createdMember =
+        await OrganizationMembersRepo.createOrganizationMember(tx, {
           organizationId: invitation.organizationId,
           userId,
           role: invitation.role,
-        })
-        .returning();
+        });
 
-      await tx
-        .update(organization_invitations)
-        .set({
-          acceptedAt: new Date(),
-        })
-        .where(eq(organization_invitations.id, invitation.id));
+      await OrganizationInvitationRepo.accept(tx, invitation.id);
 
       return createdMember;
     });

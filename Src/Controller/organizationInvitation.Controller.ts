@@ -5,24 +5,22 @@ import { organizationInvitationService } from "../Services/organizationInvitatio
 import type {
   OrganizationInvitationCreateInput,
   OrganizationInvitationAcceptInput,
+  OrganizationIdInput,
+  OrganizationInvitationDeleteInput,
 } from "../Validators/organizationInvitation.Validator";
 import UserRepo from "../Repositories/User.Repo";
 
 export const organizationInvitationController = {
-  // POST /organizations/:organizationId/invitations
   async create(request: FastifyRequest, reply: FastifyReply) {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
-
-    const data = request.body as OrganizationInvitationCreateInput;
+    const { email, role } = request.body as OrganizationInvitationCreateInput;
+    const { organizationId } = request.params as OrganizationIdInput;
 
     const createdBy = request.user.userId;
 
     const result = await organizationInvitationService.create(
       organizationId,
       createdBy,
-      data,
+      { email, role },
     );
 
     return reply.code(201).send({
@@ -34,9 +32,7 @@ export const organizationInvitationController = {
 
   // GET /organizations/:organizationId/invitations
   async getAll(request: FastifyRequest, reply: FastifyReply) {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
+    const { organizationId } = request.params as OrganizationIdInput;
 
     const invitations =
       await organizationInvitationService.getAllByOrganizationId(
@@ -51,10 +47,8 @@ export const organizationInvitationController = {
 
   // DELETE /organizations/:organizationId/invitations/:invitationId
   async delete(request: FastifyRequest, reply: FastifyReply) {
-    const { organizationId, invitationId } = request.params as {
-      organizationId: string;
-      invitationId: string;
-    };
+    const { organizationId, invitationId } =
+      request.params as OrganizationInvitationDeleteInput;
 
     await organizationInvitationService.delete(organizationId, invitationId);
 

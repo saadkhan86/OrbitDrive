@@ -1,25 +1,50 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class OrganizationMembers {
+  public async createOrganizationMember(
+    tx: NodePgDatabase,
+    data: typeof organization_members.$inferInsert,
+  ) {
+    return (
+      await tx
+        .insert(organization_members)
+        .values({
+          organizationId: data.organizationId,
+          userId: data.userId,
+          role: data.role,
+        })
+        .returning()
+    )[0];
+  }
   public async getAllByOrganizationId(organizationId: string) {
     return await db
       .select()
       .from(organization_members)
       .where(eq(organization_members.organizationId, organizationId));
   }
-  public async getByUserId(userId: string, organizationId: string) {
+  public async getByOrganizationAndUserId(
+    organizationId: string,
+    userId: string,
+  ) {
+    return await db
+      .select()
+      .from(organization_members)
+      .where(
+        and(
+          eq(organization_members.userId, userId),
+          eq(organization_members.id, organizationId),
+        ),
+      );
+  }
+  public async getByUserId(userId: string) {
     return (
       await db
         .select()
         .from(organization_members)
-        .where(
-          and(
-            eq(organization_members.userId, userId),
-            eq(organization_members.organizationId, organizationId),
-          ),
-        )
+        .where(eq(organization_members.userId, userId))
     )[0];
   }
   public async updateOrganizationMember(

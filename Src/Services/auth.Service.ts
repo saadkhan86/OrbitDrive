@@ -8,7 +8,6 @@ import { loginValidator, signupValidator } from "../Validators/user.Validator";
 import * as argon2 from "argon2";
 import VerificationRepo from "../Repositories/Verification.Repo";
 import AuthRepo from "../Repositories/Auth.Repo";
-import { authRouter } from "../Router/auth.Router";
 
 export const authService = {
   signup: async (data: signupValidator) => {

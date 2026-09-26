@@ -19,7 +19,6 @@ export const organizationInvitationValidator = {
 
     role: z.enum(["ADMIN", "MEMBER", "VIEWER"]),
   }),
-
   // POST /invitations/accept
   accept: z.object({
     token: z.string().trim().min(1, "Invitation token is required"),
@@ -32,4 +31,10 @@ export type OrganizationInvitationCreateInput = z.infer<
 
 export type OrganizationInvitationAcceptInput = z.infer<
   typeof organizationInvitationValidator.accept
+>;
+export type OrganizationInvitationDeleteInput = z.infer<
+  typeof organizationInvitationValidator.invitationId
+>;
+export type OrganizationIdInput = z.infer<
+  typeof organizationInvitationValidator.organizationId
 >;

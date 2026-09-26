@@ -30,6 +30,14 @@ export const EmailWorker = new Worker(
           data.fullName,
         );
         break;
+      case "organization-invitation":
+        await sendEmailService(
+          "organization-invitation",
+          data.email,
+          data.verificationToken,
+          data.expiresIn,
+          data.fullName,
+        );
       default:
         console.log(`Invalid job name: ${job.name}`);
     }
