@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { IEmail } from "../Interfaces/IEmail";
-import { sendEmailService } from "../Services/Email.Service";
+import { EmailService } from "../Services/Email.Service";
 import { redisConnection } from "../Config/Redis.Config";
 import { EmailQueue } from "../Queues/Email.Queue";
 
@@ -10,36 +10,37 @@ export const EmailWorker = new Worker(
     console.log(
       `⏳ [RUNNING] Job ID: ${job.id} | Name: ${job.name} started processing`,
     );
-    const data: IEmail.EmailVerificationJob = job.data;
     switch (job.name) {
-      case "email":
-        await sendEmailService(
-          "email",
-          data.email,
-          data.verificationToken,
-          data.expiresIn,
-          data.fullName,
+      case "verify-email":
+        await EmailService.sendEmailVerificationEmail(
+          job.data.email,
+          job.data.verificationToken,
+          job.data.expiresIn,
+          job.data.fullName,
         );
         break;
+
       case "password-reset":
-        await sendEmailService(
-          "password-reset",
-          data.email,
-          data.verificationToken,
-          data.expiresIn,
-          data.fullName,
+        await EmailService.sendPasswordResetEmail(
+          job.data.email,
+          job.data.verificationToken,
+          job.data.expiresIn,
+          job.data.fullName,
         );
         break;
+
       case "organization-invitation":
-        await sendEmailService(
-          "organization-invitation",
-          data.email,
-          data.verificationToken,
-          data.expiresIn,
-          data.fullName,
+        await EmailService.sendOrganizationInvitationEmail(
+          job.data.email,
+          job.data.verificationToken,
+          job.data.expiresIn,
+          job.data.organizationName,
+          job.data.role,
         );
+        break;
+
       default:
-        console.log(`Invalid job name: ${job.name}`);
+        throw new Error(`Unknown email job: ${job.name}`);
     }
   },
   {

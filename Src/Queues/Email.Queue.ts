@@ -1,8 +1,7 @@
 import { Queue } from "bullmq";
-import { redisConnection } from "../Config/Redis.Config";
-import { IEmail } from "../Interfaces/IEmail";
-
-export const EmailQueue = new Queue<IEmail.EmailVerificationJob>("email", {
+import type { EmailJobData, EmailJobName } from "../Types/emailJob.js";
+import { redisConnection } from "../Config/Redis.Config.js";
+export const EmailQueue = new Queue("email", {
   connection: redisConnection,
   defaultJobOptions: {
     attempts: 5,
@@ -13,3 +12,10 @@ export const EmailQueue = new Queue<IEmail.EmailVerificationJob>("email", {
     },
   },
 });
+
+export async function addEmailJob<K extends EmailJobName>(
+  name: K,
+  data: EmailJobData[K],
+) {
+  return EmailQueue.add(name, data);
+}

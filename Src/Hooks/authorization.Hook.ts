@@ -14,7 +14,7 @@ export const authorize = {
           "Organization id is required",
           "ORGANIZATION_ID_REQUIRED",
         );
-      const member = await OrganizationMembersRepo.getByUserId(
+      const member = await OrganizationMembersRepo.getByOrganizationAndUserId(
         userId,
         organizationId,
       );

@@ -1,33 +1,76 @@
 import transporter from "../Config/Transporter.Config";
 import { Constants } from "../Constants/Constants";
 
-export async function sendEmailService(
-  type: "email" | "password-reset" | "organization-invitation",
-  email: string,
-  verificationToken: string,
-  expiresIn: number,
-  fullName: string,
-) {
-  let verificationUrl;
-  if (type == "password-reset") {
-    verificationUrl = `${process.env.VERIFICATION_URL}/auth/${type}/${verificationToken}`;
-  } else {
-    verificationUrl = `${process.env.VERIFICATION_URL}/verification/${type}/${verificationToken}`;
-  }
-  const minutes = Math.round(expiresIn);
-  let content;
-  if (type === "password-reset") {
-    content = Constants.passwordReset;
-  } else {
-    content = Constants.emailVerification;
-  }
-  await transporter.sendMail({
-    from: `"Orbit Drive" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: content.subject(fullName),
+export const EmailService = {
+  sendEmailVerificationEmail: async function sendEmailVerificationEmail(
+    email: string,
+    verificationToken: string,
+    expiresIn: number,
+    fullName: string,
+  ) {
+    const verificationUrl = `${process.env.VERIFICATION_URL}/verification/email/${verificationToken}`;
 
-    text: content.text(verificationUrl, minutes),
+    const minutes = Math.round(expiresIn);
 
-    html: content.html(verificationUrl, minutes),
-  });
-}
+    const content = Constants.emailVerification;
+
+    await transporter.sendMail({
+      from: `"Orbit Drive" <${process.env.EMAIL_USER}>`,
+      to: email,
+
+      subject: content.subject(fullName),
+
+      text: content.text(verificationUrl, minutes),
+
+      html: content.html(verificationUrl, minutes),
+    });
+  },
+  sendPasswordResetEmail: async function sendPasswordResetEmail(
+    email: string,
+    verificationToken: string,
+    expiresIn: number,
+    fullName: string,
+  ) {
+    const verificationUrl = `${process.env.VERIFICATION_URL}/auth/password-reset/${verificationToken}`;
+
+    const minutes = Math.round(expiresIn);
+
+    const content = Constants.passwordReset;
+
+    await transporter.sendMail({
+      from: `"Orbit Drive" <${process.env.EMAIL_USER}>`,
+      to: email,
+
+      subject: content.subject(fullName),
+
+      text: content.text(verificationUrl, minutes),
+
+      html: content.html(verificationUrl, minutes),
+    });
+  },
+  sendOrganizationInvitationEmail:
+    async function sendOrganizationInvitationEmail(
+      email: string,
+      verificationToken: string,
+      expiresIn: number,
+      organizationName: string,
+      role: "ADMIN" | "MEMBER" | "VIEWER",
+    ) {
+      const invitationUrl = `${process.env.VERIFICATION_URL}/invitations/${verificationToken}`;
+
+      const hours = Math.round(expiresIn);
+
+      const content = Constants.organizationInvitation;
+
+      await transporter.sendMail({
+        from: `"Orbit Drive" <${process.env.EMAIL_USER}>`,
+        to: email,
+
+        subject: content.subject(organizationName),
+
+        text: content.text(organizationName, invitationUrl, role, hours),
+
+        html: content.html(organizationName, invitationUrl, role, hours),
+      });
+    },
+};

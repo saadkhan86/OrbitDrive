@@ -10,7 +10,8 @@ import { OrganizationInvitationCreateInput } from "../Validators/organizationInv
 import OrganizationInvitationRepo from "../Repositories/OrganizationInvitation.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
-import { EmailQueue } from "../Queues/Email.Queue";
+import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
+import OrganizationRepo from "../Repositories/Organization.Repo";
 
 function generateInvitationToken() {
   return crypto.randomBytes(32).toString("hex");
@@ -27,20 +28,27 @@ export const organizationInvitationService = {
     data: OrganizationInvitationCreateInput,
   ) {
     const email = data.email.trim().toLowerCase();
+
     const existingInvitation =
       await OrganizationInvitationRepo.getPendingByEmail(organizationId, email);
-    if (!existingInvitation && ) {
+
+    if (
+      existingInvitation &&
+      existingInvitation.expiresAt &&
+      existingInvitation.expiresAt > new Date()
+    ) {
       throw new CustomError(
-        404,
-        "An invitation ha been already sent to this email",
+        409,
+        "An active invitation has already been sent to this email",
         "INVITATION_ALREADY_EXISTS",
       );
     }
+
     const token = generateInvitationToken();
+
     const tokenHash = hashInvitationToken(token);
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
     const invitation = await OrganizationInvitationRepo.create({
       organizationId,
       email,
@@ -49,15 +57,25 @@ export const organizationInvitationService = {
       expiresAt,
       createdBy,
     });
-    await EmailQueue.add("organization-invitation", {
+    const organization =
+      await OrganizationRepo.getByOrganizationId(organizationId);
+    if (!organization) {
+      throw new CustomError(
+        404,
+        "Organization Not Found",
+        "ORGANIZATION_NOT_FOUND",
+      );
+    }
+    await addEmailJob("organization-invitation", {
       email,
       verificationToken: token,
       expiresIn: 24,
-      fullName: "",
+      organizationName: organization?.name,
+      role: data.role,
     });
+
     return {
       invitation,
-      token,
     };
   },
 

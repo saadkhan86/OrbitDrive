@@ -4,12 +4,6 @@ export declare namespace IEmail {
     tokenHash: string;
     expiresAt: Date;
   }
-  interface EmailVerificationJob {
-    email: string;
-    verificationToken: string;
-    expiresIn: number;
-    fullName: string;
-  }
   interface update {
     id: string;
     tokenHash?: string | null;

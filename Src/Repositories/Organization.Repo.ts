@@ -68,5 +68,13 @@ class OrganizationRepo {
         .returning()
     )[0];
   }
+  public async getByOrganizationId(organizationId: string) {
+    return (
+      await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+    )[0];
+  }
 }
 export default new OrganizationRepo();

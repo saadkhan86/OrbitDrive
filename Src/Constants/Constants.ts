@@ -108,4 +108,77 @@ If you did not request a password reset, you can safely ignore this email.
       </div>
     `,
   },
+  organizationInvitation: {
+    subject: (organizationName: string) =>
+      `You're invited to join ${organizationName} on OrbitDrive`,
+
+    text: (
+      organizationName: string,
+      invitationUrl: string,
+      role: string,
+      hours: number,
+    ) => `
+You have been invited to join ${organizationName} on OrbitDrive.
+
+Your assigned role will be: ${role}
+
+Accept the invitation by clicking this link:
+
+${invitationUrl}
+
+This invitation will expire in ${hours} hours.
+
+If you were not expecting this invitation, you can safely ignore this email.
+  `,
+
+    html: (
+      organizationName: string,
+      invitationUrl: string,
+      role: string,
+      hours: number,
+    ) => `
+    <div>
+      <h2>You're Invited to Join ${organizationName}</h2>
+
+      <p>
+        You have been invited to join
+        <strong>${organizationName}</strong>
+        on OrbitDrive.
+      </p>
+
+      <p>
+        Your assigned role will be:
+        <strong>${role}</strong>
+      </p>
+
+      <div style="text-align: center; margin: 25px 25px 25px 0px;">
+        <a
+          href="${invitationUrl}"
+          style="
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #000000;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+          "
+        >
+          Accept Invitation
+        </a>
+      </div>
+
+      <p>
+        This invitation will expire in
+        <strong>${hours} hours</strong>.
+      </p>
+
+      <p>
+        If you were not expecting this invitation,
+        you can safely ignore this email.
+      </p>
+    </div>
+  `,
+  },
 };
