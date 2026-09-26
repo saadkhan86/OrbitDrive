@@ -29,15 +29,17 @@ class OrganizationMembers {
     organizationId: string,
     userId: string,
   ) {
-    return await db
-      .select()
-      .from(organization_members)
-      .where(
-        and(
-          eq(organization_members.userId, userId),
-          eq(organization_members.id, organizationId),
-        ),
-      );
+    return (
+      await db
+        .select()
+        .from(organization_members)
+        .where(
+          and(
+            eq(organization_members.userId, userId),
+            eq(organization_members.organizationId, organizationId),
+          ),
+        )
+    )[0];
   }
   public async getByUserId(userId: string) {
     return (

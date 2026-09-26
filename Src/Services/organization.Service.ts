@@ -1,22 +1,38 @@
+import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import OrganizationRepo from "../Repositories/Organization.Repo";
+import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { createOrganizationValidator } from "../Validators/organization.Validator";
 import { idValidator } from "../Validators/shared.Validator";
 
 export const organizationService = {
   create: async (ownerId: idValidator, data: createOrganizationValidator) => {
-    const organization = await OrganizationRepo.findByOwnerAndSlug(
+    const existingOrganization = await OrganizationRepo.findByOwnerAndSlug(
       ownerId,
       data.slug,
     );
-    if (organization) {
+    if (existingOrganization) {
       throw new CustomError(
         409,
         "Organization already exists",
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
-    return await OrganizationRepo.create(ownerId, data);
+    const organization = await db.transaction(async (tx) => {
+      const createdOrganization = await OrganizationRepo.create(
+        tx,
+        ownerId,
+        data,
+      );
+      const createdOrganizationMember =
+        await OrganizationMembersRepo.createOrganizationMember(tx, {
+          organizationId: createdOrganization!.id,
+          userId: ownerId,
+          role: "OWNER",
+        });
+      return createdOrganization;
+    });
+    return organization;
   },
   getAllByOwnerId: async (ownerId: idValidator) => {
     return await OrganizationRepo.getAllByOwnerId(ownerId);
@@ -45,10 +61,7 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-    organization = await OrganizationRepo.findByOwnerAndSlug(
-      userId,
-      data.slug,
-    );
+    organization = await OrganizationRepo.findByOwnerAndSlug(userId, data.slug);
     if (organization) {
       throw new CustomError(
         409,

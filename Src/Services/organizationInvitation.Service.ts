@@ -12,14 +12,7 @@ import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import OrganizationRepo from "../Repositories/Organization.Repo";
-
-function generateInvitationToken() {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-function hashInvitationToken(token: string) {
-  return crypto.createHash("sha256").update(token).digest("hex");
-}
+import { tokenUtils } from "../Utils/authTokenUtils";
 
 export const organizationInvitationService = {
   async create(
@@ -28,7 +21,14 @@ export const organizationInvitationService = {
     data: OrganizationInvitationCreateInput,
   ) {
     const email = data.email.trim().toLowerCase();
-
+    const user = await UserRepo.findByEmail(email);
+    if (user && user.email == email) {
+      throw new CustomError(
+        409,
+        "Owner can not create invitation to self",
+        "INVALID_EMAIL",
+      );
+    }
     const existingInvitation =
       await OrganizationInvitationRepo.getPendingByEmail(organizationId, email);
 
@@ -44,9 +44,9 @@ export const organizationInvitationService = {
       );
     }
 
-    const token = generateInvitationToken();
+    const token = await tokenUtils.generateToken();
 
-    const tokenHash = hashInvitationToken(token);
+    const tokenHash = await tokenUtils.hashToken(token);
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const invitation = await OrganizationInvitationRepo.create({
@@ -110,7 +110,7 @@ export const organizationInvitationService = {
   },
 
   async accept(token: string, userId: string, userEmail: string) {
-    const tokenHash = hashInvitationToken(token);
+    const tokenHash = await tokenUtils.hashToken(token);
 
     const invitation =
       await OrganizationInvitationRepo.getByTokenHash(tokenHash);

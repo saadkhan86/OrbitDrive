@@ -1,7 +1,7 @@
 import { Constants } from "../Constants/Constants";
 import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
-import { EmailQueue } from "../Queues/Email.Queue";
+import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
 import { loginValidator, signupValidator } from "../Validators/user.Validator";
@@ -40,7 +40,7 @@ export const authService = {
       });
       return createdUser;
     });
-    await EmailQueue.add("email", {
+    await addEmailJob("verify-email", {
       email: user!.email,
       fullName: user!.fullName,
       verificationToken,

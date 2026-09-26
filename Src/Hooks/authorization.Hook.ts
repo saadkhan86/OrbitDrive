@@ -15,8 +15,8 @@ export const authorize = {
           "ORGANIZATION_ID_REQUIRED",
         );
       const member = await OrganizationMembersRepo.getByOrganizationAndUserId(
-        userId,
         organizationId,
+        userId,
       );
       if (!member)
         throw new CustomError(

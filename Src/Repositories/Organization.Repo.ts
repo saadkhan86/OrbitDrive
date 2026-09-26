@@ -1,11 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class OrganizationRepo {
-  public async create(ownerId: string, data: { name: string; slug: string }) {
+  public async create(
+    tx: NodePgDatabase,
+    ownerId: string,
+    data: { name: string; slug: string },
+  ) {
     return (
-      await db
+      await tx
         .insert(organizations)
         .values({ ownerId, name: data.name, slug: data.slug })
         .returning()

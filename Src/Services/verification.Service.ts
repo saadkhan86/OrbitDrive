@@ -1,7 +1,7 @@
 import { Constants } from "../Constants/Constants";
 import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
-import { EmailQueue } from "../Queues/Email.Queue";
+import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import EmailVerificationRepo from "../Repositories/Verification.Repo";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
@@ -88,7 +88,7 @@ export const verificationService = {
       expiresAt,
       claimedAt: null,
     });
-    await EmailQueue.add("email", {
+    await addEmailJob("verify-email", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,

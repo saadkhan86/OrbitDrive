@@ -23,7 +23,7 @@ export const organizationInvitationController = {
       { email, role },
     );
 
-    return reply.code(201).send({
+    return reply.status(201).send({
       success: true,
       message: "Invitation created successfully",
       data: result.invitation,
@@ -39,7 +39,7 @@ export const organizationInvitationController = {
         organizationId,
       );
 
-    return reply.code(200).send({
+    return reply.status(200).send({
       success: true,
       data: invitations,
     });
@@ -52,7 +52,7 @@ export const organizationInvitationController = {
 
     await organizationInvitationService.delete(organizationId, invitationId);
 
-    return reply.code(200).send({
+    return reply.status(200).send({
       success: true,
       message: "Invitation cancelled successfully",
     });
@@ -70,7 +70,7 @@ export const organizationInvitationController = {
       userId,
       user?.email!,
     );
-    return reply.code(200).send({
+    return reply.status(200).send({
       success: true,
       message: "Invitation accepted successfully",
       data: member,
