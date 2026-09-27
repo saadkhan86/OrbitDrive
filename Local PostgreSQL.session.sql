@@ -1,1 +1,1 @@
-SELECT * FROM organization_invitations WHERE email ILIKE '%Saad%' 
+UPDATE organization_invitations SET "expiresAt" = Null WHERE email Like '%saad%'

@@ -25,7 +25,7 @@ export const organizationInvitationService = {
     if (user && user.email == email) {
       throw new CustomError(
         409,
-        "Owner can not create invitation to self",
+        "You can not create invitation to self",
         "INVALID_EMAIL",
       );
     }
@@ -39,7 +39,7 @@ export const organizationInvitationService = {
     ) {
       throw new CustomError(
         409,
-        "An active invitation has already been sent to this email",
+        "Invitation already sent",
         "INVITATION_ALREADY_EXISTS",
       );
     }
