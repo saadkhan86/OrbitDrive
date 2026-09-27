@@ -1,0 +1,1 @@
+SELECT * FROM organization_invitations WHERE email ILIKE '%Saad%' 

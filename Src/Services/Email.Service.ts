@@ -56,7 +56,7 @@ export const EmailService = {
       organizationName: string,
       role: "ADMIN" | "MEMBER" | "VIEWER",
     ) {
-      const invitationUrl = `${process.env.VERIFICATION_URL}/invitations/${verificationToken}`;
+      const invitationUrl = `${process.env.APP_URL}/invitations/${verificationToken}`;
 
       const hours = Math.round(expiresIn);
 

@@ -1,0 +1,2 @@
+ALTER TABLE "organization_invitations" ALTER COLUMN "expiresAt" SET DEFAULT now() + interval '24 hours';--> statement-breakpoint
+ALTER TABLE "organization_invitations" ALTER COLUMN "acceptedAt" SET DEFAULT NULL;

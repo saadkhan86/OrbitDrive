@@ -6,27 +6,27 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class OrganizationInvitationRepo {
   public async create(data: typeof organization_invitations.$inferInsert) {
-    const [invitation] = await db
-      .insert(organization_invitations)
-      .values(data)
-      .returning();
-
-    return invitation;
+    return (
+      await db
+        .insert(organization_invitations)
+        .values({ ...data, acceptedAt: null })
+        .returning()
+    )[0];
   }
 
   public async getById(organizationId: string, invitationId: string) {
-    const [invitation] = await db
-      .select()
-      .from(organization_invitations)
-      .where(
-        and(
-          eq(organization_invitations.id, invitationId),
-          eq(organization_invitations.organizationId, organizationId),
-        ),
-      )
-      .limit(1);
-
-    return invitation;
+    return (
+      await db
+        .select()
+        .from(organization_invitations)
+        .where(
+          and(
+            eq(organization_invitations.id, invitationId),
+            eq(organization_invitations.organizationId, organizationId),
+          ),
+        )
+        .limit(1)
+    )[0];
   }
 
   public async getAllByOrganizationId(organizationId: string) {
@@ -51,13 +51,13 @@ class OrganizationInvitationRepo {
     )[0];
   }
   public async getByTokenHash(tokenHash: string) {
-    const [invitation] = await db
-      .select()
-      .from(organization_invitations)
-      .where(eq(organization_invitations.tokenHash, tokenHash))
-      .limit(1);
-
-    return invitation;
+    return (
+      await db
+        .select()
+        .from(organization_invitations)
+        .where(eq(organization_invitations.tokenHash, tokenHash))
+        .limit(1)
+    )[0];
   }
   public async accept(tx: NodePgDatabase, invitationId: string) {
     return (
@@ -72,17 +72,17 @@ class OrganizationInvitationRepo {
   }
 
   public async delete(organizationId: string, invitationId: string) {
-    const [invitation] = await db
-      .delete(organization_invitations)
-      .where(
-        and(
-          eq(organization_invitations.id, invitationId),
-          eq(organization_invitations.organizationId, organizationId),
-        ),
-      )
-      .returning();
-
-    return invitation;
+    return (
+      await db
+        .delete(organization_invitations)
+        .where(
+          and(
+            eq(organization_invitations.id, invitationId),
+            eq(organization_invitations.organizationId, organizationId),
+          ),
+        )
+        .returning()
+    )[0];
   }
 }
 
