@@ -1,4 +1,5 @@
 import { ConnectionOptions } from "bullmq";
+import Redis from "ioredis";
 
 export const redisConnection: ConnectionOptions = {
   host: process.env.REDIS_HOST || "localhost",
@@ -6,6 +7,6 @@ export const redisConnection: ConnectionOptions = {
   maxRetriesPerRequest: null,
 };
 
-export const RedisConfig = redisConnection;
-
-
+export const redis = new Redis(
+  process.env.REDIS_PORT || "redis://127.0.0.1:6379",
+);

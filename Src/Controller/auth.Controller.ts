@@ -29,10 +29,7 @@ export const authController = {
     });
   },
   forgotPassword: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.forgotPassword(
-      (request.body as emailValidator).email,
-      request.server.jwtUtils.generatePasswordResetToken,
-    );
+    await authService.forgotPassword((request.body as emailValidator).email);
     return reply
       .status(201)
       .send({ success: true, message: "Password reset email has been sent" });

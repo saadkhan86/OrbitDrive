@@ -1,13 +1,13 @@
 import { Constants } from "../Constants/Constants";
-import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
 import { loginValidator, signupValidator } from "../Validators/user.Validator";
 import * as argon2 from "argon2";
-import VerificationRepo from "../Repositories/Verification.Repo";
 import AuthRepo from "../Repositories/Auth.Repo";
+import { redis } from "../Config/Redis.Config";
+import { redisUtils } from "../Utils/redis.Utils";
 
 export const authService = {
   signup: async (data: signupValidator) => {
@@ -25,27 +25,25 @@ export const authService = {
         "EMAIL_ALREADY_EXISTS",
       );
     const passwordHash = await argon2.hash(data.password);
-    const verificationToken = await tokenUtils.generateToken();
-    const hashedVerificationToken =
-      await tokenUtils.hashToken(verificationToken);
-    const expiresAt = new Date(
-      Date.now() + Constants.tokenExpireTime * 60 * 1000,
-    );
-    const user = await db.transaction(async (tx) => {
-      const createdUser = await AuthRepo.signup(tx, { ...data, passwordHash });
-      await VerificationRepo.create(tx, {
-        userId: createdUser!.id,
-        tokenHash: hashedVerificationToken,
-        expiresAt,
-      });
-      return createdUser;
+    const token = await tokenUtils.generateToken();
+    const hashedVerificationToken = await tokenUtils.hashToken(token);
+    const user = await AuthRepo.signup({
+      ...data,
+      passwordHash,
     });
+    if (!user)
+      throw new CustomError(
+        500,
+        "something went wrong",
+        "SOMETHING_WENT_WRONG",
+      );
     await addEmailJob("verify-email", {
       email: user!.email,
       fullName: user!.fullName,
-      verificationToken,
+      verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
+    await redisUtils.setRedis("verify-email", hashedVerificationToken, user.id);
     return user;
   },
   login: async (data: loginValidator) => {
@@ -61,18 +59,11 @@ export const authService = {
     const isMatch = await argon2.verify(user.passwordHash, data.password);
     if (!isMatch)
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
-    const { passwordHash, ...userWithoutPassword } = user;
     const refreshToken = await tokenUtils.generateToken();
-    const userWithToken = await AuthRepo.updateRefreshToken(
-      user.id,
-      refreshToken,
-    );
+    await AuthRepo.updateRefreshToken(user.id, refreshToken);
     return { refreshToken, userId: user.id };
   },
-  forgotPassword: async (
-    email: string,
-    tokenGenerator: (id: string) => string,
-  ) => {
+  forgotPassword: async (email: string) => {
     const user = await UserRepo.findByEmail(email);
     if (!user)
       throw new CustomError(
@@ -86,13 +77,15 @@ export const authService = {
         "User email is not verified",
         "EMAIL_NOT_VERIFIED",
       );
-    const token = tokenGenerator(user.id);
+    const token = await tokenUtils.generateToken();
+    const hashedToken = await tokenUtils.hashToken(token);
     await EmailQueue.add("password-reset", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
+    await redisUtils.setRedis("password-reset", hashedToken, user.id);
     return true;
   },
   passwordReset: async (userId: string, password: string) => {

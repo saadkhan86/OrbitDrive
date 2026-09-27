@@ -5,7 +5,6 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class AuthRepo {
   public async signup(
-    tx: any,
     data: {
       fullName: string;
       email: string;
