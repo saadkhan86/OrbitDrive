@@ -11,7 +11,10 @@ export const redisUtils = {
       Constants.tokenExpireTime * 60,
     );
   },
-  getRedis: async (type: EmailJobName, token: string) => {
+  getRedis: async (
+    type: EmailJobName,
+    token: string,
+  ): Promise<string | null> => {
     return await redis.get(`${type}:${token}`);
   },
   deleteRedis: async (type: EmailJobName, token: string) => {

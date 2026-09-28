@@ -4,17 +4,6 @@ import type { emailValidator } from "../Validators/email.Validator";
 import { verificationService } from "../Services/verification.Service";
 
 export const verificationController = {
-  verifyEmailVerification: async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-  ) => {
-    await verificationService.verifyEmailVerification(
-      request.params as tokenValidator,
-    );
-    return reply
-      .status(200)
-      .send({ success: true, message: "Email verified successfully" });
-  },
   resendEmailVerification: async (
     request: FastifyRequest,
     reply: FastifyReply,
@@ -25,5 +14,16 @@ export const verificationController = {
     return reply
       .status(201)
       .send({ success: true, message: "Verification email has been sent" });
+  },
+  verifyEmailVerification: async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => {
+    await verificationService.verifyEmailVerification(
+      request.params as tokenValidator,
+    );
+    return reply
+      .status(200)
+      .send({ success: true, message: "Email verified successfully" });
   },
 };

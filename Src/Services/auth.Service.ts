@@ -3,12 +3,14 @@ import { CustomError } from "../Errors/CustomError";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
-import { loginValidator, signupValidator } from "../Validators/user.Validator";
+import {
+  loginValidator,
+  passwordResetValidator,
+  signupValidator,
+} from "../Validators/user.Validator";
 import * as argon2 from "argon2";
 import AuthRepo from "../Repositories/Auth.Repo";
-import { redis } from "../Config/Redis.Config";
 import { redisUtils } from "../Utils/redis.Utils";
-
 export const authService = {
   signup: async (data: signupValidator) => {
     const isExist = await UserRepo.findByEmail(data.email);
@@ -71,7 +73,7 @@ export const authService = {
         "User not found associated with this email",
         "USER_NOT_FOUND",
       );
-    if (!user?.isEmailVerified)
+    if (!user.isEmailVerified)
       throw new CustomError(
         403,
         "User email is not verified",
@@ -79,7 +81,7 @@ export const authService = {
       );
     const token = await tokenUtils.generateToken();
     const hashedToken = await tokenUtils.hashToken(token);
-    await EmailQueue.add("password-reset", {
+    await addEmailJob("password-reset", {
       email: user.email,
       fullName: user.fullName,
       verificationToken: token,
@@ -88,8 +90,13 @@ export const authService = {
     await redisUtils.setRedis("password-reset", hashedToken, user.id);
     return true;
   },
-  passwordReset: async (userId: string, password: string) => {
-    const passwordHash = await argon2.hash(password);
+  passwordReset: async (data: passwordResetValidator) => {
+    const hashedToken = await tokenUtils.hashToken(data.token);
+    const userId = await redisUtils.getRedis("password-reset", hashedToken);
+    if (!userId)
+      throw new CustomError(400, "Invalid or expired token", "INVALID_TOKEN");
+    await redisUtils.deleteRedis("password-reset", hashedToken);
+    const passwordHash = await argon2.hash(data.password);
     await UserRepo.update(userId, { passwordHash });
     return true;
   },

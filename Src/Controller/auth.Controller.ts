@@ -35,10 +35,7 @@ export const authController = {
       .send({ success: true, message: "Password reset email has been sent" });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.passwordReset(
-      request.user.userId,
-      (request.body as passwordResetValidator).password,
-    );
+    await authService.passwordReset(request.body as passwordResetValidator);
     return reply
       .status(200)
       .send({ success: true, message: "Password reset successfully" });

@@ -39,6 +39,9 @@ export const userValidator = {
       .optional(),
   }),
   passwordResetValidator: z.object({
+    token: z.string().length(64, {
+      message: "Token must be 64 characters long",
+    }),
     password: z
       .string()
       .min(6, { message: "password must be greater than 5 characters" })

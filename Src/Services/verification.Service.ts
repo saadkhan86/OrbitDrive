@@ -66,17 +66,8 @@ export const verificationService = {
         "USER_NOT_FOUND",
       );
 
-    if (user?.isEmailVerified)
+    if (user.isEmailVerified)
       throw new CustomError(409, "Email already verified", "ALREADY_VERIFIED");
-    const isTokenAlreadyExists = await EmailVerificationRepo.findByUserId(
-      user.id,
-    );
-    if (!isTokenAlreadyExists)
-      throw new CustomError(
-        500,
-        "something went wrong while processing your request",
-        "SOMETHING_WENT_WRONG",
-      );
     const token = await tokenUtils.generateToken();
     const tokenHash = await tokenUtils.hashToken(token);
     const expiresAt = new Date(
