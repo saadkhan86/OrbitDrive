@@ -1,60 +1,32 @@
 import { Constants } from "../Constants/Constants";
-import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
-import EmailVerificationRepo from "../Repositories/Verification.Repo";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
 import type { tokenValidator } from "../Validators/token.Validator";
 import AuthRepo from "../Repositories/Auth.Repo";
-
+import { redisUtils } from "../Utils/redis.Utils";
 export const verificationService = {
   verifyEmailVerification: async (data: tokenValidator) => {
-    await db.transaction(async (tx) => {
-      const tokenHash = await tokenUtils.hashToken(data.token);
-      const emailVerification = await EmailVerificationRepo.findByTokenHash(
-        tx,
-        tokenHash,
+    const userId = await redisUtils.getRedis("verify-email", data.token);
+    if (!userId)
+      throw new CustomError(
+        410,
+        "Email verification link has been expired",
+        "LINK_EXPIRED",
       );
-      if (!emailVerification)
-        throw new CustomError(
-          400,
-          "already used or expired token",
-          "INVALID_TOKEN",
-        );
-
-      if (emailVerification.claimedAt != null)
-        throw new CustomError(
-          400,
-          "already used or expired token",
-          "TOKEN_ALREADY_USED",
-        );
-
-      if (Date.now() > emailVerification.expiresAt!.getTime())
-        throw new CustomError(
-          400,
-          "already used or expired token",
-          "TOKEN_EXPIRED",
-        );
-
-      await EmailVerificationRepo.update(tx, {
-        id: emailVerification.id,
-        claimedAt: new Date(),
-        tokenHash: null,
-        expiresAt: null,
-      });
-      const updatedUser = await AuthRepo.updateIsEmailVerified(
-        tx,
-        emailVerification.userId,
+    const updatedUser = await AuthRepo.updateIsEmailVerified(userId);
+    if (!updatedUser)
+      throw new CustomError(
+        500,
+        "something went wrong while verifying email",
+        "COULD_NOT_VERIFY",
       );
-      if (!updatedUser)
-        throw new CustomError(
-          500,
-          "something went wrong while verifying email",
-          "COULD_NOT_VERIFY",
-        );
-    });
-
+    await redisUtils.deleteRedis("verify-email", userId);
+    await redisUtils.deleteRedis(
+      "verify-email",
+      (await redisUtils.getRedis("verify-email", userId))!,
+    );
     return true;
   },
   resendEmailVerification: async (email: string) => {
@@ -68,17 +40,17 @@ export const verificationService = {
 
     if (user.isEmailVerified)
       throw new CustomError(409, "Email already verified", "ALREADY_VERIFIED");
+    let hashedToken = await redisUtils.getRedis("verify-email", user.id);
+    if (hashedToken)
+      throw new CustomError(
+        409,
+        "email verification link already sent",
+        "ALREADY_SENT",
+      );
     const token = await tokenUtils.generateToken();
-    const tokenHash = await tokenUtils.hashToken(token);
-    const expiresAt = new Date(
-      Date.now() + Constants.tokenExpireTime * 60 * 1000,
-    );
-    await EmailVerificationRepo.update(db, {
-      id: isTokenAlreadyExists.id,
-      tokenHash,
-      expiresAt,
-      claimedAt: null,
-    });
+    hashedToken = await tokenUtils.hashToken(token);
+    await redisUtils.setRedis("verify-email", hashedToken, user.id);
+    await redisUtils.setRedis("verify-email", user.id, hashedToken);
     await addEmailJob("verify-email", {
       email: user.email,
       fullName: user.fullName,

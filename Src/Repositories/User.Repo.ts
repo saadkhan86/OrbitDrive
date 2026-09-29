@@ -1,21 +1,16 @@
 import { users } from "../Database/Schemas/users.Schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../Database";
-import { updateValidator } from "../Validators/user.Validator";
 
 class UserRepo {
   public async findByEmail(email: string) {
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-    return user[0];
+    return (
+      await db.select().from(users).where(eq(users.email, email)).limit(1)
+    )[0];
   }
 
   public async findById(id: string) {
-    const user = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return user[0];
+    return (await db.select().from(users).where(eq(users.id, id)).limit(1))[0];
   }
 
   public async update(
@@ -25,20 +20,21 @@ class UserRepo {
     const newData: Partial<typeof users.$inferInsert> = {};
     if (data.fullName) newData.fullName = data.fullName;
     if (data.passwordHash) newData.passwordHash = data.passwordHash;
-    const user = await db
-      .update(users)
-      .set({
-        ...newData,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id))
-      .returning({
-        id: users.id,
-        fullName: users.fullName,
-        email: users.email,
-        updatedAt: users.updatedAt,
-      });
-    return user[0];
+    return (
+      await db
+        .update(users)
+        .set({
+          ...newData,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, id))
+        .returning({
+          id: users.id,
+          fullName: users.fullName,
+          email: users.email,
+          updatedAt: users.updatedAt,
+        })
+    )[0];
   }
 }
 

@@ -28,7 +28,7 @@ export const authService = {
       );
     const passwordHash = await argon2.hash(data.password);
     const token = await tokenUtils.generateToken();
-    const hashedVerificationToken = await tokenUtils.hashToken(token);
+    const hashedToken = await tokenUtils.hashToken(token);
     const user = await AuthRepo.signup({
       ...data,
       passwordHash,
@@ -45,7 +45,8 @@ export const authService = {
       verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
-    await redisUtils.setRedis("verify-email", hashedVerificationToken, user.id);
+    await redisUtils.setRedis("verify-email", hashedToken, user.id);
+    await redisUtils.setRedis("verify-email", user.id, hashedToken);
     return user;
   },
   login: async (data: loginValidator) => {
@@ -87,7 +88,9 @@ export const authService = {
       verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
+
     await redisUtils.setRedis("password-reset", hashedToken, user.id);
+    await redisUtils.setRedis("password-reset", user.id, hashedToken);
     return true;
   },
   passwordReset: async (data: passwordResetValidator) => {
@@ -96,6 +99,7 @@ export const authService = {
     if (!userId)
       throw new CustomError(400, "Invalid or expired token", "INVALID_TOKEN");
     await redisUtils.deleteRedis("password-reset", hashedToken);
+    await redisUtils.deleteRedis("password-reset", userId);
     const passwordHash = await argon2.hash(data.password);
     await UserRepo.update(userId, { passwordHash });
     return true;

@@ -9,15 +9,6 @@ export const CreateJWTUtils = (app: FastifyInstance) => {
     generateRefreshToken: (id: string) => {
       return app.jwt.sign({ userId: id, type: "refresh" }, { expiresIn: "7d" });
     },
-    generatePasswordResetToken: (id: string) => {
-      return app.jwt.sign(
-        { userId: id, type: "password-reset" },
-        { expiresIn: `${Constants.tokenExpireTime}m` },
-      );
-    },
-    verifyPasswordResetToken: (token: string) => {
-      return app.jwt.verify<{ id: string; type: "password-reset" }>(token);
-    },
   };
 };
 export type JWTUtils = ReturnType<typeof CreateJWTUtils>;

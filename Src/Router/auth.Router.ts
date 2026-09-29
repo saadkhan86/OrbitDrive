@@ -27,7 +27,6 @@ export const authRouter = async (app: FastifyInstance) => {
     "/reset-password",
     {
       schema: { body: userValidator.passwordResetValidator },
-      preHandler: authenticate.user,
     },
     authController.passwordReset,
   );

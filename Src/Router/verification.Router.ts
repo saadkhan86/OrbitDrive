@@ -5,14 +5,14 @@ import { emailValidator } from "../Validators/email.Validator";
 
 export const verificationRouter = async (app: FastifyInstance) => {
   app.post(
-    "/email/resend",
+    "/email-verification/resend",
     {
       schema: { body: emailValidator.emailSchema },
     },
     verificationController.resendEmailVerification,
   );
   app.get(
-    "/email/:token",
+    "/email-verification:token",
     {
       schema: {
         params: tokenValidator.tokenSchema,

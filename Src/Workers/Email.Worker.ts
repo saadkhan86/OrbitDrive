@@ -1,5 +1,4 @@
 import { Worker } from "bullmq";
-import { IEmail } from "../Interfaces/IEmail";
 import { EmailService } from "../Services/Email.Service";
 import { redisConnection } from "../Config/Redis.Config";
 import { EmailQueue } from "../Queues/Email.Queue";

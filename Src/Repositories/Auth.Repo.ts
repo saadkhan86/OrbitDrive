@@ -1,16 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { users } from "../Database/Schemas/users.Schema";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class AuthRepo {
-  public async signup(
-    data: {
-      fullName: string;
-      email: string;
-      passwordHash: string;
-    },
-  ) {
+  public async signup(data: {
+    fullName: string;
+    email: string;
+    passwordHash: string;
+  }) {
     const result = await db
       .insert(users)
       .values({
@@ -28,13 +25,14 @@ class AuthRepo {
     return result[0];
   }
 
-  public async updateIsEmailVerified(tx: NodePgDatabase<any>, id: string) {
-    const user = await tx
-      .update(users)
-      .set({ isEmailVerified: true })
-      .where(and(eq(users.id, id), eq(users.isEmailVerified, false)))
-      .returning({ isEmailVerified: users.isEmailVerified });
-    return user[0]?.isEmailVerified;
+  public async updateIsEmailVerified(id: string) {
+    return (
+      await db
+        .update(users)
+        .set({ isEmailVerified: true })
+        .where(and(eq(users.id, id), eq(users.isEmailVerified, false)))
+        .returning({ isEmailVerified: users.isEmailVerified })
+    )[0]?.isEmailVerified;
   }
   public async updateRefreshToken(userId: string, refreshToken: string) {
     const user = await db

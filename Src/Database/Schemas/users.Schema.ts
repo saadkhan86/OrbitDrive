@@ -7,7 +7,6 @@ import {
   pgEnum,
   unique,
 } from "drizzle-orm/pg-core";
-import { string } from "zod";
 export const authProviderEnum = pgEnum("auth_provider", ["password", "google"]);
 export const users = pgTable(
   "users",

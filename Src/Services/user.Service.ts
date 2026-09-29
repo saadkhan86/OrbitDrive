@@ -2,6 +2,9 @@ import UserRepo from "../Repositories/User.Repo";
 import type { updateValidator } from "../Validators/user.Validator";
 import * as argon2 from "argon2";
 export const userService = {
+  me: async (userId: string) => {
+    return UserRepo.findById(userId);
+  },
   update: async (userId: string, data: updateValidator) => {
     let newData: Record<string, string> = {};
     if (data.password && data.password !== undefined)
