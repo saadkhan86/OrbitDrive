@@ -9,6 +9,9 @@ export const authenticate = {
       if (!user) {
         throw new CustomError(401, "User not found", "USER_NOT_FOUND");
       }
+      if (!user.isEmailVerified) {
+        throw new CustomError(403, "Email not verified", "EMAIL_NOT_VERIFIED");
+      }
       request.user = { ...user, type: "access", userId: user.id };
     } catch (error) {
       throw error;

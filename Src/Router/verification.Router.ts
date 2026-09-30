@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance } from "fastify";
 import { tokenValidator } from "../Validators/token.Validator";
 import { verificationController } from "../Controller/verification.Controller";
 import { emailValidator } from "../Validators/email.Validator";

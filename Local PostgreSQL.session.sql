@@ -1,1 +1,1 @@
-UPDATE organization_invitations SET "expiresAt" = Null WHERE email Like '%saad%'
+UPDATE users SET "isEmailVerified"=false WHERE "email"='sk8613013@gmail.com';

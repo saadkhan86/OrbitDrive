@@ -30,6 +30,13 @@ export const authorize = {
           "you are not authorized to perform this action",
           "NOT_AUTHORIZED",
         );
+      //   if (member.userId == request.user.userId) {
+      //   throw new CustomError(
+      //     403,
+      //     "Owner can't update own role",
+      //     "CANNOT_UPDATE_OWN_ROLE",
+      //   );
+      // }
     };
   },
 };

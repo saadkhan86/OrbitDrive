@@ -60,7 +60,7 @@ class OrganizationMembers {
       .where(
         and(
           eq(organization_members.organizationId, organizationId),
-          eq(organization_members.userId, organizationMemberId),
+          eq(organization_members.id, organizationMemberId),
         ),
       )
       .returning();

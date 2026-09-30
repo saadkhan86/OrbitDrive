@@ -32,9 +32,9 @@ export const organizationMemberController = {
     const organizationMember =
       await organizationMemberService.updateOrganizationMember(
         (request.params as organizationMemberOrganizationMemberIdValidator)
-          .organizationMemberId,
-        (request.params as organizationMemberOrganizationMemberIdValidator)
           .organizationId,
+        (request.params as organizationMemberOrganizationMemberIdValidator)
+          .organizationMemberId,
         request.body as organizationMemberRoleValidator,
       );
     return reply.status(200).send({
