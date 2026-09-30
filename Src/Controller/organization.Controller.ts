@@ -9,14 +9,15 @@ import { idValidator } from "../Validators/shared.Validator";
 
 export const organizationController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
-    const organization = await organizationService.create(
-      request.user.userId as idValidator,
-      request.body as createOrganizationValidator,
-    );
     return reply.code(201).send({
       success: true,
       message: "organization created successfully",
-      data: { organization },
+      data: {
+        organization: await organizationService.create(
+          request.user.userId as idValidator,
+          request.body as createOrganizationValidator,
+        ),
+      },
     });
   },
   delete: async (request: FastifyRequest, reply: FastifyReply) => {

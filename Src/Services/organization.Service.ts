@@ -19,11 +19,10 @@ export const organizationService = {
       );
     }
     const organization = await db.transaction(async (tx) => {
-      const createdOrganization = await OrganizationRepo.create(
-        tx,
+      const createdOrganization = await OrganizationRepo.create(tx, {
         ownerId,
-        data,
-      );
+        ...data,
+      });
       const createdOrganizationMember =
         await OrganizationMembersRepo.createOrganizationMember(tx, {
           organizationId: createdOrganization!.id,

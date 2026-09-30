@@ -51,11 +51,9 @@ export const organizationMemberController = {
       (request.params as organizationMemberOrganizationMemberIdValidator)
         .organizationMemberId,
     );
-    return reply
-      .status(200)
-      .send({
-        success: true,
-        message: "Organization Member deleted successfully",
-      });
+    return reply.status(200).send({
+      success: true,
+      message: "Organization Member deleted successfully",
+    });
   },
 };

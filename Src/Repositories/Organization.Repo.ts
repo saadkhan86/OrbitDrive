@@ -6,13 +6,12 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
-    ownerId: string,
-    data: { name: string; slug: string },
+    data: typeof organizations.$inferInsert,
   ) {
     return (
       await tx
         .insert(organizations)
-        .values({ ownerId, name: data.name, slug: data.slug })
+        .values({ ownerId: data.ownerId, name: data.name, slug: data.slug })
         .returning()
     )[0];
   }
