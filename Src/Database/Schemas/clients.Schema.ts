@@ -17,9 +17,11 @@ export const pgClientStatusEnum = pgEnum("client_status", [
 ]);
 export const clients = pgTable("clients", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organizationId").references(() => organizations.id, {
-    onDelete: "cascade",
-  }),
+  organizationId: uuid("organizationId")
+    .references(() => organizations.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   name: varchar("name", { length: 50 }).notNull(),
   email: varchar("email", { length: 50 }).notNull().unique(),
   phone: varchar("phone", { length: 20 }).notNull(),

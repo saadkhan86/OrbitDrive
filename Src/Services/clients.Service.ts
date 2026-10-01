@@ -1,31 +1,18 @@
 import ClientRepo from "../Repositories/Client.Repo";
 
 import { CustomError } from "../Errors/CustomError";
+import {
+  CreateClientInput,
+  UpdateClientInput,
+} from "../Validators/clients.Validator";
 
 class ClientService {
   // Create Client
-  public async create(
-    organizationId: string,
-    data: {
-      name: string;
-      email?: string;
-      phone?: string;
-      company?: string;
-      status?: string;
-      notes?: string;
-    },
-  ) {
-    const client = await ClientRepo.create({
+  public async create(organizationId: string, data: CreateClientInput) {
+    return await ClientRepo.create({
+      ...data,
       organizationId,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      company: data.company,
-      status: data.status,
-      notes: data.notes,
     });
-
-    return client;
   }
 
   // Get All Clients
@@ -48,14 +35,7 @@ class ClientService {
   public async update(
     organizationId: string,
     clientId: string,
-    data: {
-      name?: string;
-      email?: string;
-      phone?: string;
-      company?: string;
-      status?: string;
-      notes?: string;
-    },
+    data: UpdateClientInput,
   ) {
     const existingClient = await ClientRepo.getById(organizationId, clientId);
 
