@@ -1,11 +1,11 @@
 {
-  "id": "00a8f88e-8806-4d0a-8955-eec2778015c0",
+  "id": "0f22142b-3f9c-416e-9f1c-6dfecfb750a1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.email_verification_tokens": {
-      "name": "email_verification_tokens",
+    "public.clients": {
+      "name": "clients",
       "schema": "",
       "columns": {
         "id": {
@@ -15,32 +15,59 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
+        "organizationId": {
+          "name": "organizationId",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "varchar(64)",
+        "email": {
+          "name": "email",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company": {
+          "name": "company",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "client_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "expires_at": {
-          "name": "expires_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         },
-        "claimed_at": {
-          "name": "claimed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
+        "updatedAt": {
+          "name": "updatedAt",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
@@ -49,12 +76,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "email_verification_tokens_user_id_users_id_fk": {
-          "name": "email_verification_tokens_user_id_users_id_fk",
-          "tableFrom": "email_verification_tokens",
-          "tableTo": "users",
+        "clients_organizationId_organizations_id_fk": {
+          "name": "clients_organizationId_organizations_id_fk",
+          "tableFrom": "clients",
+          "tableTo": "organizations",
           "columnsFrom": [
-            "user_id"
+            "organizationId"
           ],
           "columnsTo": [
             "id"
@@ -65,11 +92,291 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "email_verification_tokens_token_hash_unique": {
-          "name": "email_verification_tokens_token_hash_unique",
+        "clients_email_unique": {
+          "name": "clients_email_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "token_hash"
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.organization_invitations": {
+      "name": "organization_invitations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organizationId": {
+          "name": "organizationId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "organization_member_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MEMBER'"
+        },
+        "tokenHash": {
+          "name": "tokenHash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now() + interval '24 hours'"
+        },
+        "acceptedAt": {
+          "name": "acceptedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "NULL"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "organization_invitations_organizationId_organizations_id_fk": {
+          "name": "organization_invitations_organizationId_organizations_id_fk",
+          "tableFrom": "organization_invitations",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organizationId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "organization_invitations_createdBy_users_id_fk": {
+          "name": "organization_invitations_createdBy_users_id_fk",
+          "tableFrom": "organization_invitations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "organization_invitations_tokenHash_unique": {
+          "name": "organization_invitations_tokenHash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tokenHash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.organization_members": {
+      "name": "organization_members",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organizationId": {
+          "name": "organizationId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "organization_member_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MEMBER'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "organization_members_organizationId_organizations_id_fk": {
+          "name": "organization_members_organizationId_organizations_id_fk",
+          "tableFrom": "organization_members",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organizationId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "organization_members_userId_users_id_fk": {
+          "name": "organization_members_userId_users_id_fk",
+          "tableFrom": "organization_members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "organization_member_org_user_unique": {
+          "name": "organization_member_org_user_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organizationId",
+            "userId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.organizations": {
+      "name": "organizations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ownerId": {
+          "name": "ownerId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "organizations_ownerId_users_id_fk": {
+          "name": "organizations_ownerId_users_id_fk",
+          "tableFrom": "organizations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "ownerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "organizations_slug_unique": {
+          "name": "organizations_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        },
+        "organizations_owner_slug_unique": {
+          "name": "organizations_owner_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ownerId",
+            "slug"
           ]
         }
       },
@@ -127,6 +434,13 @@
           "notNull": true,
           "default": false
         },
+        "refreshToken": {
+          "name": "refreshToken",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "''"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -167,7 +481,38 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.client_status": {
+      "name": "client_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "inactive",
+        "prospect",
+        "customer",
+        "lead",
+        "vip"
+      ]
+    },
+    "public.organization_member_role": {
+      "name": "organization_member_role",
+      "schema": "public",
+      "values": [
+        "OWNER",
+        "ADMIN",
+        "MEMBER",
+        "VIEWER"
+      ]
+    },
+    "public.auth_provider": {
+      "name": "auth_provider",
+      "schema": "public",
+      "values": [
+        "password",
+        "google"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

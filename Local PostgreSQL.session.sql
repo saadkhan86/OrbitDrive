@@ -1,1 +1,0 @@
-UPDATE users SET "isEmailVerified"=false WHERE "email"='sk8613013@gmail.com';

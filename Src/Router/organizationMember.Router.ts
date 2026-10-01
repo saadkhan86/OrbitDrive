@@ -6,7 +6,7 @@ import { authorize } from "../Hooks/authorization.Hook";
 export const organizationMemberRouter = async (app: FastifyInstance) => {
   app.addHook("preHandler", authenticate.user);
   app.get(
-    "/:organizationId",
+    "/",
     {
       schema: { params: organizationMemberValidator.organizationId },
       preHandler: [authorize.role(["ADMIN", "MEMBER", "OWNER", "VIEWER"])],
@@ -14,7 +14,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     organizationMemberController.getAllByOrganizationId,
   );
   app.get(
-    "/:organizationId/:organizationMemberId",
+    "/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
@@ -24,7 +24,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     organizationMemberController.getByUserId,
   );
   app.patch(
-    "/:organizationId/:organizationMemberId",
+    "/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
@@ -35,7 +35,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     organizationMemberController.update,
   );
   app.delete(
-    "/:organizationId/:organizationMemberId",
+    "/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,

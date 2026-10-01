@@ -60,7 +60,7 @@ export const organizationInvitationController = {
 
   // POST /invitations/accept
   async accept(request: FastifyRequest, reply: FastifyReply) {
-    const { token } = request.body as OrganizationInvitationAcceptInput;
+    const { token } = request.params as OrganizationInvitationAcceptInput;
 
     const userId = request.user.userId;
 

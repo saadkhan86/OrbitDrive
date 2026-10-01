@@ -1,1 +1,0 @@
-CREATE TYPE "public"."auth_provider" AS ENUM('password', 'google');

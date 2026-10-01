@@ -20,23 +20,27 @@ export const organizationValidator = {
       })
       .min(5, { message: "slug must be grater than 4 characters" }),
   }),
-  updateValidator: z
-    .string({
-      error: (issue) =>
-        issue.code === "invalid_type"
-          ? `This ${issue.path} should be of type ${issue.expected}`
-          : `This ${issue.path} is required`,
-    })
-    .min(5, { message: "name must be greater than 5 characters" })
-    .max(100, { message: "name must be smaller than 100 characters" }),
-  slug: z
-    .string({
-      error: (issue) =>
-        issue.code == "invalid_type"
-          ? `This ${issue.path} should be of type ${issue.expected}`
-          : `This ${issue.path} is required`,
-    })
-    .min(5, { message: "slug must be grater than 4 characters" }),
+  updateValidator: z.object({
+    name: z
+      .string({
+        error: (issue) =>
+          issue.code === "invalid_type"
+            ? `This ${issue.path} should be of type ${issue.expected}`
+            : `This ${issue.path} is required`,
+      })
+      .min(5, { message: "name must be greater than 5 characters" })
+      .max(100, { message: "name must be smaller than 100 characters" })
+      .optional(),
+    slug: z
+      .string({
+        error: (issue) =>
+          issue.code == "invalid_type"
+            ? `This ${issue.path} should be of type ${issue.expected}`
+            : `This ${issue.path} is required`,
+      })
+      .min(5, { message: "slug must be grater than 4 characters" })
+      .optional(),
+  }),
   organizationIdValidator: z.object({
     id: z
       .string({

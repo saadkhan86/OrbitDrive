@@ -37,5 +37,5 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
     },
     organizationInvitationController.delete,
   );
-  app.post("/accept", organizationInvitationController.accept);
+  app.get("/accept/:token", organizationInvitationController.accept);
 };

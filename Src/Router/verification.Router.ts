@@ -12,7 +12,7 @@ export const verificationRouter = async (app: FastifyInstance) => {
     verificationController.resendEmailVerification,
   );
   app.get(
-    "/email-verification:token",
+    "/email-verification/:token",
     {
       schema: {
         params: tokenValidator.tokenSchema,

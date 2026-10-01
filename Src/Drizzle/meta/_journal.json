@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1789378112078,
-      "tag": "0000_dusty_devos",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1789378606518,
-      "tag": "0001_rare_big_bertha",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1789411653804,
-      "tag": "0002_icy_may_parker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1789586249885,
-      "tag": "0003_omniscient_klaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1789674938740,
-      "tag": "0004_complex_smasher",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1790008357983,
-      "tag": "0005_yummy_vermin",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1790420937536,
-      "tag": "0006_low_bucky",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1790446892635,
-      "tag": "0007_vengeful_loki",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1790699855478,
-      "tag": "0008_familiar_gorilla_man",
+      "when": 1790839649535,
+      "tag": "0000_tired_morbius",
       "breakpoints": true
     }
   ]

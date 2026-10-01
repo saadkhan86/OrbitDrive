@@ -26,7 +26,7 @@ export const organizationRouter = async (app: FastifyInstance) => {
     "/:id",
     {
       schema: {
-        body: organizationValidator.createValidator,
+        body: organizationValidator.updateValidator,
         params: organizationValidator.organizationIdValidator,
       },
     },

@@ -31,6 +31,7 @@ export const organizationMemberController = {
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const organizationMember =
       await organizationMemberService.updateOrganizationMember(
+        request.user.userId as idValidator,
         (request.params as organizationMemberOrganizationMemberIdValidator)
           .organizationId,
         (request.params as organizationMemberOrganizationMemberIdValidator)
@@ -46,6 +47,7 @@ export const organizationMemberController = {
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationMemberService.deleteOrganizationMember(
+      request.user.userId as idValidator,
       (request.params as organizationMemberOrganizationMemberIdValidator)
         .organizationId,
       (request.params as organizationMemberOrganizationMemberIdValidator)

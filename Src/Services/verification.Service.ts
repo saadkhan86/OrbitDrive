@@ -8,7 +8,8 @@ import AuthRepo from "../Repositories/Auth.Repo";
 import { redisUtils } from "../Utils/redis.Utils";
 export const verificationService = {
   verifyEmailVerification: async (data: tokenValidator) => {
-    const userId = await redisUtils.getRedis("verify-email", data.token);
+    const hashedToken = await tokenUtils.hashToken(data.token);
+    const userId = await redisUtils.getRedis("verify-email", hashedToken);
     if (!userId)
       throw new CustomError(
         410,

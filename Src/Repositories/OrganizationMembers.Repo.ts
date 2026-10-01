@@ -25,6 +25,19 @@ class OrganizationMembers {
       .from(organization_members)
       .where(eq(organization_members.organizationId, organizationId));
   }
+  public async getById(organizationId: string, organizationMemberId: string) {
+    return (
+      await db
+        .select()
+        .from(organization_members)
+        .where(
+          and(
+            eq(organization_members.id, organizationMemberId),
+            eq(organization_members.organizationId, organizationId),
+          ),
+        )
+    )[0];
+  }
   public async getByOrganizationAndUserId(
     organizationId: string,
     userId: string,
