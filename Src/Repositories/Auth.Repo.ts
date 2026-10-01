@@ -3,11 +3,7 @@ import { db } from "../Database";
 import { users } from "../Database/Schemas/users.Schema";
 
 class AuthRepo {
-  public async signup(data: {
-    fullName: string;
-    email: string;
-    passwordHash: string;
-  }) {
+  public async signup(data: typeof users.$inferInsert) {
     const result = await db
       .insert(users)
       .values({

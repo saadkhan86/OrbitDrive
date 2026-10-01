@@ -5,6 +5,7 @@ import { verificationRouter } from "./verification.Router";
 import { organizationRouter } from "./organization.Router";
 import { organizationMemberRouter } from "./organizationMember.Router";
 import { organizationInvitationRouter } from "./organizationInvitation.Router";
+import { clientsRouter } from "./clients.Router";
 export const router = async (app: FastifyInstance) => {
   app.register(authRouter, { prefix: "/auth" });
   app.register(userRouter, { prefix: "/user" });
@@ -16,6 +17,5 @@ export const router = async (app: FastifyInstance) => {
   app.register(organizationMemberRouter, {
     prefix: "/organization-member/:organizationId",
   });
-
-  // app.register(,{prefix:"/clients"})
+  app.register(clientsRouter, { prefix: "/clients/:organizationId" });
 };
