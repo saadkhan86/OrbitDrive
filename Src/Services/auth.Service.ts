@@ -1,18 +1,21 @@
 import { Constants } from "../Constants/Constants";
 import { CustomError } from "../Errors/CustomError";
-import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
+import { addEmailJob } from "../Queues/Email.Queue";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
-import {
-  loginValidator,
-  passwordResetValidator,
-  signupValidator,
-} from "../Validators/user.Validator";
 import * as argon2 from "argon2";
 import AuthRepo from "../Repositories/Auth.Repo";
 import { redisUtils } from "../Utils/redis.Utils";
+import {
+  emailInputValidator,
+  loginInputValidator,
+  passwordResetInputValidator,
+  refreshTokenInputValidator,
+  signupInputValidator,
+} from "../Validators/auth.Validator";
+
 export const authService = {
-  signup: async (data: signupValidator) => {
+  signup: async (data: signupInputValidator) => {
     const isExist = await UserRepo.findByEmail(data.email);
     if (isExist && !isExist.isEmailVerified)
       throw new CustomError(
@@ -29,9 +32,9 @@ export const authService = {
     const passwordHash = await argon2.hash(data.password);
     const token = await tokenUtils.generateToken();
     const hashedToken = await tokenUtils.hashToken(token);
-    const user = await AuthRepo.signup({
+    const user = await AuthRepo.create({
       ...data,
-      passwordHash,
+      password: passwordHash,
     });
     if (!user)
       throw new CustomError(
@@ -40,8 +43,8 @@ export const authService = {
         "SOMETHING_WENT_WRONG",
       );
     await addEmailJob("verify-email", {
-      email: user!.email,
-      fullName: user!.fullName,
+      email: user.email,
+      fullName: user.fullName,
       verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
@@ -49,7 +52,7 @@ export const authService = {
     await redisUtils.setRedis("verify-email", user.id, hashedToken);
     return user;
   },
-  login: async (data: loginValidator) => {
+  login: async (data: loginInputValidator) => {
     const user = await UserRepo.findByEmail(data.email);
     if (!user)
       throw new CustomError(401, "User does not exist", "USER_NOT_FOUND");
@@ -63,11 +66,14 @@ export const authService = {
     if (!isMatch)
       throw new CustomError(401, "Invalid credentials", "INVALID_CREDENTIALS");
     const refreshToken = await tokenUtils.generateToken();
-    await AuthRepo.updateRefreshToken(user.id, refreshToken);
+    await AuthRepo.updateRefreshToken({
+      userId: user.id,
+      refreshToken,
+    } as refreshTokenInputValidator);
     return { refreshToken, userId: user.id };
   },
-  forgotPassword: async (email: string) => {
-    const user = await UserRepo.findByEmail(email);
+  forgotPassword: async (data: emailInputValidator) => {
+    const user = await UserRepo.findByEmail(data.email);
     if (!user)
       throw new CustomError(
         404,
@@ -93,7 +99,7 @@ export const authService = {
     await redisUtils.setRedis("password-reset", user.id, hashedToken);
     return true;
   },
-  passwordReset: async (data: passwordResetValidator) => {
+  passwordReset: async (data: passwordResetInputValidator) => {
     const hashedToken = await tokenUtils.hashToken(data.token);
     const userId = await redisUtils.getRedis("password-reset", hashedToken);
     if (!userId)
@@ -113,7 +119,10 @@ export const authService = {
         "INVALID_TOKEN",
       );
     const refreshToken = await tokenUtils.generateToken();
-    await AuthRepo.updateRefreshToken(user?.id, refreshToken);
+    await AuthRepo.updateRefreshToken({
+      refreshToken,
+      userId: user.id,
+    } as refreshTokenInputValidator);
     return { refreshToken, userId: user.id };
   },
 };

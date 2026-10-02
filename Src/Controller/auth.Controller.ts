@@ -1,16 +1,17 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { authService } from "../Services/auth.Service";
 import {
-  loginValidator,
-  passwordResetValidator,
-  signupValidator,
-} from "../Validators/user.Validator";
-import { emailValidator } from "../Validators/email.Validator";
+  emailInputValidator,
+  loginInputValidator,
+  passwordResetInputValidator,
+  signupInputValidator,
+} from "../Validators/auth.Validator";
+
 import type { refreshTokenValidator } from "../Validators/token.Validator";
 
 export const authController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.signup(request.body as signupValidator);
+    await authService.signup(request.body as signupInputValidator);
     return reply.status(201).send({
       success: true,
       message:
@@ -19,7 +20,7 @@ export const authController = {
   },
   login: async (request: FastifyRequest, reply: FastifyReply) => {
     const { userId, refreshToken } = await authService.login(
-      request.body as loginValidator,
+      request.body as loginInputValidator,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken(userId);
     return reply.status(200).send({
@@ -29,13 +30,15 @@ export const authController = {
     });
   },
   forgotPassword: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.forgotPassword((request.body as emailValidator).email);
+    await authService.forgotPassword(request.body as emailInputValidator);
     return reply
       .status(201)
       .send({ success: true, message: "Password reset email has been sent" });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.passwordReset(request.body as passwordResetValidator);
+    await authService.passwordReset(
+      request.body as passwordResetInputValidator,
+    );
     return reply
       .status(200)
       .send({ success: true, message: "Password reset successfully" });
