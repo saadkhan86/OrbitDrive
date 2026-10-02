@@ -8,6 +8,13 @@
       "when": 1790839649535,
       "tag": "0000_tired_morbius",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790874915459,
+      "tag": "0001_new_aaron_stack",
+      "breakpoints": true
     }
   ]
 }

@@ -70,7 +70,6 @@ class ClientRepo {
     )[0];
   }
 
-  // Delete Client
   public async delete(organizationId: string, clientId: string) {
     return (
       await db

@@ -11,7 +11,6 @@ export const clientValidator = {
     clientId: z.string().uuid("Invalid client ID"),
   }),
 
-  // Create Client
   create: z.object({
     name: z
       .string()
@@ -25,7 +24,10 @@ export const clientValidator = {
 
     company: z.string().trim().max(255, "Company name is too long"),
 
-    status: z.enum(["active", "inactive"]).optional(),
+    status: z
+      .enum(["active", "inactive", "prospect", "customer", "lead", "vip"])
+      .optional()
+      .default("active"),
 
     notes: z.string().trim(),
   }),
@@ -55,7 +57,9 @@ export const clientValidator = {
         .max(255, "Company name is too long")
         .optional(),
 
-      status: z.enum(["active", "inactive"]).optional(),
+      status: z
+        .enum(["active", "inactive", "prospect", "customer", "lead", "vip"])
+        .optional(),
 
       notes: z.string().trim().optional(),
     })

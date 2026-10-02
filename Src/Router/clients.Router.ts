@@ -4,10 +4,9 @@ import { authorize } from "../Hooks/authorization.Hook";
 import { clientValidator } from "../Validators/clients.Validator";
 import { clientController } from "../Controller/client.Controller";
 
-export default async function clientRoutes(app: FastifyInstance) {
-  // Create Client
+export const clientsRouter = async (app: FastifyInstance) => {
   app.post(
-    "/:organizationId/clients",
+    "/",
     {
       preHandler: [
         authenticate.user,
@@ -21,9 +20,8 @@ export default async function clientRoutes(app: FastifyInstance) {
     clientController.create,
   );
 
-  // Get All Clients
   app.get(
-    "/:organizationId/clients",
+    "/",
     {
       preHandler: [
         authenticate.user,
@@ -36,9 +34,8 @@ export default async function clientRoutes(app: FastifyInstance) {
     clientController.getAll,
   );
 
-  // Get Single Client
   app.get(
-    "/:organizationId/clients/:clientId",
+    "/:clientId",
     {
       preHandler: [
         authenticate.user,
@@ -51,9 +48,8 @@ export default async function clientRoutes(app: FastifyInstance) {
     clientController.getById,
   );
 
-  // Update Client
   app.patch(
-    "/:organizationId/clients/:clientId",
+    "/:clientId",
     {
       preHandler: [
         authenticate.user,
@@ -67,9 +63,8 @@ export default async function clientRoutes(app: FastifyInstance) {
     clientController.update,
   );
 
-  // Delete Client
   app.delete(
-    "/:organizationId/clients/:clientId",
+    "/:clientId",
     {
       preHandler: [authenticate.user, authorize.role(["OWNER", "ADMIN"])],
       schema: {
@@ -78,4 +73,4 @@ export default async function clientRoutes(app: FastifyInstance) {
     },
     clientController.delete,
   );
-}
+};

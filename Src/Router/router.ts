@@ -15,7 +15,7 @@ export const router = async (app: FastifyInstance) => {
     prefix: "/organization-invitation",
   });
   app.register(organizationMemberRouter, {
-    prefix: "/organization-member/:organizationId",
+    prefix: "/:organizationId/organization-member",
   });
-  app.register(clientsRouter, { prefix: "/clients/:organizationId" });
+  app.register(clientsRouter, { prefix: "/:organizationId/clients" });
 };

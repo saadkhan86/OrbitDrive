@@ -2,83 +2,74 @@ import { FastifyReply, FastifyRequest } from "fastify";
 
 import clientsService from "../Services/clients.Service";
 import {
+  ClientIdParams,
   CreateClientInput,
   UpdateClientInput,
 } from "../Validators/clients.Validator";
+import { OrganizationIdInput } from "../Validators/organizationInvitation.Validator";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
-
-    const client = await clientsService.create(
-      organizationId,
-      request.body as CreateClientInput,
-    );
-
     return reply.code(201).send({
       success: true,
-      data: client,
+      message: "client created successfully",
+      data: {
+        client: await clientsService.create(
+          (request.params as OrganizationIdInput).organizationId,
+          request.body as CreateClientInput,
+        ),
+      },
     });
   },
 
   getAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
-
-    const clients = await clientsService.getAll(organizationId);
-
     return reply.code(200).send({
       success: true,
-      data: clients,
+      message: "clients fetched successfully",
+      data: {
+        clients: await clientsService.getAll(
+          (request.params as OrganizationIdInput).organizationId,
+        ),
+      },
     });
   },
 
   getById: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, clientId } = request.params as {
-      organizationId: string;
-      clientId: string;
-    };
-
-    const client = await clientsService.getById(organizationId, clientId);
-
     return reply.code(200).send({
       success: true,
-      data: client,
+      message: "client fetched successfully",
+      data: {
+        client: await clientsService.getById(
+          (request.params as ClientIdParams).organizationId,
+          (request.params as ClientIdParams).clientId,
+        ),
+      },
     });
   },
 
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, clientId } = request.params as {
-      organizationId: string;
-      clientId: string;
-    };
-
-    const client = await clientsService.update(
-      organizationId,
-      clientId,
-      request.body as UpdateClientInput,
-    );
-
     return reply.code(200).send({
       success: true,
-      data: client,
+      message: "client updated successfully",
+      data: {
+        client: await clientsService.update(
+          (request.params as ClientIdParams).organizationId,
+          (request.params as ClientIdParams).clientId,
+          request.body as UpdateClientInput,
+        ),
+      },
     });
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, clientId } = request.params as {
-      organizationId: string;
-      clientId: string;
-    };
-
-    const result = await clientsService.delete(organizationId, clientId);
+    await clientsService.delete(
+      (request.params as ClientIdParams).organizationId,
+      (request.params as ClientIdParams).clientId,
+    );
 
     return reply.code(200).send({
       success: true,
-      data: result,
+      message: "client deleted successfully",
     });
   },
 };
