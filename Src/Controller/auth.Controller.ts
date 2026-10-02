@@ -4,10 +4,10 @@ import {
   emailInputValidator,
   loginInputValidator,
   passwordResetInputValidator,
+  refreshTokenInputValidator,
   signupInputValidator,
+  UserIdInputValidator,
 } from "../Validators/auth.Validator";
-
-import type { refreshTokenValidator } from "../Validators/token.Validator";
 
 export const authController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -22,7 +22,9 @@ export const authController = {
     const { userId, refreshToken } = await authService.login(
       request.body as loginInputValidator,
     );
-    const accessToken = request.server.jwtUtils.generateAccessToken(userId);
+    const accessToken = request.server.jwtUtils.generateAccessToken({
+      userId,
+    } as UserIdInputValidator);
     return reply.status(200).send({
       success: true,
       message: "User logged in successfully",
@@ -45,9 +47,11 @@ export const authController = {
   },
   refresh: async (request: FastifyRequest, reply: FastifyReply) => {
     const { refreshToken, userId } = await authService.refresh(
-      (request.query as refreshTokenValidator).token,
+      request.body as refreshTokenInputValidator,
     );
-    const accessToken = request.server.jwtUtils.generateAccessToken(userId);
+    const accessToken = request.server.jwtUtils.generateAccessToken({
+      userId,
+    } as UserIdInputValidator);
     return reply.status(200).send({
       success: true,
       message: "Token refreshed successfully",

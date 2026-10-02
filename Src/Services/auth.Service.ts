@@ -12,6 +12,7 @@ import {
   passwordResetInputValidator,
   refreshTokenInputValidator,
   signupInputValidator,
+  updateRefreshTokenInputValidator,
 } from "../Validators/auth.Validator";
 
 export const authService = {
@@ -69,7 +70,7 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       userId: user.id,
       refreshToken,
-    } as refreshTokenInputValidator);
+    } as updateRefreshTokenInputValidator);
     return { refreshToken, userId: user.id };
   },
   forgotPassword: async (data: emailInputValidator) => {
@@ -110,8 +111,8 @@ export const authService = {
     await UserRepo.update(userId, { passwordHash });
     return true;
   },
-  refresh: async (token: string) => {
-    const user = await AuthRepo.findByRefreshToken(token);
+  refresh: async (data: refreshTokenInputValidator) => {
+    const user = await AuthRepo.findByRefreshToken(data);
     if (!user)
       throw new CustomError(
         400,
@@ -122,7 +123,7 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       refreshToken,
       userId: user.id,
-    } as refreshTokenInputValidator);
+    } as updateRefreshTokenInputValidator);
     return { refreshToken, userId: user.id };
   },
 };

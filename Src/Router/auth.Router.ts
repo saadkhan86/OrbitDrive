@@ -30,11 +30,11 @@ export const authRouter = async (app: FastifyInstance) => {
     },
     authController.passwordReset,
   );
-  app.get(
+  app.post(
     "/refresh",
     {
       schema: {
-        querystring: refreshTokenSchema,
+        body: authValidator.refreshToken,
       },
     },
     authController.refresh,

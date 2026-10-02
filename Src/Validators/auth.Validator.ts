@@ -70,9 +70,21 @@ export const authValidator = {
           : undefined,
     }),
   }),
-  refreshToken: z.object({
+  updateRefreshToken: z.object({
     userId: z.string(),
     refreshToken: z.string(),
+  }),
+  refreshToken: z.object({
+    refreshToken: z
+      .string({
+        error: (issue) =>
+          issue.code === "invalid_type"
+            ? "Token must be a string"
+            : "Token is required",
+      })
+      .length(64, {
+        message: "Refresh Token must be 64 characters long",
+      }),
   }),
 };
 export type UserIdInputValidator = z.infer<typeof authValidator.userId>;
@@ -83,6 +95,9 @@ export type passwordResetInputValidator = z.infer<
   typeof authValidator.passwordReset
 >;
 export type emailInputValidator = z.infer<typeof authValidator.email>;
+export type updateRefreshTokenInputValidator = z.infer<
+  typeof authValidator.updateRefreshToken
+>;
 export type refreshTokenInputValidator = z.infer<
   typeof authValidator.refreshToken
 >;

@@ -1,13 +1,19 @@
 import { FastifyInstance } from "fastify";
-import { Constants } from "../Constants/Constants";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
 
 export const CreateJWTUtils = (app: FastifyInstance) => {
   return {
-    generateAccessToken: (id: string) => {
-      return app.jwt.sign({ userId: id, type: "access" }, { expiresIn: "1d" });
+    generateAccessToken: (data: UserIdInputValidator) => {
+      return app.jwt.sign(
+        { userId: data.userId, type: "access" },
+        { expiresIn: "1d" },
+      );
     },
-    generateRefreshToken: (id: string) => {
-      return app.jwt.sign({ userId: id, type: "refresh" }, { expiresIn: "7d" });
+    generateRefreshToken: (data: UserIdInputValidator) => {
+      return app.jwt.sign(
+        { userId: data.userId, type: "refresh" },
+        { expiresIn: "7d" },
+      );
     },
   };
 };

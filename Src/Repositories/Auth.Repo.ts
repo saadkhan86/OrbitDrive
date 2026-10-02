@@ -4,6 +4,7 @@ import { users } from "../Database/Schemas/users.Schema";
 import {
   refreshTokenInputValidator,
   signupInputValidator,
+  updateRefreshTokenInputValidator,
   UserIdInputValidator,
 } from "../Validators/auth.Validator";
 
@@ -36,7 +37,7 @@ class AuthRepo {
         .returning({ isEmailVerified: users.isEmailVerified })
     )[0]?.isEmailVerified;
   }
-  public async updateRefreshToken(data: refreshTokenInputValidator) {
+  public async updateRefreshToken(data: updateRefreshTokenInputValidator) {
     return (
       await db
         .update(users)
@@ -45,11 +46,11 @@ class AuthRepo {
         .returning()
     )[0];
   }
-  public async findByRefreshToken(token: string) {
+  public async findByRefreshToken(data: refreshTokenInputValidator) {
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.refreshToken, token));
+      .where(eq(users.refreshToken, data.refreshToken));
     return user ? user[0] : null;
   }
 }
