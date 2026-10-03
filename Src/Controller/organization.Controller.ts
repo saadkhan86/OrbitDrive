@@ -1,15 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { organizationService } from "../Services/organization.Service";
 
-import OrganizationRepo from "../Repositories/Organization.Repo";
-import { idValidator } from "../Validators/shared.Validator";
 import {
   CreateOrganizationInputValidator,
   OrganizationIdInputValidator,
   OrganizationUpdateInputValidator,
 } from "../Validators/organization.Validator";
 import { UserIdInputValidator } from "../Validators/auth.Validator";
-import { OrganizationInvitationCreateInput } from "../Validators/organizationInvitation.Validator";
 
 export const organizationController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -55,7 +52,7 @@ export const organizationController = {
       message: "Organizations fetched successfully",
       data: {
         organizations: await organizationService.getAllByOwnerId(
-          request.user.userId,
+          request.user as UserIdInputValidator,
         ),
       },
     });

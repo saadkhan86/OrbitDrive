@@ -1,27 +1,20 @@
 import { z } from "zod";
 
 export const organizationInvitationValidator = {
-  // POST /organizations/:organizationId/invitations
   organizationId: z.object({
-    organizationId: z.string().uuid("Invalid organization ID"),
+    organizationId: z.string().uuid({ message: "Invalid organization ID" }),
   }),
-
-  // DELETE /organizations/:organizationId/invitations/:invitationId
   invitationId: z.object({
-    organizationId: z.string().uuid("Invalid organization ID"),
-
-    invitationId: z.string().uuid("Invalid invitation ID"),
+    organizationId: z.string().uuid({ message: "Invalid organization ID" }),
+    invitationId: z.string().uuid({ message: "Invalid invitation ID" }),
   }),
-
-  // Create invitation body
   create: z.object({
-    email: z.string().trim().toLowerCase().email("Invalid email address"),
+    email: z.email({ message: "Invalid email address" }),
 
-    role: z.enum(["ADMIN", "MEMBER", "VIEWER"]),
+    role: z.enum(["ADMIN", "MEMBER", "VIEWER"], { message: "invalid role" }),
   }),
-  // POST /invitations/accept
   accept: z.object({
-    token: z.string().trim().min(1, "Invitation token is required"),
+    token: z.string({ message: "invalid token" }),
   }),
 };
 

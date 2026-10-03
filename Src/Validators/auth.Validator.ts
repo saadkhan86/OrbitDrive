@@ -1,39 +1,27 @@
 import z from "zod";
 export const authValidator = {
   userId: z.object({
-    userId: z
-      .string({
-        error: (issue) =>
-          issue.code == "invalid_type"
-            ? `This ${issue.path} should be of ${issue.expected} type`
-            : `This ${issue.path} is required`,
-      })
-      .length(36, {
-        error: (issue) =>
-          issue.code == "too_big" || issue.code == "too_small"
-            ? `This ${issue.path} must be of length ${issue.maximum ?? issue.minimum}`
-            : undefined,
-      }),
+    userId: z.string({ message: "invalid userId" }).length(36, {
+      error: (issue) =>
+        issue.code == "too_big" || issue.code == "too_small"
+          ? `This ${issue.path} must be of length ${issue.maximum ?? issue.minimum}`
+          : undefined,
+    }),
   }),
   signup: z.object({
     fullName: z
-      .string({
-        error: (issue) =>
-          issue.code === "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
+      .string({ message: "invalid fullName" })
       .min(3, { message: `fullName must be greater than 3 characters` })
       .max(50, { message: "fullName must be smaller than 50 characters" }),
-    email: z.email(),
+    email: z.email({ message: "invalid email" }),
     password: z
-      .string()
+      .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(30, { message: "password must be smaller than 30 characters" }),
   }),
 
   login: z.object({
-    email: z.email(),
+    email: z.email({ message: "invalid email" }),
     password: z.string().min(6).max(30),
   }),
   update: z.object({
@@ -54,7 +42,7 @@ export const authValidator = {
       .optional(),
   }),
   passwordReset: z.object({
-    token: z.string().length(64, {
+    token: z.string({ message: "invalid token" }).length(64, {
       message: "Token must be 64 characters long",
     }),
     password: z
@@ -71,8 +59,8 @@ export const authValidator = {
     }),
   }),
   updateRefreshToken: z.object({
-    userId: z.string(),
-    refreshToken: z.string(),
+    userId: z.string({ message: "invalid user id" }),
+    refreshToken: z.string({ message: "invalid refresh token" }),
   }),
   refreshToken: z.object({
     refreshToken: z

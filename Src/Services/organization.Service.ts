@@ -44,17 +44,14 @@ export const organizationService = {
     });
     return organization;
   },
-  getAllByOwnerId: async (ownerId: idValidator) => {
-    return await OrganizationRepo.getAllByOwnerId(ownerId);
+  getAllByOwnerId: async (user: UserIdInputValidator) => {
+    return await OrganizationRepo.getAllByOwnerId(user.userId);
   },
   getById: async (
     user: UserIdInputValidator,
-    id: OrganizationIdInputValidator,
+    org: OrganizationIdInputValidator,
   ) => {
-    const organization = await OrganizationRepo.getById(
-      user.userId,
-      id.organizationId,
-    );
+    const organization = await OrganizationRepo.getById(user, org);
     if (!organization) {
       throw new CustomError(
         404,
@@ -69,10 +66,7 @@ export const organizationService = {
     org: OrganizationIdInputValidator,
     data: OrganizationUpdateInputValidator,
   ) => {
-    let organization: any = await OrganizationRepo.getById(
-      user.userId,
-      org.organizationId,
-    );
+    let organization: any = await OrganizationRepo.getById(user, org);
     if (!organization) {
       throw new CustomError(
         404,
@@ -90,19 +84,16 @@ export const organizationService = {
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
-    return await OrganizationRepo.update(organization.id, {
+    return await OrganizationRepo.update(org, {
       name: data.name!,
       slug: slug!,
-    });
+    } as any);
   },
   delete: async (
     user: UserIdInputValidator,
     org: OrganizationIdInputValidator,
   ) => {
-    const organization = await OrganizationRepo.getById(
-      user.userId,
-      org.organizationId,
-    );
+    const organization = await OrganizationRepo.getById(user, org);
     if (!organization) {
       throw new CustomError(
         404,
@@ -110,6 +101,6 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-    return await OrganizationRepo.delete(user.userId, org.organizationId);
+    return await OrganizationRepo.delete(user, org);
   },
 };

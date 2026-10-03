@@ -2,6 +2,8 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { OrganizationIdInputValidator } from "../Validators/organization.Validator";
 
 class OrganizationRepo {
   public async create(
@@ -15,15 +17,18 @@ class OrganizationRepo {
         .returning()
     )[0];
   }
-  public async getById(ownerId: string, organizationId: string) {
+  public async getById(
+    user: UserIdInputValidator,
+    org: OrganizationIdInputValidator,
+  ) {
     return (
       await db
         .select()
         .from(organizations)
         .where(
           and(
-            eq(organizations.id, organizationId),
-            eq(organizations.ownerId, ownerId),
+            eq(organizations.id, org.organizationId),
+            eq(organizations.ownerId, user.userId),
           ),
         )
     )[0];
@@ -45,7 +50,7 @@ class OrganizationRepo {
       .where(eq(organizations.ownerId, ownerId));
   }
   public async update(
-    organizationId: string,
+    org: OrganizationIdInputValidator,
     data: { name?: string; slug?: string },
   ) {
     let newData: Record<string, any> = {};
@@ -55,18 +60,21 @@ class OrganizationRepo {
       await db
         .update(organizations)
         .set(newData)
-        .where(eq(organizations.id, organizationId))
+        .where(eq(organizations.id, org.organizationId))
         .returning()
     )[0];
   }
-  public async delete(ownerId: string, organizationId: string) {
+  public async delete(
+    user: UserIdInputValidator,
+    org: OrganizationIdInputValidator,
+  ) {
     return (
       await db
         .delete(organizations)
         .where(
           and(
-            eq(organizations.id, organizationId),
-            eq(organizations.ownerId, ownerId),
+            eq(organizations.id, org.organizationId),
+            eq(organizations.ownerId, user.userId),
           ),
         )
         .returning()
