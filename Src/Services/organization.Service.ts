@@ -2,31 +2,42 @@ import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import OrganizationRepo from "../Repositories/Organization.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
-import { createOrganizationValidator } from "../Validators/organization.Validator";
+import {
+  CreateOrganizationInputValidator,
+  OrganizationIdInputValidator,
+  OrganizationUpdateInputValidator,
+} from "../Validators/organization.Validator";
 import { idValidator } from "../Validators/shared.Validator";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { generateSlug } from "../Utils/slug.Utils";
 
 export const organizationService = {
-  create: async (ownerId: idValidator, data: createOrganizationValidator) => {
+  create: async (
+    user: UserIdInputValidator,
+    data: CreateOrganizationInputValidator,
+  ) => {
+    const slug = generateSlug(data.name);
     const existingOrganization = await OrganizationRepo.findByOwnerAndSlug(
-      ownerId,
-      data.slug,
+      user.userId,
+      slug,
     );
     if (existingOrganization) {
       throw new CustomError(
         409,
-        "Organization already exists",
+        "Organization with the given name already exists",
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
     const organization = await db.transaction(async (tx) => {
       const createdOrganization = await OrganizationRepo.create(tx, {
-        ownerId,
-        ...data,
+        ownerId: user.userId,
+        name: data.name,
+        slug,
       });
       const createdOrganizationMember =
         await OrganizationMembersRepo.createOrganizationMember(tx, {
           organizationId: createdOrganization!.id,
-          userId: ownerId,
+          userId: user.userId,
           role: "OWNER",
         });
       return createdOrganization;
@@ -36,8 +47,14 @@ export const organizationService = {
   getAllByOwnerId: async (ownerId: idValidator) => {
     return await OrganizationRepo.getAllByOwnerId(ownerId);
   },
-  getById: async (ownerId: idValidator, id: idValidator) => {
-    const organization = await OrganizationRepo.getById(ownerId, id);
+  getById: async (
+    user: UserIdInputValidator,
+    id: OrganizationIdInputValidator,
+  ) => {
+    const organization = await OrganizationRepo.getById(
+      user.userId,
+      id.organizationId,
+    );
     if (!organization) {
       throw new CustomError(
         404,
@@ -48,11 +65,14 @@ export const organizationService = {
     return organization;
   },
   update: async (
-    userId: idValidator,
-    id: idValidator,
-    data: createOrganizationValidator,
+    user: UserIdInputValidator,
+    org: OrganizationIdInputValidator,
+    data: OrganizationUpdateInputValidator,
   ) => {
-    let organization: any = await OrganizationRepo.getById(userId, id);
+    let organization: any = await OrganizationRepo.getById(
+      user.userId,
+      org.organizationId,
+    );
     if (!organization) {
       throw new CustomError(
         404,
@@ -60,18 +80,29 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-    organization = await OrganizationRepo.findByOwnerAndSlug(userId, data.slug);
+
+    const slug = generateSlug(data.name!);
+    organization = await OrganizationRepo.findByOwnerAndSlug(user.userId, slug);
     if (organization) {
       throw new CustomError(
         409,
-        "Organization with the given slug already exists",
+        "Organization with the given name already exists",
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
-    return await OrganizationRepo.update(id, data);
+    return await OrganizationRepo.update(organization.id, {
+      name: data.name!,
+      slug: slug!,
+    });
   },
-  delete: async (ownerId: idValidator, id: idValidator) => {
-    const organization = await OrganizationRepo.getById(ownerId, id);
+  delete: async (
+    user: UserIdInputValidator,
+    org: OrganizationIdInputValidator,
+  ) => {
+    const organization = await OrganizationRepo.getById(
+      user.userId,
+      org.organizationId,
+    );
     if (!organization) {
       throw new CustomError(
         404,
@@ -79,6 +110,6 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-    return await OrganizationRepo.delete(ownerId, id);
+    return await OrganizationRepo.delete(user.userId, org.organizationId);
   },
 };

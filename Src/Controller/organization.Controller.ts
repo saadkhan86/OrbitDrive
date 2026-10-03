@@ -1,11 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { organizationService } from "../Services/organization.Service";
-import {
-  createOrganizationValidator,
-  organizationIdValidator,
-} from "../Validators/organization.Validator";
+
 import OrganizationRepo from "../Repositories/Organization.Repo";
 import { idValidator } from "../Validators/shared.Validator";
+import {
+  CreateOrganizationInputValidator,
+  OrganizationIdInputValidator,
+  OrganizationUpdateInputValidator,
+} from "../Validators/organization.Validator";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { OrganizationInvitationCreateInput } from "../Validators/organizationInvitation.Validator";
 
 export const organizationController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -14,20 +18,11 @@ export const organizationController = {
       message: "organization created successfully",
       data: {
         organization: await organizationService.create(
-          request.user.userId as idValidator,
-          request.body as createOrganizationValidator,
+          request.user as UserIdInputValidator,
+          request.body as CreateOrganizationInputValidator,
         ),
       },
     });
-  },
-  delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    await organizationService.delete(
-      request.user.userId as idValidator,
-      (request.params as organizationIdValidator).id as idValidator,
-    );
-    reply
-      .status(200)
-      .send({ success: true, message: "organization deleted successfully" });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.status(200).send({
@@ -35,9 +30,9 @@ export const organizationController = {
       message: "Organization updated successfully",
       data: {
         organization: await organizationService.update(
-          request.user.userId as idValidator,
-          (request.params as organizationIdValidator).id as idValidator,
-          request.body as createOrganizationValidator,
+          request.user as UserIdInputValidator,
+          request.params as OrganizationIdInputValidator,
+          request.body as OrganizationUpdateInputValidator,
         ),
       },
     });
@@ -48,8 +43,8 @@ export const organizationController = {
       message: "Organization fetched successfully",
       data: {
         organization: await organizationService.getById(
-          request.user.userId as idValidator,
-          (request.params as organizationIdValidator).id as idValidator,
+          request.user as UserIdInputValidator,
+          request.params as OrganizationIdInputValidator,
         ),
       },
     });
@@ -64,5 +59,14 @@ export const organizationController = {
         ),
       },
     });
+  },
+  delete: async (request: FastifyRequest, reply: FastifyReply) => {
+    await organizationService.delete(
+      request.user as UserIdInputValidator,
+      request.params as OrganizationIdInputValidator,
+    );
+    reply
+      .status(200)
+      .send({ success: true, message: "organization deleted successfully" });
   },
 };

@@ -9,33 +9,33 @@ export const organizationRouter = async (app: FastifyInstance) => {
     "/",
     {
       schema: {
-        body: organizationValidator.createValidator,
+        body: organizationValidator.create,
       },
     },
     organizationController.create,
   );
   app.get("/", organizationController.getAllByOwnerId);
   app.get(
-    "/:id",
+    "/:organizationId",
     {
-      schema: { params: organizationValidator.organizationIdValidator },
+      schema: { params: organizationValidator.organizationId },
     },
     organizationController.getById,
   );
   app.patch(
-    "/:id",
+    "/:organizationId",
     {
       schema: {
-        body: organizationValidator.updateValidator,
-        params: organizationValidator.organizationIdValidator,
+        body: organizationValidator.update,
+        params: organizationValidator.organizationId,
       },
     },
     organizationController.update,
   );
   app.delete(
-    "/:id",
+    "/:organizationId",
     {
-      schema: { params: organizationValidator.organizationIdValidator },
+      schema: { params: organizationValidator.organizationId },
     },
     organizationController.delete,
   );

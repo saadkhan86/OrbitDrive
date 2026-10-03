@@ -1,7 +1,7 @@
-import z from "zod";
+import z, { object } from "zod";
 
 export const organizationValidator = {
-  createValidator: z.object({
+  create: z.object({
     name: z
       .string({
         error: (issue) =>
@@ -11,38 +11,26 @@ export const organizationValidator = {
       })
       .min(5, { message: "name must be greater than 5 characters" })
       .max(100, { message: "name must be smaller than 100 characters" }),
-    slug: z
-      .string({
-        error: (issue) =>
-          issue.code == "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
-      .min(5, { message: "slug must be grater than 4 characters" }),
   }),
-  updateValidator: z.object({
-    name: z
-      .string({
-        error: (issue) =>
-          issue.code === "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
-      .min(5, { message: "name must be greater than 5 characters" })
-      .max(100, { message: "name must be smaller than 100 characters" })
-      .optional(),
-    slug: z
-      .string({
-        error: (issue) =>
-          issue.code == "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
-      .min(5, { message: "slug must be grater than 4 characters" })
-      .optional(),
-  }),
-  organizationIdValidator: z.object({
-    id: z
+  update: z
+    .object({
+      name: z
+        .string({
+          error: (issue) =>
+            issue.code === "invalid_type"
+              ? `This ${issue.path} should be of type ${issue.expected}`
+              : `This ${issue.path} is required`,
+        })
+        .min(5, { message: "name must be greater than 5 characters" })
+        .max(100, { message: "name must be smaller than 100 characters" })
+        .optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      abort: true,
+      message: "At least one field is required",
+    }),
+  organizationId: z.object({
+    organizationId: z
       .string({
         error: (issue) =>
           issue.code == "invalid_type"
@@ -57,12 +45,15 @@ export const organizationValidator = {
       }),
   }),
 };
-export type createOrganizationValidator = z.infer<
-  typeof organizationValidator.createValidator
+export type CreateOrganizationInputValidator = z.infer<
+  typeof organizationValidator.create
 >;
-export type updateOrganizationValidator = z.infer<
-  typeof organizationValidator.updateValidator
+export type UpdateOrganizationInputValidator = z.infer<
+  typeof organizationValidator.update
 >;
-export type organizationIdValidator = z.infer<
-  typeof organizationValidator.organizationIdValidator
+export type OrganizationIdInputValidator = z.infer<
+  typeof organizationValidator.organizationId
+>;
+export type OrganizationUpdateInputValidator = z.infer<
+  typeof organizationValidator.update
 >;
