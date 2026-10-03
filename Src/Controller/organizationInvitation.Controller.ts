@@ -5,22 +5,18 @@ import { organizationInvitationService } from "../Services/organizationInvitatio
 import type {
   OrganizationInvitationCreateInput,
   OrganizationInvitationAcceptInput,
-  OrganizationIdInput,
   OrganizationInvitationDeleteInput,
+  OrganizationInvitationOrganizationIdInput,
 } from "../Validators/organizationInvitation.Validator";
 import UserRepo from "../Repositories/User.Repo";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
 
 export const organizationInvitationController = {
   async create(request: FastifyRequest, reply: FastifyReply) {
-    const { email, role } = request.body as OrganizationInvitationCreateInput;
-    const { organizationId } = request.params as OrganizationIdInput;
-
-    const createdBy = request.user.userId;
-
     const result = await organizationInvitationService.create(
-      organizationId,
-      createdBy,
-      { email, role },
+      request.user as UserIdInputValidator,
+      request.params as OrganizationInvitationOrganizationIdInput,
+      request.body as OrganizationInvitationCreateInput,
     );
 
     return reply.status(201).send({
@@ -30,13 +26,10 @@ export const organizationInvitationController = {
     });
   },
 
-  // GET /organizations/:organizationId/invitations
   async getAll(request: FastifyRequest, reply: FastifyReply) {
-    const { organizationId } = request.params as OrganizationIdInput;
-
     const invitations =
       await organizationInvitationService.getAllByOrganizationId(
-        organizationId,
+        request.params as OrganizationInvitationOrganizationIdInput,
       );
 
     return reply.status(200).send({
@@ -47,10 +40,9 @@ export const organizationInvitationController = {
 
   // DELETE /organizations/:organizationId/invitations/:invitationId
   async delete(request: FastifyRequest, reply: FastifyReply) {
-    const { organizationId, invitationId } =
-      request.params as OrganizationInvitationDeleteInput;
-
-    await organizationInvitationService.delete(organizationId, invitationId);
+    await organizationInvitationService.delete(
+      request.params as OrganizationInvitationDeleteInput,
+    );
 
     return reply.status(200).send({
       success: true,

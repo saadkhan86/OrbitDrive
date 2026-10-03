@@ -1,9 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { authValidator } from "../Validators/auth.Validator";
-import { authenticate } from "../Hooks/AuthenticationHook";
-import { emailValidator } from "../Validators/email.Validator";
 import { authController } from "../Controller/auth.Controller";
-import { refreshTokenSchema } from "../Validators/token.Validator";
 
 export const authRouter = async (app: FastifyInstance) => {
   app.post(

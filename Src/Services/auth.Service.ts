@@ -6,18 +6,11 @@ import { tokenUtils } from "../Utils/authTokenUtils";
 import * as argon2 from "argon2";
 import AuthRepo from "../Repositories/Auth.Repo";
 import { redisUtils } from "../Utils/redis.Utils";
-import {
-  emailInputValidator,
-  loginInputValidator,
-  passwordResetInputValidator,
-  refreshTokenInputValidator,
-  signupInputValidator,
-  updateRefreshTokenInputValidator,
-} from "../Validators/auth.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const authService = {
-  signup: async (data: signupInputValidator) => {
-    const isExist = await UserRepo.findByEmail(data.email);
+  signup: async (data: VAuth.create) => {
+    const isExist = await UserRepo.findByEmail(data as VAuth.email);
     if (isExist && !isExist.isEmailVerified)
       throw new CustomError(
         409,
@@ -36,7 +29,7 @@ export const authService = {
     const user = await AuthRepo.create({
       ...data,
       password: passwordHash,
-    });
+    } as VAuth.create);
     if (!user)
       throw new CustomError(
         500,
@@ -53,8 +46,8 @@ export const authService = {
     await redisUtils.setRedis("verify-email", user.id, hashedToken);
     return user;
   },
-  login: async (data: loginInputValidator) => {
-    const user = await UserRepo.findByEmail(data.email);
+  login: async (data: VAuth.login) => {
+    const user = await UserRepo.findByEmail(data as VAuth.email);
     if (!user)
       throw new CustomError(401, "User does not exist", "USER_NOT_FOUND");
     if (!user.isEmailVerified)
@@ -70,11 +63,11 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       userId: user.id,
       refreshToken,
-    } as updateRefreshTokenInputValidator);
+    } as VAuth.updateRefreshToken);
     return { refreshToken, userId: user.id };
   },
-  forgotPassword: async (data: emailInputValidator) => {
-    const user = await UserRepo.findByEmail(data.email);
+  forgotPassword: async (data: VAuth.email) => {
+    const user = await UserRepo.findByEmail(data as VAuth.email);
     if (!user)
       throw new CustomError(
         404,
@@ -100,7 +93,7 @@ export const authService = {
     await redisUtils.setRedis("password-reset", user.id, hashedToken);
     return true;
   },
-  passwordReset: async (data: passwordResetInputValidator) => {
+  passwordReset: async (data: VAuth.passwordReset) => {
     const hashedToken = await tokenUtils.hashToken(data.token);
     const userId = await redisUtils.getRedis("password-reset", hashedToken);
     if (!userId)
@@ -108,10 +101,12 @@ export const authService = {
     await redisUtils.deleteRedis("password-reset", hashedToken);
     await redisUtils.deleteRedis("password-reset", userId);
     const passwordHash = await argon2.hash(data.password);
-    await UserRepo.update(userId, { passwordHash });
+    await UserRepo.update({ userId } as VAuth.userId, {
+      password: passwordHash,
+    });
     return true;
   },
-  refresh: async (data: refreshTokenInputValidator) => {
+  refresh: async (data: VAuth.refreshToken) => {
     const user = await AuthRepo.findByRefreshToken(data);
     if (!user)
       throw new CustomError(
@@ -123,7 +118,7 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       refreshToken,
       userId: user.id,
-    } as updateRefreshTokenInputValidator);
+    } as VAuth.updateRefreshToken);
     return { refreshToken, userId: user.id };
   },
 };

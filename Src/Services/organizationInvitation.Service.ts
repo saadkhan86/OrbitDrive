@@ -6,23 +6,27 @@ import { db } from "../Database";
 import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
 import UserRepo from "../Repositories/User.Repo";
 import { CustomError } from "../Errors/CustomError";
-import { OrganizationInvitationCreateInput } from "../Validators/organizationInvitation.Validator";
+import {
+  OrganizationInvitationCreateInput,
+  OrganizationInvitationDeleteInput,
+  OrganizationInvitationOrganizationIdInput,
+} from "../Validators/organizationInvitation.Validator";
 import OrganizationInvitationRepo from "../Repositories/OrganizationInvitation.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import OrganizationRepo from "../Repositories/Organization.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
+import { UserIdInputValidator } from "../Validators/auth.Validator";
 
 export const organizationInvitationService = {
   async create(
-    organizationId: string,
-    createdBy: string,
+    user: UserIdInputValidator,
+    org: OrganizationInvitationOrganizationIdInput,
     data: OrganizationInvitationCreateInput,
   ) {
-    const email = data.email.trim().toLowerCase();
-    const user = await UserRepo.findByEmail(email);
-    if (user && user.email == email) {
+    const targetUser = await UserRepo.findByEmail(data.email);
+    if (targetUser && targetUser.email == data.email) {
       throw new CustomError(
         409,
         "You can not create invitation to self",
@@ -30,7 +34,10 @@ export const organizationInvitationService = {
       );
     }
     const existingInvitation =
-      await OrganizationInvitationRepo.getPendingByEmail(organizationId, email);
+      await OrganizationInvitationRepo.getPendingByEmail(
+        org.organizationId,
+        data.email,
+      );
 
     if (
       existingInvitation &&
@@ -50,15 +57,16 @@ export const organizationInvitationService = {
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const invitation = await OrganizationInvitationRepo.create({
-      organizationId,
-      email,
+      organizationId: org.organizationId,
+      email: data.email,
       role: data.role,
       tokenHash,
       expiresAt,
-      createdBy,
+      createdBy: user.userId,
     });
-    const organization =
-      await OrganizationRepo.getByOrganizationId(organizationId);
+    const organization = await OrganizationRepo.getByOrganizationId(
+      org.organizationId,
+    );
     if (!organization) {
       throw new CustomError(
         404,
@@ -67,7 +75,7 @@ export const organizationInvitationService = {
       );
     }
     await addEmailJob("organization-invitation", {
-      email,
+      email: data.email,
       verificationToken: token,
       expiresIn: 24,
       organizationName: organization?.name,
@@ -79,15 +87,12 @@ export const organizationInvitationService = {
     };
   },
 
-  async getAllByOrganizationId(organizationId: string) {
-    return OrganizationInvitationRepo.getAllByOrganizationId(organizationId);
+  async getAllByOrganizationId(org: OrganizationInvitationOrganizationIdInput) {
+    return OrganizationInvitationRepo.getAllByOrganizationId(org);
   },
 
-  async delete(organizationId: string, invitationId: string) {
-    const invitation = await OrganizationInvitationRepo.getById(
-      organizationId,
-      invitationId,
-    );
+  async delete(org: OrganizationInvitationDeleteInput) {
+    const invitation = await OrganizationInvitationRepo.getById(org);
 
     if (!invitation) {
       throw new CustomError(
@@ -106,7 +111,7 @@ export const organizationInvitationService = {
       );
     }
 
-    return OrganizationInvitationRepo.delete(organizationId, invitationId);
+    return OrganizationInvitationRepo.delete(org);
   },
 
   async accept(token: string, userId: string, userEmail: string) {

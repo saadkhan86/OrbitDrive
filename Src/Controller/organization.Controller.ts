@@ -1,12 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { organizationService } from "../Services/organization.Service";
-
-import {
-  CreateOrganizationInputValidator,
-  OrganizationIdInputValidator,
-  OrganizationUpdateInputValidator,
-} from "../Validators/organization.Validator";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { VAuth } from "../Validators/auth.Validator";
+import { VOrganization } from "../Validators/organization.Validator";
 
 export const organizationController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -15,8 +10,8 @@ export const organizationController = {
       message: "organization created successfully",
       data: {
         organization: await organizationService.create(
-          request.user as UserIdInputValidator,
-          request.body as CreateOrganizationInputValidator,
+          request.user as VAuth.userId,
+          request.body as VOrganization.create,
         ),
       },
     });
@@ -27,9 +22,9 @@ export const organizationController = {
       message: "Organization updated successfully",
       data: {
         organization: await organizationService.update(
-          request.user as UserIdInputValidator,
-          request.params as OrganizationIdInputValidator,
-          request.body as OrganizationUpdateInputValidator,
+          request.user as VAuth.userId,
+          request.params as VOrganization.getById,
+          request.body as VOrganization.update,
         ),
       },
     });
@@ -40,8 +35,8 @@ export const organizationController = {
       message: "Organization fetched successfully",
       data: {
         organization: await organizationService.getById(
-          request.user as UserIdInputValidator,
-          request.params as OrganizationIdInputValidator,
+          request.user as VAuth.userId,
+          request.params as VOrganization.getById,
         ),
       },
     });
@@ -52,15 +47,15 @@ export const organizationController = {
       message: "Organizations fetched successfully",
       data: {
         organizations: await organizationService.getAllByOwnerId(
-          request.user as UserIdInputValidator,
+          request.user as VAuth.userId,
         ),
       },
     });
   },
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationService.delete(
-      request.user as UserIdInputValidator,
-      request.params as OrganizationIdInputValidator,
+      request.user as VAuth.userId,
+      request.params as VOrganization.getById,
     );
     reply
       .status(200)

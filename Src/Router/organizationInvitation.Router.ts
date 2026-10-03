@@ -3,6 +3,7 @@ import { organizationInvitationController } from "../Controller/organizationInvi
 import { organizationInvitationValidator } from "../Validators/organizationInvitation.Validator";
 import { authorize } from "../Hooks/authorization.Hook";
 import { authenticate } from "../Hooks/AuthenticationHook";
+import { organizationValidator } from "../Validators/organization.Validator";
 
 export const organizationInvitationRouter = (app: FastifyInstance) => {
   app.addHook("preHandler", authenticate.user);
@@ -10,7 +11,7 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
     "/:organizationId",
     {
       schema: {
-        params: organizationInvitationValidator.organizationId,
+        params: organizationValidator.organizationId,
         body: organizationInvitationValidator.create,
       },
       preHandler: [authorize.role(["ADMIN", "OWNER"])],

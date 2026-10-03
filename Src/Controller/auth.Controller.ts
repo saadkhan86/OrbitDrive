@@ -1,17 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { authService } from "../Services/auth.Service";
-import {
-  emailInputValidator,
-  loginInputValidator,
-  passwordResetInputValidator,
-  refreshTokenInputValidator,
-  signupInputValidator,
-  UserIdInputValidator,
-} from "../Validators/auth.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const authController = {
   signup: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.signup(request.body as signupInputValidator);
+    await authService.signup(request.body as VAuth.create);
     return reply.status(201).send({
       success: true,
       message:
@@ -20,11 +13,11 @@ export const authController = {
   },
   login: async (request: FastifyRequest, reply: FastifyReply) => {
     const { userId, refreshToken } = await authService.login(
-      request.body as loginInputValidator,
+      request.body as VAuth.login,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken({
       userId,
-    } as UserIdInputValidator);
+    } as VAuth.userId);
     return reply.status(200).send({
       success: true,
       message: "User logged in successfully",
@@ -32,14 +25,14 @@ export const authController = {
     });
   },
   forgotPassword: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.forgotPassword(request.body as emailInputValidator);
+    await authService.forgotPassword(request.body as VAuth.email);
     return reply
       .status(201)
       .send({ success: true, message: "Password reset email has been sent" });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
     await authService.passwordReset(
-      request.body as passwordResetInputValidator,
+      request.body as VAuth.passwordReset,
     );
     return reply
       .status(200)
@@ -47,11 +40,11 @@ export const authController = {
   },
   refresh: async (request: FastifyRequest, reply: FastifyReply) => {
     const { refreshToken, userId } = await authService.refresh(
-      request.body as refreshTokenInputValidator,
+      request.body as VAuth.refreshToken,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken({
       userId,
-    } as UserIdInputValidator);
+    } as VAuth.userId);
     return reply.status(200).send({
       success: true,
       message: "Token refreshed successfully",

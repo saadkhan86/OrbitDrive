@@ -3,12 +3,7 @@ import z, { object } from "zod";
 export const organizationValidator = {
   create: z.object({
     name: z
-      .string({
-        error: (issue) =>
-          issue.code === "invalid_type"
-            ? `This ${issue.path} should be of type ${issue.expected}`
-            : `This ${issue.path} is required`,
-      })
+      .string({ message: "invalid name of organization" })
       .min(5, { message: "name must be greater than 5 characters" })
       .max(100, { message: "name must be smaller than 100 characters" }),
   }),
@@ -16,10 +11,7 @@ export const organizationValidator = {
     .object({
       name: z
         .string({
-          error: (issue) =>
-            issue.code === "invalid_type"
-              ? `This ${issue.path} should be of type ${issue.expected}`
-              : `This ${issue.path} is required`,
+          message: "invalid name of organization",
         })
         .min(5, { message: "name must be greater than 5 characters" })
         .max(100, { message: "name must be smaller than 100 characters" })
@@ -31,29 +23,19 @@ export const organizationValidator = {
     }),
   organizationId: z.object({
     organizationId: z
-      .string({
-        error: (issue) =>
-          issue.code == "invalid_type"
-            ? `This ${issue.path} should be of ${issue.expected} type`
-            : `This ${issue.path} is required`,
-      })
+      .string({ message: "invalid format of organizationId" })
       .length(36, {
-        error: (issue) =>
-          issue.code == "too_big" || issue.code == "too_small"
-            ? `This ${issue.path} must be of length ${issue.maximum ?? issue.minimum}`
-            : undefined,
+        message: "invalid length of organizationId",
       }),
   }),
 };
-export type CreateOrganizationInputValidator = z.infer<
-  typeof organizationValidator.create
->;
-export type UpdateOrganizationInputValidator = z.infer<
-  typeof organizationValidator.update
->;
-export type OrganizationIdInputValidator = z.infer<
-  typeof organizationValidator.organizationId
->;
-export type OrganizationUpdateInputValidator = z.infer<
-  typeof organizationValidator.update
->;
+export declare namespace VOrganization {
+  interface create extends z.infer<typeof organizationValidator.create> {}
+  interface update extends z.infer<typeof organizationValidator.update> {}
+  interface getById extends z.infer<
+    typeof organizationValidator.organizationId
+  > {}
+  interface remove extends z.infer<
+    typeof organizationValidator.organizationId
+  > {}
+}

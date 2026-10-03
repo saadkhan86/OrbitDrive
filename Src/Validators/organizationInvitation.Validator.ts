@@ -5,8 +5,8 @@ export const organizationInvitationValidator = {
     organizationId: z.string().uuid({ message: "Invalid organization ID" }),
   }),
   invitationId: z.object({
-    organizationId: z.string().uuid({ message: "Invalid organization ID" }),
-    invitationId: z.string().uuid({ message: "Invalid invitation ID" }),
+    organizationId: z.string().uuid({ message: "Invalid organizationId" }),
+    invitationId: z.string().uuid({ message: "Invalid invitationId" }),
   }),
   create: z.object({
     email: z.email({ message: "Invalid email address" }),
@@ -28,6 +28,9 @@ export type OrganizationInvitationAcceptInput = z.infer<
 export type OrganizationInvitationDeleteInput = z.infer<
   typeof organizationInvitationValidator.invitationId
 >;
-export type OrganizationIdInput = z.infer<
+export type OrganizationInvitationOrganizationIdInput = z.infer<
   typeof organizationInvitationValidator.organizationId
+>;
+export type organizationInvitationIdInput = z.infer<
+  typeof organizationInvitationValidator.invitationId
 >;
