@@ -13,11 +13,11 @@ export const organizationMemberValidator = {
   }),
 };
 export declare namespace VOrganizationMember {
-  export type role = z.infer<typeof organizationMemberValidator.role>;
-  export type organizationId = z.infer<
+  type role = z.infer<typeof organizationMemberValidator.role>;
+  type organizationId = z.infer<
     typeof organizationMemberValidator.organizationId
   >;
-  export type organizationMemberId = z.infer<
+  type organizationMemberId = z.infer<
     typeof organizationMemberValidator.organizationMemberId
   >;
 }

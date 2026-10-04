@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { VOrganizationMember } from "../Validators/organizationMember.Validator";
 
 class OrganizationMembers {
   public async createOrganizationMember(
@@ -19,11 +20,11 @@ class OrganizationMembers {
         .returning()
     )[0];
   }
-  public async getAllByOrganizationId(organizationId: string) {
+  public async getAllByOrganizationId(org: VOrganizationMember.organizationId) {
     return await db
       .select()
       .from(organization_members)
-      .where(eq(organization_members.organizationId, organizationId));
+      .where(eq(organization_members.organizationId, org.organizationId));
   }
   public async getById(organizationId: string, organizationMemberId: string) {
     return (

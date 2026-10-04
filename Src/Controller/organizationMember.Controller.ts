@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { organizationMemberService } from "../Services/organizationMember.Service";
 import { VOrganizationMember } from "../Validators/organizationMember.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const organizationMemberController = {
   getAllByOrganizationId: async (
@@ -19,7 +20,7 @@ export const organizationMemberController = {
   },
   getByUserId: async (request: FastifyRequest, reply: FastifyReply) => {
     return await organizationMemberService.getByUserId(
-      request.user.userId as idValidator,
+      request.user.userId as VAuth.userId,
     );
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {

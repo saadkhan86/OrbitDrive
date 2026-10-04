@@ -1,17 +1,18 @@
 import { idValidator } from "../Validators/shared.Validator";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
-import { organizationMemberRoleValidator } from "../Validators/organizationMember.Validator";
+import { VOrganizationMember } from "../Validators/organizationMember.Validator";
 import { CustomError } from "../Errors/CustomError";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const organizationMemberService = {
-  getAllByOrganizationId: async (organizationId: idValidator) => {
-    return await OrganizationMembersRepo.getAllByOrganizationId(organizationId);
+  getAllByOrganizationId: async (org: VOrganizationMember.organizationId) => {
+    return await OrganizationMembersRepo.getAllByOrganizationId(org);
   },
   getByUserId: async (userId: idValidator) => {
     return await OrganizationMembersRepo.getByUserId(userId);
   },
   updateOrganizationMember: async (
-    currentUserId: idValidator,
+    currentUserId: VAuth.userId,
     organizationId: idValidator,
     organizationMemberId: idValidator,
     data: organizationMemberRoleValidator,
