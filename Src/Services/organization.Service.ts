@@ -2,23 +2,15 @@ import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import OrganizationRepo from "../Repositories/Organization.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
-import {
-  CreateOrganizationInputValidator,
-  OrganizationIdInputValidator,
-  OrganizationUpdateInputValidator,
-} from "../Validators/organization.Validator";
-import { idValidator } from "../Validators/shared.Validator";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
 import { generateSlug } from "../Utils/slug.Utils";
+import { VAuth } from "../Validators/auth.Validator";
+import { VOrganization } from "../Validators/organization.Validator";
 
 export const organizationService = {
-  create: async (
-    user: UserIdInputValidator,
-    data: CreateOrganizationInputValidator,
-  ) => {
+  create: async (user: VAuth.userId, data: VOrganization.create) => {
     const slug = generateSlug(data.name);
     const existingOrganization = await OrganizationRepo.findByOwnerAndSlug(
-      user.userId,
+      user,
       slug,
     );
     if (existingOrganization) {
@@ -34,23 +26,19 @@ export const organizationService = {
         name: data.name,
         slug,
       });
-      const createdOrganizationMember =
-        await OrganizationMembersRepo.createOrganizationMember(tx, {
-          organizationId: createdOrganization!.id,
-          userId: user.userId,
-          role: "OWNER",
-        });
+      await OrganizationMembersRepo.createOrganizationMember(tx, {
+        organizationId: createdOrganization!.id,
+        userId: user.userId,
+        role: "OWNER",
+      });
       return createdOrganization;
     });
     return organization;
   },
-  getAllByOwnerId: async (user: UserIdInputValidator) => {
-    return await OrganizationRepo.getAllByOwnerId(user.userId);
+  getAllByOwnerId: async (user: VAuth.userId) => {
+    return await OrganizationRepo.getAllByOwnerId(user);
   },
-  getById: async (
-    user: UserIdInputValidator,
-    org: OrganizationIdInputValidator,
-  ) => {
+  getById: async (user: VAuth.userId, org: VOrganization.getById) => {
     const organization = await OrganizationRepo.getById(user, org);
     if (!organization) {
       throw new CustomError(
@@ -62,9 +50,9 @@ export const organizationService = {
     return organization;
   },
   update: async (
-    user: UserIdInputValidator,
-    org: OrganizationIdInputValidator,
-    data: OrganizationUpdateInputValidator,
+    user: VAuth.userId,
+    org: VOrganization.getById,
+    data: VOrganization.update,
   ) => {
     let organization: any = await OrganizationRepo.getById(user, org);
     if (!organization) {
@@ -76,7 +64,7 @@ export const organizationService = {
     }
 
     const slug = generateSlug(data.name!);
-    organization = await OrganizationRepo.findByOwnerAndSlug(user.userId, slug);
+    organization = await OrganizationRepo.findByOwnerAndSlug(user, slug);
     if (organization) {
       throw new CustomError(
         409,
@@ -89,10 +77,7 @@ export const organizationService = {
       slug: slug!,
     } as any);
   },
-  delete: async (
-    user: UserIdInputValidator,
-    org: OrganizationIdInputValidator,
-  ) => {
+  delete: async (user: VAuth.userId, org: VOrganization.getById) => {
     const organization = await OrganizationRepo.getById(user, org);
     if (!organization) {
       throw new CustomError(

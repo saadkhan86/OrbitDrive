@@ -14,6 +14,7 @@ declare module "@fastify/jwt" {
 
     user: {
       userId: string;
+      email: string;
       type: "access" | "refresh" | "password-reset";
     };
   }

@@ -1,22 +1,17 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { organizationInvitationService } from "../Services/organizationInvitation.Service";
-
-import type {
-  OrganizationInvitationCreateInput,
-  OrganizationInvitationAcceptInput,
-  OrganizationInvitationDeleteInput,
-  OrganizationInvitationOrganizationIdInput,
-} from "../Validators/organizationInvitation.Validator";
 import UserRepo from "../Repositories/User.Repo";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { VAuth } from "../Validators/auth.Validator";
+import { VOrganization } from "../Validators/organization.Validator";
+import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
 
 export const organizationInvitationController = {
   async create(request: FastifyRequest, reply: FastifyReply) {
     const result = await organizationInvitationService.create(
-      request.user as UserIdInputValidator,
-      request.params as OrganizationInvitationOrganizationIdInput,
-      request.body as OrganizationInvitationCreateInput,
+      request.user as VAuth.userId & VAuth.email,
+      request.params as VOrganizationInvitation.organizationId,
+      request.body as VOrganizationInvitation.create,
     );
 
     return reply.status(201).send({
@@ -29,7 +24,7 @@ export const organizationInvitationController = {
   async getAll(request: FastifyRequest, reply: FastifyReply) {
     const invitations =
       await organizationInvitationService.getAllByOrganizationId(
-        request.params as OrganizationInvitationOrganizationIdInput,
+        request.params as VOrganizationInvitation.organizationId,
       );
 
     return reply.status(200).send({
@@ -41,7 +36,7 @@ export const organizationInvitationController = {
   // DELETE /organizations/:organizationId/invitations/:invitationId
   async delete(request: FastifyRequest, reply: FastifyReply) {
     await organizationInvitationService.delete(
-      request.params as OrganizationInvitationDeleteInput,
+      request.params as VOrganizationInvitation.invitationId,
     );
 
     return reply.status(200).send({
@@ -52,15 +47,9 @@ export const organizationInvitationController = {
 
   // POST /invitations/accept
   async accept(request: FastifyRequest, reply: FastifyReply) {
-    const { token } = request.params as OrganizationInvitationAcceptInput;
-
-    const userId = request.user.userId;
-
-    const user = await UserRepo.findById(userId);
     const member = await organizationInvitationService.accept(
-      token,
-      userId,
-      user?.email!,
+      request.params as VOrganizationInvitation.token,
+      request.user as VAuth.userId & VAuth.email,
     );
     return reply.status(200).send({
       success: true,

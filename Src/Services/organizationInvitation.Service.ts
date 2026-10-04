@@ -1,31 +1,21 @@
-import * as crypto from "node:crypto";
-
-import { eq } from "drizzle-orm";
-
 import { db } from "../Database";
-import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
 import UserRepo from "../Repositories/User.Repo";
 import { CustomError } from "../Errors/CustomError";
-import {
-  OrganizationInvitationCreateInput,
-  OrganizationInvitationDeleteInput,
-  OrganizationInvitationOrganizationIdInput,
-} from "../Validators/organizationInvitation.Validator";
 import OrganizationInvitationRepo from "../Repositories/OrganizationInvitation.Repo";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
-import { organization_members } from "../Database/Schemas/organization_members.Schema";
-import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
+import { addEmailJob } from "../Queues/Email.Queue";
 import OrganizationRepo from "../Repositories/Organization.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { VAuth } from "../Validators/auth.Validator";
+import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
 
 export const organizationInvitationService = {
   async create(
-    user: UserIdInputValidator,
-    org: OrganizationInvitationOrganizationIdInput,
-    data: OrganizationInvitationCreateInput,
+    user: VAuth.userId & VAuth.email,
+    org: VOrganizationInvitation.organizationId,
+    data: VOrganizationInvitation.create,
   ) {
-    const targetUser = await UserRepo.findByEmail(data.email);
+    const targetUser = await UserRepo.findByEmail(data as VAuth.email);
     if (targetUser && targetUser.email == data.email) {
       throw new CustomError(
         409,
@@ -87,12 +77,12 @@ export const organizationInvitationService = {
     };
   },
 
-  async getAllByOrganizationId(org: OrganizationInvitationOrganizationIdInput) {
+  async getAllByOrganizationId(org: VOrganizationInvitation.organizationId) {
     return OrganizationInvitationRepo.getAllByOrganizationId(org);
   },
 
-  async delete(org: OrganizationInvitationDeleteInput) {
-    const invitation = await OrganizationInvitationRepo.getById(org);
+  async delete(invitationId: VOrganizationInvitation.invitationId) {
+    const invitation = await OrganizationInvitationRepo.getById(invitationId);
 
     if (!invitation) {
       throw new CustomError(
@@ -111,11 +101,14 @@ export const organizationInvitationService = {
       );
     }
 
-    return OrganizationInvitationRepo.delete(org);
+    return OrganizationInvitationRepo.delete(invitationId);
   },
 
-  async accept(token: string, userId: string, userEmail: string) {
-    const tokenHash = await tokenUtils.hashToken(token);
+  async accept(
+    orgInvitation: VOrganizationInvitation.token,
+    user: VAuth.userId & VAuth.email,
+  ) {
+    const tokenHash = await tokenUtils.hashToken(orgInvitation.token);
 
     const invitation =
       await OrganizationInvitationRepo.getByTokenHash(tokenHash);
@@ -142,7 +135,7 @@ export const organizationInvitationService = {
       );
     }
 
-    if (invitation.email.toLowerCase() !== userEmail.toLowerCase()) {
+    if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
       throw new CustomError(
         403,
         "This invitation belongs to a different email",
@@ -154,7 +147,7 @@ export const organizationInvitationService = {
     const existingMember =
       await OrganizationMembersRepo.getByOrganizationAndUserId(
         invitation.organizationId,
-        userId,
+        user.userId,
       );
 
     if (existingMember) {
@@ -170,7 +163,7 @@ export const organizationInvitationService = {
       const createdMember =
         await OrganizationMembersRepo.createOrganizationMember(tx, {
           organizationId: invitation.organizationId,
-          userId,
+          userId: user.userId,
           role: invitation.role,
         });
 

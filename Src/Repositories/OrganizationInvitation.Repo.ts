@@ -3,11 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import {
-  OrganizationInvitationDeleteInput,
-  OrganizationInvitationOrganizationIdInput,
-} from "../Validators/organizationInvitation.Validator";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
+import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
 
 class OrganizationInvitationRepo {
   public async create(data: typeof organization_invitations.$inferInsert) {
@@ -19,15 +15,18 @@ class OrganizationInvitationRepo {
     )[0];
   }
 
-  public async getById(org: OrganizationInvitationDeleteInput) {
+  public async getById(invitation: VOrganizationInvitation.invitationId) {
     return (
       await db
         .select()
         .from(organization_invitations)
         .where(
           and(
-            eq(organization_invitations.id, org.invitationId),
-            eq(organization_invitations.organizationId, org.organizationId),
+            eq(organization_invitations.id, invitation.invitationId),
+            eq(
+              organization_invitations.organizationId,
+              invitation.organizationId,
+            ),
           ),
         )
         .limit(1)
@@ -35,7 +34,7 @@ class OrganizationInvitationRepo {
   }
 
   public async getAllByOrganizationId(
-    org: OrganizationInvitationOrganizationIdInput,
+    org: VOrganizationInvitation.organizationId,
   ) {
     return db
       .select()
@@ -78,14 +77,17 @@ class OrganizationInvitationRepo {
     )[0];
   }
 
-  public async delete(org: OrganizationInvitationDeleteInput) {
+  public async delete(invitation: VOrganizationInvitation.invitationId) {
     return (
       await db
         .delete(organization_invitations)
         .where(
           and(
-            eq(organization_invitations.id, org.invitationId),
-            eq(organization_invitations.organizationId, org.organizationId),
+            eq(organization_invitations.id, invitation.invitationId),
+            eq(
+              organization_invitations.organizationId,
+              invitation.organizationId,
+            ),
           ),
         )
         .returning()

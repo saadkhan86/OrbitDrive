@@ -71,14 +71,12 @@ export const authValidator = {
   }),
 };
 export declare namespace VAuth {
-  interface create extends z.infer<typeof authValidator.signup> {}
-  interface login extends z.infer<typeof authValidator.login> {}
-  interface update extends z.infer<typeof authValidator.update> {}
-  interface passwordReset extends z.infer<typeof authValidator.passwordReset> {}
-  interface email extends z.infer<typeof authValidator.email> {}
-  interface updateRefreshToken extends z.infer<
-    typeof authValidator.updateRefreshToken
-  > {}
-  interface refreshToken extends z.infer<typeof authValidator.refreshToken> {}
-  interface userId extends z.infer<typeof authValidator.userId> {}
+  type create = z.infer<typeof authValidator.signup>;
+  type login = z.infer<typeof authValidator.login>;
+  type update = z.infer<typeof authValidator.update>;
+  type passwordReset = z.infer<typeof authValidator.passwordReset>;
+  type email = z.infer<typeof authValidator.email>;
+  type updateRefreshToken = z.infer<typeof authValidator.updateRefreshToken>;
+  type refreshToken = z.infer<typeof authValidator.refreshToken>;
+  type userId = z.infer<typeof authValidator.userId>;
 }

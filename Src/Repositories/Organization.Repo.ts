@@ -2,9 +2,8 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { UserIdInputValidator } from "../Validators/auth.Validator";
-import { OrganizationIdInputValidator } from "../Validators/organization.Validator";
-
+import { VAuth } from "../Validators/auth.Validator";
+import { VOrganization } from "../Validators/organization.Validator";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
@@ -17,10 +16,7 @@ class OrganizationRepo {
         .returning()
     )[0];
   }
-  public async getById(
-    user: UserIdInputValidator,
-    org: OrganizationIdInputValidator,
-  ) {
+  public async getById(user: VAuth.userId, org: VOrganization.getById) {
     return (
       await db
         .select()
@@ -33,24 +29,27 @@ class OrganizationRepo {
         )
     )[0];
   }
-  public async findByOwnerAndSlug(ownerId: string, slug: string) {
+  public async findByOwnerAndSlug(user: VAuth.userId, slug: string) {
     return (
       await db
         .select()
         .from(organizations)
         .where(
-          and(eq(organizations.ownerId, ownerId), eq(organizations.slug, slug)),
+          and(
+            eq(organizations.ownerId, user.userId),
+            eq(organizations.slug, slug),
+          ),
         )
     )[0];
   }
-  public async getAllByOwnerId(ownerId: string) {
+  public async getAllByOwnerId(user: VAuth.userId) {
     return await db
       .select()
       .from(organizations)
-      .where(eq(organizations.ownerId, ownerId));
+      .where(eq(organizations.ownerId, user.userId));
   }
   public async update(
-    org: OrganizationIdInputValidator,
+    org: VOrganization.getById,
     data: { name?: string; slug?: string },
   ) {
     let newData: Record<string, any> = {};
@@ -65,8 +64,8 @@ class OrganizationRepo {
     )[0];
   }
   public async delete(
-    user: UserIdInputValidator,
-    org: OrganizationIdInputValidator,
+    user: VAuth.userId,
+    org: VOrganization.getById,
   ) {
     return (
       await db

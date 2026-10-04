@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const organizationInvitationValidator = {
   organizationId: z.object({
-    organizationId: z.string().uuid({ message: "Invalid organization ID" }),
+    organizationId: z.string().uuid({ message: "Invalid organizationId" }),
   }),
   invitationId: z.object({
     organizationId: z.string().uuid({ message: "Invalid organizationId" }),
@@ -18,19 +18,14 @@ export const organizationInvitationValidator = {
   }),
 };
 
-export type OrganizationInvitationCreateInput = z.infer<
-  typeof organizationInvitationValidator.create
->;
-
-export type OrganizationInvitationAcceptInput = z.infer<
-  typeof organizationInvitationValidator.accept
->;
-export type OrganizationInvitationDeleteInput = z.infer<
-  typeof organizationInvitationValidator.invitationId
->;
-export type OrganizationInvitationOrganizationIdInput = z.infer<
-  typeof organizationInvitationValidator.organizationId
->;
-export type organizationInvitationIdInput = z.infer<
-  typeof organizationInvitationValidator.invitationId
->;
+export declare namespace VOrganizationInvitation {
+  type create = z.infer<typeof organizationInvitationValidator.create>;
+  type accept = z.infer<typeof organizationInvitationValidator.accept>;
+  type invitationId = z.infer<
+    typeof organizationInvitationValidator.invitationId
+  >;
+  type organizationId = z.infer<
+    typeof organizationInvitationValidator.organizationId
+  >;
+  type token = z.infer<typeof organizationInvitationValidator.accept>;
+}

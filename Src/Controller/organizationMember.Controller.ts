@@ -1,11 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { organizationMemberService } from "../Services/organizationMember.Service";
-import {
-  organizationMemberOrganizationIdValidator,
-  organizationMemberOrganizationMemberIdValidator,
-  organizationMemberRoleValidator,
-} from "../Validators/organizationMember.Validator";
-import { idValidator } from "../Validators/shared.Validator";
+import { VOrganizationMember } from "../Validators/organizationMember.Validator";
 
 export const organizationMemberController = {
   getAllByOrganizationId: async (
@@ -14,8 +9,7 @@ export const organizationMemberController = {
   ) => {
     const organizationMembers =
       await organizationMemberService.getAllByOrganizationId(
-        (request.params as organizationMemberOrganizationIdValidator)
-          .organizationId,
+        request.params as VOrganizationMember.organizationId,
       );
     return reply.status(200).send({
       success: true,
