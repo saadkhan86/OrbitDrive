@@ -12,16 +12,19 @@ export const authController = {
     });
   },
   login: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { userId, refreshToken } = await authService.login(
+    const { user, refreshToken } = await authService.login(
       request.body as VAuth.login,
     );
     const accessToken = request.server.jwtUtils.generateAccessToken({
-      userId,
+      userId: user.id,
     } as VAuth.userId);
     return reply.status(200).send({
       success: true,
       message: "User logged in successfully",
-      data: { tokens: { accessToken, refreshToken } },
+      data: {
+        tokens: { accessToken, refreshToken },
+        user: { id: user.id, fullName: user.fullName, email: user.email },
+      },
     });
   },
   forgotPassword: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -31,9 +34,7 @@ export const authController = {
       .send({ success: true, message: "Password reset email has been sent" });
   },
   passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.passwordReset(
-      request.body as VAuth.passwordReset,
-    );
+    await authService.passwordReset(request.body as VAuth.passwordReset);
     return reply
       .status(200)
       .send({ success: true, message: "Password reset successfully" });

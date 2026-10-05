@@ -1,4 +1,3 @@
-import { idValidator } from "../Validators/shared.Validator";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 import { VOrganizationMember } from "../Validators/organizationMember.Validator";
 import { CustomError } from "../Errors/CustomError";
@@ -8,23 +7,20 @@ export const organizationMemberService = {
   getAllByOrganizationId: async (org: VOrganizationMember.organizationId) => {
     return await OrganizationMembersRepo.getAllByOrganizationId(org);
   },
-  getByUserId: async (userId: idValidator) => {
-    return await OrganizationMembersRepo.getByUserId(userId);
+  getByUserId: async (user: VAuth.userId) => {
+    return await OrganizationMembersRepo.getByUserId(user);
   },
   updateOrganizationMember: async (
-    currentUserId: VAuth.userId,
-    organizationId: idValidator,
-    organizationMemberId: idValidator,
-    data: organizationMemberRoleValidator,
+    currentUser: VAuth.userId,
+    orgMember: VOrganizationMember.organizationMemberId,
+    data: VOrganizationMember.role,
   ) => {
-    const targetOrganizationMember = await OrganizationMembersRepo.getById(
-      organizationId,
-      organizationMemberId,
-    );
+    const targetOrganizationMember =
+      await OrganizationMembersRepo.getById(orgMember);
     if (!targetOrganizationMember) {
       throw new CustomError(404, "organization member not found", "NOT_FOUND");
     }
-    if (targetOrganizationMember?.userId == currentUserId) {
+    if (targetOrganizationMember?.userId == currentUser.userId) {
       throw new CustomError(
         403,
         "You cannot update your own role",
@@ -32,33 +28,29 @@ export const organizationMemberService = {
       );
     }
     return await OrganizationMembersRepo.updateOrganizationMember(
-      organizationId,
-      organizationMemberId,
-      data.role,
+      orgMember,
+      data,
     );
   },
   deleteOrganizationMember: async (
-    currentUserId: idValidator,
-    organizationId: idValidator,
-    organizationMemberId: idValidator,
+    currentUser: VAuth.userId,
+    orgMember: VOrganizationMember.organizationMemberId,
   ) => {
-    const targetOrganizationMember = await OrganizationMembersRepo.getById(
-      organizationId,
-      organizationMemberId,
-    );
+    const targetOrganizationMember =
+      await OrganizationMembersRepo.getById(orgMember);
     if (!targetOrganizationMember) {
       throw new CustomError(404, "organization member not found", "NOT_FOUND");
     }
-    if (targetOrganizationMember?.userId == currentUserId) {
+    if (targetOrganizationMember?.userId == currentUser.userId) {
       throw new CustomError(
         403,
-        "You cannot delete your own organization member entry",
+        "You cannot delete yourself",
         "CANNOT_DELETE_SELF_ROLE",
       );
     }
     return await OrganizationMembersRepo.deleteOrganizationMember(
-      organizationId,
-      organizationMemberId,
+      orgMember.organizationId,
+      orgMember.organizationMemberId,
     );
   },
 };

@@ -20,18 +20,15 @@ export const organizationMemberController = {
   },
   getByUserId: async (request: FastifyRequest, reply: FastifyReply) => {
     return await organizationMemberService.getByUserId(
-      request.user.userId as VAuth.userId,
+      request.user as VAuth.userId,
     );
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const organizationMember =
       await organizationMemberService.updateOrganizationMember(
-        request.user.userId as idValidator,
-        (request.params as organizationMemberOrganizationMemberIdValidator)
-          .organizationId,
-        (request.params as organizationMemberOrganizationMemberIdValidator)
-          .organizationMemberId,
-        request.body as organizationMemberRoleValidator,
+        request.user as VAuth.userId,
+        request.params as VOrganizationMember.organizationMemberId,
+        request.body as VOrganizationMember.role,
       );
     return reply.status(200).send({
       success: true,
@@ -42,11 +39,8 @@ export const organizationMemberController = {
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationMemberService.deleteOrganizationMember(
-      request.user.userId as idValidator,
-      (request.params as organizationMemberOrganizationMemberIdValidator)
-        .organizationId,
-      (request.params as organizationMemberOrganizationMemberIdValidator)
-        .organizationMemberId,
+      request.user as VAuth.userId,
+      request.params as VOrganizationMember.organizationMemberId,
     );
     return reply.status(200).send({
       success: true,

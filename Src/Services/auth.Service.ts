@@ -64,7 +64,7 @@ export const authService = {
       userId: user.id,
       refreshToken,
     } as VAuth.updateRefreshToken);
-    return { refreshToken, userId: user.id };
+    return { refreshToken, user };
   },
   forgotPassword: async (data: VAuth.email) => {
     const user = await UserRepo.findByEmail(data as VAuth.email);

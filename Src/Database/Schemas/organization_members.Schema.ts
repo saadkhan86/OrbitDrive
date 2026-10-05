@@ -16,7 +16,7 @@ export const organization_members = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    userId: uuid("userId").references(() => users.id),
+    userId: uuid("userId").references(() => users.id, { onDelete: "cascade" }),
     role: pgRoleEnum("role").notNull().default("MEMBER"),
     createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),

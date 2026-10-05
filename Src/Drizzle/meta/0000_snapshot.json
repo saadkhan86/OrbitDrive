@@ -1,5 +1,5 @@
 {
-  "id": "0f22142b-3f9c-416e-9f1c-6dfecfb750a1",
+  "id": "4da5c22b-cd0a-4dcd-b5e9-e1d5c36d6a91",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -19,7 +19,7 @@
           "name": "organizationId",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -283,7 +283,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

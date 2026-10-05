@@ -6,7 +6,7 @@ import {
   CreateClientInput,
   UpdateClientInput,
 } from "../Validators/clients.Validator";
-import { OrganizationIdInput } from "../Validators/organizationInvitation.Validator";
+import { VOrganization } from "../Validators/organization.Validator";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -15,7 +15,7 @@ export const clientController = {
       message: "client created successfully",
       data: {
         client: await clientsService.create(
-          (request.params as OrganizationIdInput).organizationId,
+          (request.params as VOrganization.getById).organizationId,
           request.body as CreateClientInput,
         ),
       },
@@ -28,7 +28,7 @@ export const clientController = {
       message: "clients fetched successfully",
       data: {
         clients: await clientsService.getAll(
-          (request.params as OrganizationIdInput).organizationId,
+          (request.params as VOrganization.getById).organizationId,
         ),
       },
     });

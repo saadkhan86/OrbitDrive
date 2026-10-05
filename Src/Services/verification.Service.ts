@@ -16,7 +16,7 @@ export const verificationService = {
         "Email verification link has been expired",
         "LINK_EXPIRED",
       );
-    const updatedUser = await AuthRepo.updateIsEmailVerified(userId);
+    const updatedUser = await AuthRepo.updateIsEmailVerified({ userId });
     if (!updatedUser)
       throw new CustomError(
         500,
@@ -31,7 +31,7 @@ export const verificationService = {
     return true;
   },
   resendEmailVerification: async (email: string) => {
-    const user = await UserRepo.findByEmail(email);
+    const user = await UserRepo.findByEmail({ email });
     if (!user)
       throw new CustomError(
         404,

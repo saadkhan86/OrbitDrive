@@ -3,6 +3,7 @@ import { db } from "../Database";
 import { organization_members } from "../Database/Schemas/organization_members.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganizationMember } from "../Validators/organizationMember.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 class OrganizationMembers {
   public async createOrganizationMember(
@@ -26,15 +27,15 @@ class OrganizationMembers {
       .from(organization_members)
       .where(eq(organization_members.organizationId, org.organizationId));
   }
-  public async getById(organizationId: string, organizationMemberId: string) {
+  public async getById(orgMember: VOrganizationMember.organizationMemberId) {
     return (
       await db
         .select()
         .from(organization_members)
         .where(
           and(
-            eq(organization_members.id, organizationMemberId),
-            eq(organization_members.organizationId, organizationId),
+            eq(organization_members.id, orgMember.organizationMemberId),
+            eq(organization_members.organizationId, orgMember.organizationId),
           ),
         )
     )[0];
@@ -55,26 +56,25 @@ class OrganizationMembers {
         )
     )[0];
   }
-  public async getByUserId(userId: string) {
+  public async getByUserId(user: VAuth.userId) {
     return (
       await db
         .select()
         .from(organization_members)
-        .where(eq(organization_members.userId, userId))
+        .where(eq(organization_members.userId, user.userId))
     )[0];
   }
   public async updateOrganizationMember(
-    organizationId: string,
-    organizationMemberId: string,
-    role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER",
+    orgMember: VOrganizationMember.organizationMemberId,
+    data: VOrganizationMember.role,
   ) {
     return await db
       .update(organization_members)
-      .set({ role })
+      .set({ role: data.role })
       .where(
         and(
-          eq(organization_members.organizationId, organizationId),
-          eq(organization_members.id, organizationMemberId),
+          eq(organization_members.organizationId, orgMember.organizationId),
+          eq(organization_members.id, orgMember.organizationMemberId),
         ),
       )
       .returning();

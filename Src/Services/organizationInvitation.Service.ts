@@ -42,7 +42,7 @@ export const organizationInvitationService = {
     }
 
     const token = await tokenUtils.generateToken();
-
+    console.log("------------------Token", token);
     const tokenHash = await tokenUtils.hashToken(token);
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);

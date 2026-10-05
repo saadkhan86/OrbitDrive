@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import { ResponseTimeHook } from "./Hooks/ResponseTimeHook";
 import {
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
@@ -8,41 +9,27 @@ import { GlobalErrorHandler } from "./Errors/GlobalErrorHandler";
 import { JWTPlugin } from "./Plugin/JWTPlugin";
 import { StartServer } from "./Config/StartServer.Config";
 import "dotenv/config";
-import { EmailWorker } from "./Workers/Email.Worker";
+import cors from "@fastify/cors";
 import { router } from "./Router/router";
+import { shutdownServer } from "./Config/shutdownServer.Config";
+import { swaggerConfig } from "./Config/swagger.Config";
+
 const server = Fastify({
   logger: true,
 });
-
+swaggerConfig(server);
+server.register(cors, { origin: "*" });
 server.register(ResponseTimeHook);
 server.register(JWTPlugin);
-
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
-
 server.setErrorHandler(GlobalErrorHandler);
-
 server.get("/ping", async function (request, reply) {
   return {
     message: "pong",
   };
 });
-
 server.register(router, { prefix: "/api/v1" });
-
-const shutdown = async (signal: string) => {
-  server.log.info(`Received ${signal}. Shutting down gracefully...`);
-  try {
-    await EmailWorker.close();
-    await server.close();
-  } catch (err) {
-    server.log.error(err);
-  } finally {
-    process.exit(0);
-  }
-};
-
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-
+process.on("SIGINT", () => shutdownServer(server, "SIGINT"));
+process.on("SIGTERM", () => shutdownServer(server, "SIGTERM"));
 StartServer(server);

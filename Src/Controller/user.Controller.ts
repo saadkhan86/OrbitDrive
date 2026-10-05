@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { userService } from "../Services/user.Service";
-import type { updateValidator } from "../Validators/user.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const userController = {
   me: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -17,7 +17,7 @@ export const userController = {
       data: {
         user: await userService.update(
           request.user.userId,
-          request.body as updateValidator,
+          request.body as VAuth.update,
         ),
       },
     });

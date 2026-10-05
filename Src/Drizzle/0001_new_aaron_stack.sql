@@ -1,1 +1,0 @@
-ALTER TABLE "clients" ALTER COLUMN "organizationId" SET NOT NULL;
