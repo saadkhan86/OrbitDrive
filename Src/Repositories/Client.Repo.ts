@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../Database";
 
 import { clients } from "../Database/Schemas/clients.Schema";
-import { UpdateClientInput } from "../Validators/clients.Validator";
+import { VClient } from "../Validators/clients.Validator";
 
 class ClientRepo {
   // Create Client
@@ -51,7 +51,7 @@ class ClientRepo {
   public async update(
     organizationId: string,
     clientId: string,
-    data: UpdateClientInput,
+    data: VClient.UpdateClientInput,
   ) {
     return (
       await db

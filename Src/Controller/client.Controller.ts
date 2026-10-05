@@ -1,12 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
 import clientsService from "../Services/clients.Service";
-import {
-  ClientIdParams,
-  CreateClientInput,
-  UpdateClientInput,
-} from "../Validators/clients.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
+import { VClient } from "../Validators/clients.Validator";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -16,7 +12,7 @@ export const clientController = {
       data: {
         client: await clientsService.create(
           (request.params as VOrganization.getById).organizationId,
-          request.body as CreateClientInput,
+          request.body as VClient.CreateClientInput,
         ),
       },
     });
@@ -40,8 +36,8 @@ export const clientController = {
       message: "client fetched successfully",
       data: {
         client: await clientsService.getById(
-          (request.params as ClientIdParams).organizationId,
-          (request.params as ClientIdParams).clientId,
+          (request.params as VClient.ClientIdParams).organizationId,
+          (request.params as VClient.ClientIdParams).clientId,
         ),
       },
     });
@@ -53,9 +49,9 @@ export const clientController = {
       message: "client updated successfully",
       data: {
         client: await clientsService.update(
-          (request.params as ClientIdParams).organizationId,
-          (request.params as ClientIdParams).clientId,
-          request.body as UpdateClientInput,
+          (request.params as VClient.ClientIdParams).organizationId,
+          (request.params as VClient.ClientIdParams).clientId,
+          request.body as VClient.UpdateClientInput,
         ),
       },
     });
@@ -63,8 +59,8 @@ export const clientController = {
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await clientsService.delete(
-      (request.params as ClientIdParams).organizationId,
-      (request.params as ClientIdParams).clientId,
+      (request.params as VClient.ClientIdParams).organizationId,
+      (request.params as VClient.ClientIdParams).clientId,
     );
 
     return reply.code(200).send({

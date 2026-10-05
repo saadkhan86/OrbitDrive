@@ -68,13 +68,9 @@ export const clientValidator = {
     }),
 };
 
-// Types
-export type OrganizationIdParams = z.infer<
-  typeof clientValidator.organizationId
->;
-
-export type ClientIdParams = z.infer<typeof clientValidator.clientId>;
-
-export type CreateClientInput = z.infer<typeof clientValidator.create>;
-
-export type UpdateClientInput = z.infer<typeof clientValidator.update>;
+export declare namespace VClient {
+  type OrganizationIdParams = z.infer<typeof clientValidator.organizationId>;
+  type ClientIdParams = z.infer<typeof clientValidator.clientId>;
+  type CreateClientInput = z.infer<typeof clientValidator.create>;
+  type UpdateClientInput = z.infer<typeof clientValidator.update>;
+}

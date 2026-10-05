@@ -10,7 +10,7 @@ export const authValidator = {
       .string({ message: "invalid fullName" })
       .min(3, { message: `fullName must be greater than 3 characters` })
       .max(50, { message: "fullName must be smaller than 50 characters" })
-      .meta({ example: "saad" }),
+      .meta({ example: "saad Muhammad Bin Ramzan" }),
     email: z
       .email({ message: "invalid email" })
       .meta({ example: "sk8613013@gmail.com" }),
@@ -18,11 +18,11 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(20, { message: "password must be smaller than 20 characters" })
-      .meta({ example: "123456" }),
-    // .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
-    //   message:
-    //     "Password must contain uppercase, lowercase, number and special character",
-    // }),
+      .meta({ example: "Sk8613013@" })
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
+        message:
+          "Password must contain uppercase, lowercase, number and special character",
+      }),
   }),
 
   login: z.object({
@@ -33,7 +33,7 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(30, { message: "password must be smaller than 30 characters" })
-      .meta({ example: "123456" }),
+      .meta({ example: "Sk8613013@" }),
   }),
   update: z.object({
     fullName: z
@@ -46,11 +46,11 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(30, { message: "password must be smaller than 30 characters" })
-      .meta({ example: "123456" })
-      // .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
-      //   message:
-      //     "Password must contain uppercase, lowercase, number and special character",
-      // })
+      .meta({ example: "Sk8613013@#" })
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
+        message:
+          "Password must contain uppercase, lowercase, number and special character",
+      })
       .optional(),
   }),
   passwordReset: z.object({

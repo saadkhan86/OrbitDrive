@@ -1,13 +1,10 @@
 import ClientRepo from "../Repositories/Client.Repo";
 
 import { CustomError } from "../Errors/CustomError";
-import {
-  CreateClientInput,
-  UpdateClientInput,
-} from "../Validators/clients.Validator";
+import { VClient } from "../Validators/clients.Validator";
 
 class ClientsService {
-  public async create(organizationId: string, data: CreateClientInput) {
+  public async create(organizationId: string, data: VClient.CreateClientInput) {
     return await ClientRepo.create({
       ...data,
       organizationId,
@@ -31,7 +28,7 @@ class ClientsService {
   public async update(
     organizationId: string,
     clientId: string,
-    data: UpdateClientInput,
+    data: VClient.UpdateClientInput,
   ) {
     return await ClientRepo.update(organizationId, clientId, data);
   }
