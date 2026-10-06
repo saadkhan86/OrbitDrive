@@ -28,14 +28,15 @@ export const organizationValidator = {
         message: "invalid length of organizationId",
       }),
   }),
+
+  slug: z.object({
+    slug: z.string(),
+  }),
 };
 export declare namespace VOrganization {
-  interface create extends z.infer<typeof organizationValidator.create> {}
-  interface update extends z.infer<typeof organizationValidator.update> {}
-  interface getById extends z.infer<
-    typeof organizationValidator.organizationId
-  > {}
-  interface remove extends z.infer<
-    typeof organizationValidator.organizationId
-  > {}
+  type create = z.infer<typeof organizationValidator.create>;
+  type update = z.infer<typeof organizationValidator.update>;
+  type getById = z.infer<typeof organizationValidator.organizationId>;
+  type remove = z.infer<typeof organizationValidator.organizationId>;
+  type slug = z.infer<typeof organizationValidator.slug>;
 }

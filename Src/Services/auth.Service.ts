@@ -10,7 +10,7 @@ import { VAuth } from "../Validators/auth.Validator";
 
 export const authService = {
   signup: async (data: VAuth.create) => {
-    const isExist = await UserRepo.findByEmail(data as VAuth.email);
+    const isExist = await UserRepo.findByEmail({ email: data.email });
     if (isExist && !isExist.isEmailVerified)
       throw new CustomError(
         409,
@@ -28,8 +28,8 @@ export const authService = {
     const hashedToken = await tokenUtils.hashToken(token);
     const user = await AuthRepo.create({
       ...data,
-      password: passwordHash,
-    } as VAuth.create);
+      passwordHash,
+    });
     if (!user)
       throw new CustomError(
         500,
@@ -47,7 +47,7 @@ export const authService = {
     return user;
   },
   login: async (data: VAuth.login) => {
-    const user = await UserRepo.findByEmail(data as VAuth.email);
+    const user = await UserRepo.findByEmail({ email: data.email });
     if (!user)
       throw new CustomError(401, "User does not exist", "USER_NOT_FOUND");
     if (!user.isEmailVerified)
@@ -63,11 +63,11 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       userId: user.id,
       refreshToken,
-    } as VAuth.updateRefreshToken);
+    });
     return { refreshToken, user };
   },
   forgotPassword: async (data: VAuth.email) => {
-    const user = await UserRepo.findByEmail(data as VAuth.email);
+    const user = await UserRepo.findByEmail({ email: data.email });
     if (!user)
       throw new CustomError(
         404,
@@ -101,13 +101,18 @@ export const authService = {
     await redisUtils.deleteRedis("password-reset", hashedToken);
     await redisUtils.deleteRedis("password-reset", userId);
     const passwordHash = await argon2.hash(data.password);
-    await UserRepo.update({ userId } as VAuth.userId, {
-      password: passwordHash,
-    });
+    await UserRepo.update(
+      { userId },
+      {
+        password: passwordHash,
+      },
+    );
     return true;
   },
   refresh: async (data: VAuth.refreshToken) => {
-    const user = await AuthRepo.findByRefreshToken(data);
+    const user = await AuthRepo.findByRefreshToken({
+      refreshToken: data.refreshToken,
+    });
     if (!user)
       throw new CustomError(
         400,
@@ -118,7 +123,7 @@ export const authService = {
     await AuthRepo.updateRefreshToken({
       refreshToken,
       userId: user.id,
-    } as VAuth.updateRefreshToken);
+    });
     return { refreshToken, userId: user.id };
   },
 };

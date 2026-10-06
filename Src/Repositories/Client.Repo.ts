@@ -33,15 +33,15 @@ class ClientRepo {
   }
 
   // Get Single Client
-  public async getById(organizationId: string, clientId: string) {
+  public async getById(data: VClient.ClientIdParams) {
     return (
       await db
         .select()
         .from(clients)
         .where(
           and(
-            eq(clients.id, clientId),
-            eq(clients.organizationId, organizationId),
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
           ),
         )
     )[0];

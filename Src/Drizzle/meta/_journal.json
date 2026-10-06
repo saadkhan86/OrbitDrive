@@ -8,6 +8,13 @@
       "when": 1791142230703,
       "tag": "0000_small_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791220446051,
+      "tag": "0001_remarkable_mephisto",
+      "breakpoints": true
     }
   ]
 }

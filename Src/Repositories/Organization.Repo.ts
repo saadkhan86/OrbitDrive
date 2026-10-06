@@ -16,41 +16,42 @@ class OrganizationRepo {
         .returning()
     )[0];
   }
-  public async getById(user: VAuth.userId, org: VOrganization.getById) {
+  public async getById(data: VAuth.userId & VOrganization.getById) {
     return (
       await db
         .select()
         .from(organizations)
         .where(
           and(
-            eq(organizations.id, org.organizationId),
-            eq(organizations.ownerId, user.userId),
+            eq(organizations.id, data.organizationId),
+            eq(organizations.ownerId, data.userId),
           ),
         )
     )[0];
   }
-  public async findByOwnerAndSlug(user: VAuth.userId, slug: string) {
+  public async findByOwnerAndSlug(data: VAuth.userId & VOrganization.slug) {
     return (
       await db
         .select()
         .from(organizations)
         .where(
           and(
-            eq(organizations.ownerId, user.userId),
-            eq(organizations.slug, slug),
+            eq(organizations.ownerId, data.userId),
+            eq(organizations.slug, data.slug),
           ),
         )
     )[0];
   }
-  public async getAllByOwnerId(user: VAuth.userId) {
+  public async getAllByOwnerId(data: VAuth.userId) {
     return await db
       .select()
       .from(organizations)
-      .where(eq(organizations.ownerId, user.userId));
+      .where(eq(organizations.ownerId, data.userId));
   }
   public async update(
-    org: VOrganization.getById,
-    data: { name?: string; slug?: string },
+    data: VOrganization.getById &
+      VOrganization.update &
+      Partial<VOrganization.slug>,
   ) {
     let newData: Record<string, any> = {};
     if (data.name) newData.name = data.name;
@@ -59,14 +60,11 @@ class OrganizationRepo {
       await db
         .update(organizations)
         .set(newData)
-        .where(eq(organizations.id, org.organizationId))
+        .where(eq(organizations.id, data.organizationId))
         .returning()
     )[0];
   }
-  public async delete(
-    user: VAuth.userId,
-    org: VOrganization.getById,
-  ) {
+  public async delete(user: VAuth.userId, org: VOrganization.getById) {
     return (
       await db
         .delete(organizations)

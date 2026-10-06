@@ -9,10 +9,10 @@ import { VOrganization } from "../Validators/organization.Validator";
 export const organizationService = {
   create: async (user: VAuth.userId, data: VOrganization.create) => {
     const slug = generateSlug(data.name);
-    const existingOrganization = await OrganizationRepo.findByOwnerAndSlug(
-      user,
+    const existingOrganization = await OrganizationRepo.findByOwnerAndSlug({
+      userId: user.userId,
       slug,
-    );
+    });
     if (existingOrganization) {
       throw new CustomError(
         409,
@@ -39,7 +39,7 @@ export const organizationService = {
     return await OrganizationRepo.getAllByOwnerId(user);
   },
   getById: async (user: VAuth.userId, org: VOrganization.getById) => {
-    const organization = await OrganizationRepo.getById(user, org);
+    const organization = await OrganizationRepo.getById({ ...user, ...org });
     if (!organization) {
       throw new CustomError(
         404,
@@ -54,7 +54,7 @@ export const organizationService = {
     org: VOrganization.getById,
     data: VOrganization.update,
   ) => {
-    let organization: any = await OrganizationRepo.getById(user, org);
+    let organization: any = await OrganizationRepo.getById({ ...user, ...org });
     if (!organization) {
       throw new CustomError(
         404,
@@ -62,9 +62,14 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-
-    const slug = generateSlug(data.name!);
-    organization = await OrganizationRepo.findByOwnerAndSlug(user, slug);
+    if (!data.name)
+      throw new CustomError(
+        400,
+        "Organization name is required",
+        "ORGANIZATION_NAME_REQUIRED",
+      );
+    const slug = generateSlug(data.name);
+    organization = await OrganizationRepo.findByOwnerAndSlug({ ...user, slug });
     if (organization) {
       throw new CustomError(
         409,
@@ -72,13 +77,14 @@ export const organizationService = {
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
-    return await OrganizationRepo.update(org, {
-      name: data.name!,
-      slug: slug!,
-    } as any);
+    return await OrganizationRepo.update({
+      ...org,
+      name: data.name,
+      slug: slug,
+    });
   },
   delete: async (user: VAuth.userId, org: VOrganization.getById) => {
-    const organization = await OrganizationRepo.getById(user, org);
+    const organization = await OrganizationRepo.getById({ ...user, ...org });
     if (!organization) {
       throw new CustomError(
         404,

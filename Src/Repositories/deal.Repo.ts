@@ -5,72 +5,79 @@ import { db } from "../Database";
 import { deals } from "../Database/Schemas/deals.Schema";
 
 class DealRepo {
-  public async create(data: VDeal.create & { organizationId: string }) {
-    const [deal] = await db
-      .insert(deals)
-      .values({
-        organizationId: data.organizationId,
-        clientId: data.clientId,
-        title: data.title,
-        value: data.value.toString(),
-        currency: data.currency,
-        stage: data.stage,
-        expectedCloseDate: data.expectedCloseDate,
-        description: data.description,
-      })
-      .returning();
-
-    return deal;
+  public async create(data: VDeal.create & VDeal.organizationId) {
+    return (
+      await db
+        .insert(deals)
+        .values({
+          organizationId: data.organizationId,
+          clientId: data.clientId,
+          title: data.title,
+          value: data.value.toString(),
+          currency: data.currency,
+          stage: data.stage,
+          expectedCloseDate: data.expectedCloseDate,
+          description: data.description,
+        })
+        .returning()
+    )[0];
   }
 
-  public async findById(dealId: string, organizationId: string) {
-    const [deal] = await db
-      .select()
-      .from(deals)
-      .where(
-        and(eq(deals.id, dealId), eq(deals.organizationId, organizationId)),
-      )
-      .limit(1);
-
-    return deal ?? null;
+  public async findById(data: VDeal.organizationId & VDeal.dealId) {
+    return (
+      await db
+        .select()
+        .from(deals)
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        )
+        .limit(1)
+    )[0];
   }
 
-  public async findAll(organizationId: string) {
+  public async findAll(data: VDeal.organizationId) {
     return await db
       .select()
       .from(deals)
-      .where(eq(deals.organizationId, organizationId));
+      .where(eq(deals.organizationId, data.organizationId));
   }
 
   public async update(
-    dealId: string,
-    organizationId: string,
-    data: VDeal.update,
+    data: VDeal.update & VDeal.dealId & VDeal.organizationId,
   ) {
-    const [deal] = await db
-      .update(deals)
-      .set({
-        ...data,
-        value: data.value !== undefined ? data.value.toString() : undefined,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(eq(deals.id, dealId), eq(deals.organizationId, organizationId)),
-      )
-      .returning();
-
-    return deal ?? null;
+    return (
+      await db
+        .update(deals)
+        .set({
+          ...data,
+          value: data.value !== undefined ? data.value.toString() : undefined,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
   }
 
-  public async delete(dealId: string, organizationId: string) {
-    const [deal] = await db
-      .delete(deals)
-      .where(
-        and(eq(deals.id, dealId), eq(deals.organizationId, organizationId)),
-      )
-      .returning();
-
-    return deal ?? null;
+  public async delete(data: VDeal.dealId & VDeal.organizationId) {
+    return (
+      await db
+        .delete(deals)
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
   }
 }
 

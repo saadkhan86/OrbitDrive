@@ -4,14 +4,14 @@ import { users } from "../Database/Schemas/users.Schema";
 import { VAuth } from "../Validators/auth.Validator";
 
 class AuthRepo {
-  public async create(data: VAuth.create) {
+  public async create(data: typeof users.$inferInsert) {
     return (
       await db
         .insert(users)
         .values({
           fullName: data.fullName,
           email: data.email,
-          passwordHash: data.password,
+          passwordHash: data.passwordHash,
         })
         .returning({
           id: users.id,
