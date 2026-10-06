@@ -39,6 +39,7 @@ class DealRepo {
   }
 
   public async findAll(data: VDeal.organizationId) {
+    console.log(data);
     return await db
       .select()
       .from(deals)

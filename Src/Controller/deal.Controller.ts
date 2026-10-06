@@ -54,7 +54,7 @@ class DealController {
 
     return reply.code(200).send({
       success: true,
-      data: {result},
+      data: {},
     });
   }
 }

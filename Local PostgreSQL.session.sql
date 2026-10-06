@@ -1,1 +1,1 @@
-SELECT * FROM organizations;
+SELECT * FROM __drizzle_migrations;

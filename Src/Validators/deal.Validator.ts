@@ -64,6 +64,7 @@ export const dealValidator = {
 
   dealId: z.object({
     dealId: z.string().uuid({ message: "invalid dealId" }),
+    organizationId: z.string().uuid({ message: "invalid organizationId" }),
   }),
 
   clientId: z.object({

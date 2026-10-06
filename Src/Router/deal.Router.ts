@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import dealController from "../Controller/deal.Controller";
 import { dealValidator } from "../Validators/deal.Validator";
 import { authenticate } from "../Hooks/AuthenticationHook";
+import { authorize } from "../Hooks/authorization.Hook";
 
 export const dealRouter = async (app: FastifyInstance) => {
   app.addHook("preHandler", authenticate.user);
@@ -13,6 +14,7 @@ export const dealRouter = async (app: FastifyInstance) => {
         params: dealValidator.organizationId,
         body: dealValidator.create,
       },
+      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
     },
     dealController.create,
   );
@@ -24,6 +26,7 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.organizationId,
       },
+      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
     },
     dealController.findAll,
   );
@@ -35,6 +38,7 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.dealId,
       },
+      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
     },
     dealController.findById,
   );
@@ -47,6 +51,7 @@ export const dealRouter = async (app: FastifyInstance) => {
         params: dealValidator.dealId,
         body: dealValidator.update,
       },
+      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
     },
     dealController.update,
   );
@@ -58,6 +63,7 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.dealId,
       },
+      preHandler: authorize.role(["ADMIN", "OWNER"]),
     },
     dealController.delete,
   );

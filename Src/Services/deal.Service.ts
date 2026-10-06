@@ -41,6 +41,10 @@ class DealService {
     deal: VDeal.dealId & VDeal.organizationId,
     data: VDeal.update,
   ) {
+    const foundDeal = await this.findById(deal);
+    if (!foundDeal) {
+      throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
+    }
     return await dealRepo.update({
       dealId: deal.dealId,
       organizationId: deal.organizationId,

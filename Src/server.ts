@@ -15,7 +15,7 @@ import { shutdownServer } from "./Config/shutdownServer.Config";
 import { swaggerConfig } from "./Config/swagger.Config";
 
 const server = Fastify({
-  logger: true,
+  logger: false,
 });
 swaggerConfig(server);
 server.register(cors, { origin: "*" });
