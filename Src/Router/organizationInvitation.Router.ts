@@ -6,6 +6,9 @@ import { authenticate } from "../Hooks/AuthenticationHook";
 import { organizationValidator } from "../Validators/organization.Validator";
 
 export const organizationInvitationRouter = (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["organization Invitation"] };
+  });
   app.addHook("preHandler", authenticate.user);
   app.post(
     "/:organizationId",

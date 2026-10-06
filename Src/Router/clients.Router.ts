@@ -5,13 +5,15 @@ import { clientValidator } from "../Validators/clients.Validator";
 import { clientController } from "../Controller/client.Controller";
 
 export const clientsRouter = async (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["clients"] };
+  });
+
+  app.addHook("preHandler", authenticate.user);
   app.post(
     "/",
     {
-      preHandler: [
-        authenticate.user,
-        authorize.role(["OWNER", "ADMIN", "MEMBER"]),
-      ],
+      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER"])],
       schema: {
         params: clientValidator.organizationId,
         body: clientValidator.create,
@@ -23,10 +25,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.get(
     "/",
     {
-      preHandler: [
-        authenticate.user,
-        authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
-      ],
+      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"])],
       schema: {
         params: clientValidator.organizationId,
       },
@@ -37,10 +36,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.get(
     "/:clientId",
     {
-      preHandler: [
-        authenticate.user,
-        authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
-      ],
+      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"])],
       schema: {
         params: clientValidator.clientId,
       },
@@ -51,10 +47,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:clientId",
     {
-      preHandler: [
-        authenticate.user,
-        authorize.role(["OWNER", "ADMIN", "MEMBER"]),
-      ],
+      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER"])],
       schema: {
         params: clientValidator.clientId,
         body: clientValidator.update,
@@ -66,7 +59,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:clientId",
     {
-      preHandler: [authenticate.user, authorize.role(["OWNER", "ADMIN"])],
+      preHandler: [authorize.role(["OWNER", "ADMIN"])],
       schema: {
         params: clientValidator.clientId,
       },

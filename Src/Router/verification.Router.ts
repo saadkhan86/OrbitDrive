@@ -4,6 +4,9 @@ import { verificationController } from "../Controller/verification.Controller";
 import { emailValidator } from "../Validators/email.Validator";
 
 export const verificationRouter = async (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["verification"] };
+  });
   app.post(
     "/email-verification/resend",
     {

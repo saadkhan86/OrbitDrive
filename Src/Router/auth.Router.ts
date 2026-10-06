@@ -3,6 +3,9 @@ import { authValidator } from "../Validators/auth.Validator";
 import { authController } from "../Controller/auth.Controller";
 
 export const authRouter = async (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["auth"] };
+  });
   app.post(
     "/signup",
     { schema: { body: authValidator.signup } },

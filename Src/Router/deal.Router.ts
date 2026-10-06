@@ -6,6 +6,9 @@ import { authenticate } from "../Hooks/AuthenticationHook";
 import { authorize } from "../Hooks/authorization.Hook";
 
 export const dealRouter = async (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["deals"] };
+  });
   app.addHook("preHandler", authenticate.user);
   app.post(
     "/",
