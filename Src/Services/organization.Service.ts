@@ -92,6 +92,6 @@ export const organizationService = {
         "UNAUTHORIZED",
       );
     }
-    return await OrganizationRepo.delete(user, org);
+    return await OrganizationRepo.delete({ ...user, ...org });
   },
 };

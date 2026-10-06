@@ -48,14 +48,18 @@ class DealRepo {
   public async update(
     data: VDeal.update & VDeal.dealId & VDeal.organizationId,
   ) {
+    let newData: Partial<typeof deals.$inferInsert> = {};
+    if (data.currency) newData.currency = data.currency;
+    if (data.description) newData.description = data.description;
+    if (data.expectedCloseDate)
+      newData.expectedCloseDate = data.expectedCloseDate;
+    if (data.stage) newData.stage = data.stage;
+    if (data.title) newData.title = data.title;
+    if (data.value) newData.value = data.value.toString();
     return (
       await db
         .update(deals)
-        .set({
-          ...data,
-          value: data.value !== undefined ? data.value.toString() : undefined,
-          updatedAt: new Date(),
-        })
+        .set(newData)
         .where(
           and(
             eq(deals.id, data.dealId),

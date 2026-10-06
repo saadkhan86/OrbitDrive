@@ -4,6 +4,7 @@ import { db } from "../Database";
 import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 class OrganizationInvitationRepo {
   public async create(data: typeof organization_invitations.$inferInsert) {
@@ -15,18 +16,15 @@ class OrganizationInvitationRepo {
     )[0];
   }
 
-  public async getById(invitation: VOrganizationInvitation.invitationId) {
+  public async getById(data: VOrganizationInvitation.invitationId) {
     return (
       await db
         .select()
         .from(organization_invitations)
         .where(
           and(
-            eq(organization_invitations.id, invitation.invitationId),
-            eq(
-              organization_invitations.organizationId,
-              invitation.organizationId,
-            ),
+            eq(organization_invitations.id, data.invitationId),
+            eq(organization_invitations.organizationId, data.organizationId),
           ),
         )
         .limit(1)
@@ -34,60 +32,62 @@ class OrganizationInvitationRepo {
   }
 
   public async getAllByOrganizationId(
-    org: VOrganizationInvitation.organizationId,
+    data: VOrganizationInvitation.organizationId,
   ) {
     return db
       .select()
       .from(organization_invitations)
-      .where(eq(organization_invitations.organizationId, org.organizationId));
+      .where(eq(organization_invitations.organizationId, data.organizationId));
   }
 
-  public async getPendingByEmail(organizationId: string, email: string) {
+  public async getPendingByEmail(
+    data: VOrganizationInvitation.organizationId & VAuth.email,
+  ) {
     return (
       await db
         .select()
         .from(organization_invitations)
         .where(
           and(
-            eq(organization_invitations.organizationId, organizationId),
-            eq(organization_invitations.email, email),
+            eq(organization_invitations.organizationId, data.organizationId),
+            eq(organization_invitations.email, data.email),
           ),
         )
         .limit(1)
     )[0];
   }
-  public async getByTokenHash(tokenHash: string) {
+  public async getByTokenHash(data: VOrganizationInvitation.token) {
     return (
       await db
         .select()
         .from(organization_invitations)
-        .where(eq(organization_invitations.tokenHash, tokenHash))
+        .where(eq(organization_invitations.tokenHash, data.token))
         .limit(1)
     )[0];
   }
-  public async accept(tx: NodePgDatabase, invitationId: string) {
+  public async accept(
+    tx: NodePgDatabase,
+    data: VOrganizationInvitation.invitationId,
+  ) {
     return (
       await tx
         .update(organization_invitations)
         .set({
           acceptedAt: new Date(),
         })
-        .where(eq(organization_invitations.id, invitationId))
+        .where(eq(organization_invitations.id, data.invitationId))
         .returning()
     )[0];
   }
 
-  public async delete(invitation: VOrganizationInvitation.invitationId) {
+  public async delete(data: VOrganizationInvitation.invitationId) {
     return (
       await db
         .delete(organization_invitations)
         .where(
           and(
-            eq(organization_invitations.id, invitation.invitationId),
-            eq(
-              organization_invitations.organizationId,
-              invitation.organizationId,
-            ),
+            eq(organization_invitations.id, data.invitationId),
+            eq(organization_invitations.organizationId, data.organizationId),
           ),
         )
         .returning()

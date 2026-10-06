@@ -24,7 +24,7 @@ export const clientController = {
       message: "clients fetched successfully",
       data: {
         clients: await clientsService.getAll(
-          (request.params as VOrganization.getById).organizationId,
+          request.params as VOrganization.getById,
         ),
       },
     });
@@ -36,8 +36,7 @@ export const clientController = {
       message: "client fetched successfully",
       data: {
         client: await clientsService.getById(
-          (request.params as VClient.ClientIdParams).organizationId,
-          (request.params as VClient.ClientIdParams).clientId,
+          request.params as VClient.ClientIdParams,
         ),
       },
     });
@@ -49,8 +48,7 @@ export const clientController = {
       message: "client updated successfully",
       data: {
         client: await clientsService.update(
-          (request.params as VClient.ClientIdParams).organizationId,
-          (request.params as VClient.ClientIdParams).clientId,
+          request.params as VClient.ClientIdParams,
           request.body as VClient.UpdateClientInput,
         ),
       },
@@ -58,10 +56,7 @@ export const clientController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    await clientsService.delete(
-      (request.params as VClient.ClientIdParams).organizationId,
-      (request.params as VClient.ClientIdParams).clientId,
-    );
+    await clientsService.delete(request.params as VClient.ClientIdParams);
 
     return reply.code(200).send({
       success: true,

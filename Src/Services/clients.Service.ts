@@ -11,30 +11,29 @@ class ClientsService {
     });
   }
 
-  public async getAll(organizationId: string) {
-    return await ClientRepo.getAll(organizationId);
+  public async getAll(organization: VClient.OrganizationIdParams) {
+    return await ClientRepo.getAll(organization);
   }
 
-  public async getById(organizationId: string, clientId: string) {
-    const client = await ClientRepo.getById(organizationId, clientId);
+  public async getById(client: VClient.ClientIdParams) {
+    const foundClient = await ClientRepo.getById({ ...client });
 
-    if (!client) {
+    if (!foundClient) {
       throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
     }
 
-    return client;
+    return foundClient;
   }
 
   public async update(
-    organizationId: string,
-    clientId: string,
+    client: VClient.ClientIdParams,
     data: VClient.UpdateClientInput,
   ) {
-    return await ClientRepo.update(organizationId, clientId, data);
+    return await ClientRepo.update({ ...client, ...data });
   }
 
-  public async delete(organizationId: string, clientId: string) {
-    return await ClientRepo.delete(organizationId, clientId);
+  public async delete(data: VClient.ClientIdParams) {
+    return await ClientRepo.delete({ ...data });
   }
 }
 

@@ -8,28 +8,15 @@ import { VClient } from "../Validators/clients.Validator";
 class ClientRepo {
   // Create Client
   public async create(data: typeof clients.$inferInsert) {
-    return (
-      await db
-        .insert(clients)
-        .values({
-          organizationId: data.organizationId,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          company: data.company,
-          status: data.status || "active",
-          notes: data.notes,
-        })
-        .returning()
-    )[0];
+    return (await db.insert(clients).values(data).returning())[0];
   }
 
   // Get All Clients
-  public async getAll(organizationId: string) {
+  public async getAll(data: VClient.OrganizationIdParams) {
     return await db
       .select()
       .from(clients)
-      .where(eq(clients.organizationId, organizationId));
+      .where(eq(clients.organizationId, data.organizationId));
   }
 
   // Get Single Client
@@ -49,9 +36,7 @@ class ClientRepo {
 
   // Update Client
   public async update(
-    organizationId: string,
-    clientId: string,
-    data: VClient.UpdateClientInput,
+    data: VClient.UpdateClientInput & VClient.ClientIdParams,
   ) {
     return (
       await db
@@ -62,22 +47,22 @@ class ClientRepo {
         })
         .where(
           and(
-            eq(clients.id, clientId),
-            eq(clients.organizationId, organizationId),
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
           ),
         )
         .returning()
     )[0];
   }
 
-  public async delete(organizationId: string, clientId: string) {
+  public async delete(data: VClient.ClientIdParams) {
     return (
       await db
         .delete(clients)
         .where(
           and(
-            eq(clients.id, clientId),
-            eq(clients.organizationId, organizationId),
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
           ),
         )
         .returning()

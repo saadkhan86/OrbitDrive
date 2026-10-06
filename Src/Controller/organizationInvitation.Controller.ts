@@ -1,9 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { organizationInvitationService } from "../Services/organizationInvitation.Service";
-import UserRepo from "../Repositories/User.Repo";
 import { VAuth } from "../Validators/auth.Validator";
-import { VOrganization } from "../Validators/organization.Validator";
 import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
 
 export const organizationInvitationController = {

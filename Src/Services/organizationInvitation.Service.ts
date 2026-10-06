@@ -24,10 +24,7 @@ export const organizationInvitationService = {
       );
     }
     const existingInvitation =
-      await OrganizationInvitationRepo.getPendingByEmail(
-        org.organizationId,
-        data.email,
-      );
+      await OrganizationInvitationRepo.getPendingByEmail({ ...org, ...data });
 
     if (
       existingInvitation &&
@@ -42,7 +39,6 @@ export const organizationInvitationService = {
     }
 
     const token = await tokenUtils.generateToken();
-    console.log("------------------Token", token);
     const tokenHash = await tokenUtils.hashToken(token);
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -54,9 +50,7 @@ export const organizationInvitationService = {
       expiresAt,
       createdBy: user.userId,
     });
-    const organization = await OrganizationRepo.getByOrganizationId(
-      org.organizationId,
-    );
+    const organization = await OrganizationRepo.getByOrganizationId({ ...org });
     if (!organization) {
       throw new CustomError(
         404,
@@ -108,10 +102,9 @@ export const organizationInvitationService = {
     orgInvitation: VOrganizationInvitation.token,
     user: VAuth.userId & VAuth.email,
   ) {
-    const tokenHash = await tokenUtils.hashToken(orgInvitation.token);
-
-    const invitation =
-      await OrganizationInvitationRepo.getByTokenHash(tokenHash);
+    const invitation = await OrganizationInvitationRepo.getByTokenHash({
+      token: await tokenUtils.hashToken(orgInvitation.token),
+    });
 
     if (!invitation) {
       throw new CustomError(404, "Invalid invitation", "INVALID_INVITATION");
@@ -145,10 +138,10 @@ export const organizationInvitationService = {
     }
 
     const existingMember =
-      await OrganizationMembersRepo.getByOrganizationAndUserId(
-        invitation.organizationId,
-        user.userId,
-      );
+      await OrganizationMembersRepo.getByOrganizationAndUserId({
+        organizationId: invitation.organizationId,
+        organizationMemberId: user.userId,
+      });
 
     if (existingMember) {
       throw new CustomError(
@@ -167,7 +160,10 @@ export const organizationInvitationService = {
           role: invitation.role,
         });
 
-      await OrganizationInvitationRepo.accept(tx, invitation.id);
+      await OrganizationInvitationRepo.accept(tx, {
+        invitationId: invitation.id,
+        organizationId: invitation.organizationId,
+      });
 
       return createdMember;
     });

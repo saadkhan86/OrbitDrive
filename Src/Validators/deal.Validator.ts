@@ -29,30 +29,38 @@ export const dealValidator = {
     description: z.string().max(1000).optional(),
   }),
 
-  update: z.object({
-    title: z
-      .string()
-      .min(5, { message: "title must between 5-150 characters" })
-      .max(150, { message: "title must between 5-150 characters" })
-      .optional(),
+  update: z
+    .object({
+      title: z
+        .string()
+        .min(5, { message: "title must between 5-150 characters" })
+        .max(150, { message: "title must between 5-150 characters" })
+        .optional(),
 
-    value: z
-      .number()
-      .nonnegative({ message: "value can not be negative" })
-      .optional(),
+      value: z
+        .number()
+        .nonnegative({ message: "value can not be negative" })
+        .optional(),
 
-    currency: z.string().length(3, { message: "invalid currency" }).optional(),
+      currency: z
+        .string()
+        .length(3, { message: "invalid currency" })
+        .optional(),
 
-    stage: z
-      .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"], {
-        message: "invalid stage passed",
-      })
-      .optional(),
+      stage: z
+        .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"], {
+          message: "invalid stage passed",
+        })
+        .optional(),
 
-    expectedCloseDate: z.coerce.date().optional(),
+      expectedCloseDate: z.coerce.date().optional(),
 
-    description: z.string().max(1000).optional(),
-  }),
+      description: z.string().max(1000).optional(),
+    })
+    .refine((data) => Object.keys.length > 0, {
+      abort: true,
+      message: "At least one field is required",
+    }),
 
   dealId: z.object({
     dealId: z.string().uuid({ message: "invalid dealId" }),

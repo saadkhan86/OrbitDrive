@@ -14,10 +14,10 @@ export const authorize = {
           "Organization id is required",
           "ORGANIZATION_ID_REQUIRED",
         );
-      const member = await OrganizationMembersRepo.getByOrganizationAndUserId(
+      const member = await OrganizationMembersRepo.getByOrganizationAndUserId({
+        organizationMemberId: userId,
         organizationId,
-        userId,
-      );
+      });
       if (!member)
         throw new CustomError(
           403,

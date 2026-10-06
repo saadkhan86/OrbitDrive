@@ -4,6 +4,7 @@ import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
+import { da } from "zod/v4/locales";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
@@ -64,25 +65,25 @@ class OrganizationRepo {
         .returning()
     )[0];
   }
-  public async delete(user: VAuth.userId, org: VOrganization.getById) {
+  public async delete(data: VOrganization.remove & VAuth.userId) {
     return (
       await db
         .delete(organizations)
         .where(
           and(
-            eq(organizations.id, org.organizationId),
-            eq(organizations.ownerId, user.userId),
+            eq(organizations.id, data.organizationId),
+            eq(organizations.ownerId, data.userId),
           ),
         )
         .returning()
     )[0];
   }
-  public async getByOrganizationId(organizationId: string) {
+  public async getByOrganizationId(data: VOrganization.getById) {
     return (
       await db
         .select()
         .from(organizations)
-        .where(eq(organizations.id, organizationId))
+        .where(eq(organizations.id, data.organizationId))
     )[0];
   }
 }
