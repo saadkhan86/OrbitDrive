@@ -49,7 +49,7 @@ export const organizationInvitationController = {
       request.params as VOrganizationInvitation.token,
       request.user as VAuth.userId & VAuth.email,
     );
-    return reply.status(200).send({
+    return reply.status(204).send({
       success: true,
       message: "Invitation accepted successfully",
       data: member,

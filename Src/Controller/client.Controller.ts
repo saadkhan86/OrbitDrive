@@ -58,7 +58,7 @@ export const clientController = {
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await clientsService.delete(request.params as VClient.ClientIdParams);
 
-    return reply.code(200).send({
+    return reply.code(204).send({
       success: true,
       message: "client deleted successfully",
     });

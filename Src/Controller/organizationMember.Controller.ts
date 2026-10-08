@@ -42,7 +42,7 @@ export const organizationMemberController = {
       request.user as VAuth.userId,
       request.params as VOrganizationMember.organizationMemberId,
     );
-    return reply.status(200).send({
+    return reply.status(204).send({
       success: true,
       message: "Organization Member deleted successfully",
     });

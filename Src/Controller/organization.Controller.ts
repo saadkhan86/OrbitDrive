@@ -58,7 +58,7 @@ export const organizationController = {
       request.params as VOrganization.getById,
     );
     reply
-      .status(200)
+      .status(204)
       .send({ success: true, message: "organization deleted successfully" });
   },
 };

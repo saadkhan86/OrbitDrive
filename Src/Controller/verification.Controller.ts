@@ -23,7 +23,7 @@ export const verificationController = {
       request.params as VToken.token,
     );
     return reply
-      .status(200)
+      .status(204)
       .send({ success: true, message: "Email verified successfully" });
   },
 };

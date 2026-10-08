@@ -49,11 +49,12 @@ export const taskController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    const result = await taskService.delete(request.params as VTask.taskId);
+    await taskService.delete(request.params as VTask.taskId);
 
-    return reply.code(200).send({
+    return reply.code(204).send({
       success: true,
-      data: result,
+      message: "task deleted successfully",
+      data: [],
     });
   },
 };

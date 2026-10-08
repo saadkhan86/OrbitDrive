@@ -52,9 +52,10 @@ class DealController {
       request.params as VDeal.organizationId & VDeal.dealId,
     );
 
-    return reply.code(200).send({
+    return reply.code(204).send({
       success: true,
-      data: {},
+      message: "Deal deleted successfully",
+      data: [],
     });
   }
 }
