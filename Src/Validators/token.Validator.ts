@@ -21,3 +21,7 @@ export const refreshTokenSchema = z.object({
 });
 export type tokenValidator = z.infer<typeof tokenValidator.tokenSchema>;
 export type refreshTokenValidator = z.infer<typeof refreshTokenSchema>;
+export declare namespace VToken {
+  type token = z.infer<typeof tokenValidator.tokenSchema>;
+  type refreshToken = z.infer<typeof tokenValidator.tokenSchema>;
+}

@@ -1,1 +1,1 @@
-SELECT * FROM __drizzle_migrations;
+SELECT * FROM users;

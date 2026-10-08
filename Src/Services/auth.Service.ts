@@ -80,7 +80,15 @@ export const authService = {
         "User email is not verified",
         "EMAIL_NOT_VERIFIED",
       );
+    if (await redisUtils.getRedis("password-reset", user.id)) {
+      throw new CustomError(
+        400,
+        "password reset link has been already sent",
+        "ALREADY_SENT",
+      );
+    }
     const token = await tokenUtils.generateToken();
+    console.log(token);
     const hashedToken = await tokenUtils.hashToken(token);
     await addEmailJob("password-reset", {
       email: user.email,
@@ -88,7 +96,6 @@ export const authService = {
       verificationToken: token,
       expiresIn: Constants.tokenExpireTime,
     });
-
     await redisUtils.setRedis("password-reset", hashedToken, user.id);
     await redisUtils.setRedis("password-reset", user.id, hashedToken);
     return true;

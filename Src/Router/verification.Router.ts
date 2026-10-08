@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { tokenValidator } from "../Validators/token.Validator";
 import { verificationController } from "../Controller/verification.Controller";
-import { emailValidator } from "../Validators/email.Validator";
+import { authValidator } from "../Validators/auth.Validator";
 
 export const verificationRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {
@@ -10,7 +10,7 @@ export const verificationRouter = async (app: FastifyInstance) => {
   app.post(
     "/email-verification/resend",
     {
-      schema: { body: emailValidator.emailSchema },
+      schema: { body: authValidator.email },
     },
     verificationController.resendEmailVerification,
   );

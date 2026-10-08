@@ -18,7 +18,7 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(20, { message: "password must be smaller than 20 characters" })
-      .meta({ example: "Sk8613013@" })
+      .meta({ example: "Saad@123456" })
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
         message:
           "Password must contain uppercase, lowercase, number and special character",
@@ -33,7 +33,7 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(30, { message: "password must be smaller than 30 characters" })
-      .meta({ example: "Sk8613013@" }),
+      .meta({ example: "Saad@123456" }),
   }),
   update: z.object({
     fullName: z
@@ -46,7 +46,7 @@ export const authValidator = {
       .string({ message: "invalid password" })
       .min(6, { message: "password must be greater than 5 characters" })
       .max(30, { message: "password must be smaller than 30 characters" })
-      .meta({ example: "Sk8613013@#" })
+      .meta({ example: "Sk8613013@" })
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
         message:
           "Password must contain uppercase, lowercase, number and special character",

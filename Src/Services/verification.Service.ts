@@ -6,6 +6,7 @@ import { tokenUtils } from "../Utils/authTokenUtils";
 import type { tokenValidator } from "../Validators/token.Validator";
 import AuthRepo from "../Repositories/Auth.Repo";
 import { redisUtils } from "../Utils/redis.Utils";
+import { VAuth } from "../Validators/auth.Validator";
 export const verificationService = {
   verifyEmailVerification: async (data: tokenValidator) => {
     const hashedToken = await tokenUtils.hashToken(data.token);
@@ -30,8 +31,8 @@ export const verificationService = {
     );
     return true;
   },
-  resendEmailVerification: async (email: string) => {
-    const user = await UserRepo.findByEmail({ email });
+  resendEmailVerification: async (data: VAuth.email) => {
+    const user = await UserRepo.findByEmail({ email: data.email });
     if (!user)
       throw new CustomError(
         404,

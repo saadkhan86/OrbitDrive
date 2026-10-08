@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import type { tokenValidator } from "../Validators/token.Validator";
-import type { emailValidator } from "../Validators/email.Validator";
+import type { tokenValidator, VToken } from "../Validators/token.Validator";
 import { verificationService } from "../Services/verification.Service";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const verificationController = {
   resendEmailVerification: async (
@@ -9,7 +9,7 @@ export const verificationController = {
     reply: FastifyReply,
   ) => {
     await verificationService.resendEmailVerification(
-      (request.body as emailValidator).email,
+      request.body as VAuth.email,
     );
     return reply
       .status(201)
@@ -20,7 +20,7 @@ export const verificationController = {
     reply: FastifyReply,
   ) => {
     await verificationService.verifyEmailVerification(
-      request.params as tokenValidator,
+      request.params as VToken.token,
     );
     return reply
       .status(200)
