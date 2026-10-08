@@ -47,7 +47,7 @@ export const taskValidator = {
     dueDate: z.coerce
       .date({
         message: "Invalid date format",
-      })
+      }).meta({example:new Date().toISOString()})
       .optional(),
   }),
 
@@ -103,6 +103,7 @@ export const taskValidator = {
       .date({
         message: "Invalid date format",
       })
+      .meta({ example: "2026-10-09T15:30:00+05:00" })
       .nullable()
       .optional(),
   }),
