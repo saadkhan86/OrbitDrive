@@ -47,23 +47,12 @@ export const taskValidator = {
     dueDate: z.coerce
       .date({
         message: "Invalid date format",
-      }).meta({example:new Date().toISOString()})
+      })
+      .meta({ example: new Date().toISOString() })
       .optional(),
   }),
 
   update: z.object({
-    clientId: z
-      .string({ message: "Invalid clientId" })
-      .uuid({ message: "Invalid clientId" })
-      .nullable()
-      .optional(),
-
-    dealId: z
-      .string({ message: "Invalid dealId" })
-      .uuid({ message: "Invalid dealId" })
-      .nullable()
-      .optional(),
-
     assignedTo: z
       .string({ message: "Invalid assignedTo ID" })
       .uuid({ message: "Invalid assignedTo ID" })
