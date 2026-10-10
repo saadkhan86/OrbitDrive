@@ -23,7 +23,7 @@ class DealRepo {
     )[0];
   }
 
-  public async findById(data: VDeal.organizationId & VDeal.dealId) {
+  public async findById(data: VDeal.dealId) {
     return (
       await db
         .select()

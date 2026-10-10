@@ -1,236 +1,154 @@
-import CustomError from "../Errors/CustomError";
-
-import activityRepo from "../Repositories/activity.Repo";
-import clientRepo from "../Repositories/client.Repo";
+import { CustomError } from "../Errors/CustomError";
+import ActivityRepo from "../Repositories/Activity.Repo";
+import ClientRepo from "../Repositories/Client.Repo";
 import dealRepo from "../Repositories/deal.Repo";
 
 import type { VActivity } from "../Validators/activity.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const activityService = {
   // Create activity
   create: async (
-    organizationId: string,
+    organization: VActivity.organizationId,
     data: VActivity.create,
-    userId: string,
+    user: VAuth.userId,
   ) => {
-    // Validate client belongs to organization
     if (data.clientId) {
-      const client = await clientRepo.findById(
-        data.clientId,
-        organizationId,
-      );
+      const client = await ClientRepo.getById({
+        clientId: data.clientId,
+        organizationId: organization.organizationId,
+      });
 
       if (!client) {
-        throw new CustomError(
-          "Client not found",
-          404,
-          "CLIENT_NOT_FOUND",
-        );
+        throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
       }
     }
 
-    // Validate deal belongs to organization
     if (data.dealId) {
-      const deal = await dealRepo.findById(
-        data.dealId,
-        organizationId,
-      );
+      const deal = await dealRepo.findById({
+        dealId: data.dealId,
+        organizationId: organization.organizationId,
+      });
 
       if (!deal) {
-        throw new CustomError(
-          "Deal not found",
-          404,
-          "DEAL_NOT_FOUND",
-        );
+        throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
       }
 
-      // If both client and deal are provided, ensure they match
       if (data.clientId && deal.clientId !== data.clientId) {
         throw new CustomError(
-          "Deal does not belong to the specified client",
           400,
+          "Deal does not belong to the specified client",
           "DEAL_CLIENT_MISMATCH",
         );
       }
     }
 
-    return await activityRepo.create({
+    return await ActivityRepo.create({
       ...data,
-      organizationId,
-      userId,
+      organizationId: organization.organizationId,
+      userId: user.userId,
     });
   },
 
-  // Get activity by ID
-  findById: async (
-    activityId: string,
-    organizationId: string,
-  ) => {
-    const activity = await activityRepo.findById(
-      activityId,
-      organizationId,
-    );
+  findById: async (activity: VActivity.activityId) => {
+    const foundActivity = await ActivityRepo.findById({
+      ...activity,
+    });
 
-    if (!activity) {
-      throw new CustomError(
-        "Activity not found",
-        404,
-        "ACTIVITY_NOT_FOUND",
-      );
+    if (!foundActivity) {
+      throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
-    return activity;
+    return foundActivity;
   },
 
-  // Get all organization activities
-  findAll: async (organizationId: string) => {
-    return await activityRepo.findAll(organizationId);
+  findAll: async (organization: VActivity.organizationId) => {
+    return await ActivityRepo.findAll({
+      organizationId: organization.organizationId,
+    });
   },
 
-  // Get activities by client
-  findByClient: async (
-    clientId: string,
-    organizationId: string,
-  ) => {
-    const client = await clientRepo.findById(
-      clientId,
-      organizationId,
-    );
+  findByClient: async (clientId: string, organizationId: string) => {
+    const client = await ClientRepo.getById({ clientId, organizationId });
 
     if (!client) {
-      throw new CustomError(
-        "Client not found",
-        404,
-        "CLIENT_NOT_FOUND",
-      );
+      throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
     }
 
-    return await activityRepo.findByClient(
-      clientId,
-      organizationId,
-    );
+    return await ActivityRepo.findByClient({ clientId, organizationId });
   },
 
-  // Get activities by deal
-  findByDeal: async (
-    dealId: string,
-    organizationId: string,
-  ) => {
-    const deal = await dealRepo.findById(
-      dealId,
-      organizationId,
-    );
+  findByDeal: async (dealId: string, organizationId: string) => {
+    const deal = await dealRepo.findById({ dealId, organizationId });
 
     if (!deal) {
-      throw new CustomError(
-        "Deal not found",
-        404,
-        "DEAL_NOT_FOUND",
-      );
+      throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
     }
 
-    return await activityRepo.findByDeal(
-      dealId,
-      organizationId,
-    );
+    return await ActivityRepo.findByDeal({ dealId, organizationId });
   },
 
   // Update activity
-  update: async (
-    activityId: string,
-    organizationId: string,
-    data: VActivity.update,
-  ) => {
-    const existingActivity = await activityRepo.findById(
-      activityId,
-      organizationId,
-    );
+  update: async (activity: VActivity.activityId, data: VActivity.update) => {
+    const existingActivity = await ActivityRepo.findById({
+      ...activity,
+    });
 
     if (!existingActivity) {
-      throw new CustomError(
-        "Activity not found",
-        404,
-        "ACTIVITY_NOT_FOUND",
-      );
+      throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
     // Validate updated client
     if (data.clientId) {
-      const client = await clientRepo.findById(
-        data.clientId,
-        organizationId,
-      );
+      const client = await ClientRepo.getById({
+        clientId: data.clientId,
+        ...activity,
+      });
 
       if (!client) {
-        throw new CustomError(
-          "Client not found",
-          404,
-          "CLIENT_NOT_FOUND",
-        );
+        throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
       }
     }
 
-    // Validate updated deal
     if (data.dealId) {
-      const deal = await dealRepo.findById(
-        data.dealId,
-        organizationId,
-      );
+      const deal = await dealRepo.findById({
+        dealId: data.dealId,
+        ...activity,
+      });
 
       if (!deal) {
-        throw new CustomError(
-          "Deal not found",
-          404,
-          "DEAL_NOT_FOUND",
-        );
+        throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
       }
 
-      const clientId = data.clientId !== undefined
-        ? data.clientId
-        : existingActivity.clientId;
+      const clientId =
+        data.clientId !== undefined ? data.clientId : existingActivity.clientId;
 
       if (clientId && deal.clientId !== clientId) {
         throw new CustomError(
-          "Deal does not belong to the specified client",
           400,
+          "Deal does not belong to the specified client",
           "DEAL_CLIENT_MISMATCH",
         );
       }
     }
 
-    return await activityRepo.update(
-      activityId,
-      organizationId,
-      data,
-    );
+    return await ActivityRepo.update({ ...activity, ...data });
   },
 
   // Delete activity
-  delete: async (
-    activityId: string,
-    organizationId: string,
-  ) => {
-    const existingActivity = await activityRepo.findById(
-      activityId,
-      organizationId,
-    );
+  delete: async (activity: VActivity.activityId) => {
+    const existingActivity = await ActivityRepo.findById({
+      ...activity,
+    });
 
     if (!existingActivity) {
-      throw new CustomError(
-        "Activity not found",
-        404,
-        "ACTIVITY_NOT_FOUND",
-      );
+      throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
-    await activityRepo.delete(
-      activityId,
-      organizationId,
-    );
+    await ActivityRepo.delete({ ...activity });
 
     return {
       message: "Activity deleted successfully",
     };
   },
 };
-

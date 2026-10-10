@@ -1,59 +1,47 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { activityService } from "../Services/activity.Service";
+import { VActivity } from "../Validators/activity.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const activityController = {
-  // Create activity
   create: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
-
     const activity = await activityService.create(
-      organizationId,
-      request.body as any,
-      request.user.id,
+      request.params as VActivity.organizationId,
+      request.body as VActivity.create,
+      request.user as VAuth.userId,
     );
 
     return reply.code(201).send({
       success: true,
-      data: activity,
+      message: "Activity created successfully",
+      data: { activity },
     });
   },
-
-  // Get all activities
   findAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId } = request.params as {
-      organizationId: string;
-    };
-
-    const activities = await activityService.findAll(organizationId);
-
-    return reply.code(200).send({
-      success: true,
-      data: activities,
-    });
-  },
-
-  // Get activity by ID
-  findById: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, activityId } = request.params as {
-      organizationId: string;
-      activityId: string;
-    };
-
-    const activity = await activityService.findById(
-      activityId,
-      organizationId,
+    const activities = await activityService.findAll(
+      request.params as VActivity.organizationId,
     );
 
     return reply.code(200).send({
       success: true,
-      data: activity,
+      message: "Activity fetched successfully",
+      data: { activities },
     });
   },
 
-  // Get activities by client
+  findById: async (request: FastifyRequest, reply: FastifyReply) => {
+    const activity = await activityService.findById(
+      request.params as VActivity.activityId,
+    );
+
+    return reply.code(200).send({
+      success: true,
+      message: "Activity fetched successfully",
+      data: { activity },
+    });
+  },
+
   findByClient: async (request: FastifyRequest, reply: FastifyReply) => {
     const { organizationId, clientId } = request.params as {
       organizationId: string;
@@ -67,62 +55,47 @@ export const activityController = {
 
     return reply.code(200).send({
       success: true,
-      data: activities,
+      message: "Activity fetched successfully",
+      data: { activities },
     });
   },
 
-  // Get activities by deal
   findByDeal: async (request: FastifyRequest, reply: FastifyReply) => {
     const { organizationId, dealId } = request.params as {
       organizationId: string;
       dealId: string;
     };
 
-    const activities = await activityService.findByDeal(
-      dealId,
-      organizationId,
-    );
+    const activities = await activityService.findByDeal(dealId, organizationId);
 
     return reply.code(200).send({
       success: true,
-      data: activities,
+      message: "Activity fetched successfully",
+      data: { activities },
     });
   },
 
-  // Update activity
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, activityId } = request.params as {
-      organizationId: string;
-      activityId: string;
-    };
-
     const activity = await activityService.update(
-      activityId,
-      organizationId,
-      request.body as any,
+      request.params as VActivity.activityId,
+      request.body as VActivity.update,
     );
 
     return reply.code(200).send({
       success: true,
-      data: activity,
+      message: "Activity updated successfully",
+      data: { activity },
     });
   },
 
-  // Delete activity
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, activityId } = request.params as {
-      organizationId: string;
-      activityId: string;
-    };
-
     const result = await activityService.delete(
-      activityId,
-      organizationId,
+      request.params as VActivity.activityId,
     );
 
     return reply.code(200).send({
       success: true,
-      data: result,
+      message: "Activity deleted successfully",
     });
   },
 };

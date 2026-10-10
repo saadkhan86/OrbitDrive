@@ -50,7 +50,7 @@ export const activityRouter = async (app: FastifyInstance) => {
 
   // Get activities by client
   app.get(
-    "/:clientId",
+    "/client/:clientId",
     {
       preHandler: [authenticate.user],
       schema: {
@@ -62,7 +62,7 @@ export const activityRouter = async (app: FastifyInstance) => {
 
   // Get activities by deal
   app.get(
-    "/:dealId",
+    "/deal/:dealId",
     {
       preHandler: [authenticate.user],
       schema: {
