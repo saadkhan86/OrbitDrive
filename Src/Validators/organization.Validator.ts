@@ -21,12 +21,9 @@ export const organizationValidator = {
       abort: true,
       message: "At least one field is required",
     }),
+
   organizationId: z.object({
-    organizationId: z
-      .string({ message: "invalid format of organizationId" })
-      .length(36, {
-        message: "invalid length of organizationId",
-      }),
+    organizationId: z.uuid("invalid uuid format of organizationId"),
   }),
 
   slug: z.object({
