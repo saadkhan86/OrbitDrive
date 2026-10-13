@@ -15,6 +15,13 @@
       "when": 1791615982104,
       "tag": "0001_nervous_owl",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791911950737,
+      "tag": "0002_yielding_vindicator",
+      "breakpoints": true
     }
   ]
 }
