@@ -10,8 +10,7 @@ export const activityRouter = async (app: FastifyInstance) => {
       tags: ["Activities"],
     };
   });
-
-  // Create activity
+  
   app.post(
     "/",
     {

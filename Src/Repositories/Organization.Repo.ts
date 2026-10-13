@@ -4,7 +4,6 @@ import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
-import { da } from "zod/v4/locales";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
