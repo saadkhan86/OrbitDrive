@@ -21,7 +21,7 @@ export const NotificationEnum = pgEnum("notification_type", [
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
   type: NotificationEnum("type").notNull(),
-  organizationId: uuid("organizationId")
+  organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
   userId: uuid("userId")
@@ -29,12 +29,12 @@ export const notifications = pgTable("notifications", {
     .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  isRead: boolean("isRead").default(false).notNull(),
-  readAt: timestamp("readAt", { withTimezone: true }),
-  createdAt: timestamp("createdAt", { withTimezone: true })
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true })
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });

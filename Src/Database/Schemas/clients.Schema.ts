@@ -17,7 +17,7 @@ export const pgClientStatusEnum = pgEnum("client_status", [
 ]);
 export const clients = pgTable("clients", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organizationId")
+  organizationId: uuid("organization_id")
     .references(() => organizations.id, {
       onDelete: "cascade",
     })
@@ -28,6 +28,6 @@ export const clients = pgTable("clients", {
   company: varchar("company", { length: 255 }).notNull(),
   status: pgClientStatusEnum("status").notNull().default("active"),
   notes: text("notes"),
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

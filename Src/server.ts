@@ -1,7 +1,6 @@
 import Fastify from "fastify";
 import { ResponseTimeHook } from "./Hooks/ResponseTimeHook";
 import {
-  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";

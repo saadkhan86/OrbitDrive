@@ -25,15 +25,15 @@ export const pgTaskStatusEnum = pgEnum("task_status", [
 ]);
 export const tasks = pgTable("tasks", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organizationId")
+  organizationId: uuid("organization_id")
     .references(() => organizations.id, {
       onDelete: "cascade",
     })
     .notNull(),
-  clientId: uuid("clientId").references(() => clients.id, {
+  clientId: uuid("client_id").references(() => clients.id, {
     onDelete: "set null",
   }),
-  assignedTo: uuid("assignedTo")
+  assignedTo: uuid("assigned_to")
     .references(() => users.id, {
       onDelete: "cascade",
     })
@@ -45,7 +45,7 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   priority: varchar("priority", { length: 50 }).notNull(),
   status: varchar("status", { length: 50 }).notNull(),
-  dueDate: timestamp("dueDate", { withTimezone: true }),
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+  dueDate: timestamp("due_date", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

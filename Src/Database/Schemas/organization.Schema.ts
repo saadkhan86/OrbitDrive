@@ -5,7 +5,7 @@ export const organizations = pgTable(
   "organizations",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    ownerId: uuid("ownerId").references(() => users.id, {
+    ownerId: uuid("owner_id").references(() => users.id, {
       onDelete: "cascade",
     }),
     name: varchar("name", { length: 255 }).notNull(),

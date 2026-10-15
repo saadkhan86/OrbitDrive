@@ -5,22 +5,22 @@ import { organizations } from "./organization.Schema";
 import { sql } from "drizzle-orm";
 export const organization_invitations = pgTable("organization_invitations", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organizationId")
+  organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id, {
       onDelete: "cascade",
     }),
-  createdBy: uuid("createdBy")
+  createdBy: uuid("created_by")
     .notNull()
     .references(() => users.id, {
       onDelete: "cascade",
     }),
   email: varchar("email", { length: 255 }).notNull(),
   role: pgRoleEnum("role").notNull().default("MEMBER"),
-  tokenHash: varchar("tokenHash", { length: 64 }).notNull().unique(),
-  expiresAt: timestamp("expiresAt", { withTimezone: true }).default(
+  tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).default(
     sql`now() + interval '24 hours'`,
   ),
-  acceptedAt: timestamp("acceptedAt", { withTimezone: true }).default(sql `NULL`),
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }).default(sql `NULL`),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

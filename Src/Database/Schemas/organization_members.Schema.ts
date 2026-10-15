@@ -11,15 +11,15 @@ export const organization_members = pgTable(
   "organization_members",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organizationId")
+    organizationId: uuid("organization_id")
       .references(() => organizations.id, {
         onDelete: "cascade",
       })
       .notNull(),
-    userId: uuid("userId").references(() => users.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     role: pgRoleEnum("role").notNull().default("MEMBER"),
-    createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [
     unique("organization_member_org_user_unique").on(
