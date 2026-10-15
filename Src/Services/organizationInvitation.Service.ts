@@ -8,6 +8,8 @@ import OrganizationRepo from "../Repositories/Organization.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
+import { auditLogService } from "./auditLog.Service";
+import auditLogRepo from "../Repositories/auditLog.Repo";
 
 export const organizationInvitationService = {
   async create(
@@ -58,6 +60,18 @@ export const organizationInvitationService = {
         "ORGANIZATION_NOT_FOUND",
       );
     }
+    await auditLogRepo.create({
+      organizationId: org.organizationId,
+      action: "INVITE",
+      entityType: "ORGANIZATION_INVITATION",
+      entityId: invitation!.id,
+      userId: user.userId,
+      metadata: {
+        invitedEmail: invitation!.email,
+        assignedRole: invitation!.role,
+        expiresAt: invitation!.expiresAt,
+      },
+    });
     await addEmailJob("organization-invitation", {
       email: data.email,
       verificationToken: token,
@@ -75,7 +89,10 @@ export const organizationInvitationService = {
     return OrganizationInvitationRepo.getAllByOrganizationId(org);
   },
 
-  async delete(invitationId: VOrganizationInvitation.invitationId) {
+  async delete(
+    user: VAuth.userId,
+    invitationId: VOrganizationInvitation.invitationId,
+  ) {
     const invitation = await OrganizationInvitationRepo.getById(invitationId);
 
     if (!invitation) {
@@ -94,7 +111,17 @@ export const organizationInvitationService = {
         "INVITATION_ALREADY_ACCEPTED",
       );
     }
-
+    await auditLogRepo.create({
+      organizationId: invitation.organizationId,
+      action: "CANCEL",
+      entityType: "ORGANIZATION_INVITATION",
+      entityId: invitation!.id,
+      userId: user.userId,
+      metadata: {
+        invitedEmail: invitation!.email,
+        assignedRole: invitation!.role,
+      },
+    });
     return OrganizationInvitationRepo.delete(invitationId);
   },
 
@@ -150,8 +177,6 @@ export const organizationInvitationService = {
         "ALREADY_ORGANIZATION_MEMBER",
       );
     }
-
-    // Membership + invitation update must happen together
     const member = await db.transaction(async (tx) => {
       const createdMember =
         await OrganizationMembersRepo.createOrganizationMember(tx, {
@@ -165,9 +190,22 @@ export const organizationInvitationService = {
         organizationId: invitation.organizationId,
       });
 
+      await auditLogRepo.create(
+        {
+          organizationId: invitation.organizationId,
+          action: "ACCEPT",
+          entityType: "ORGANIZATION_INVITATION",
+          entityId: invitation!.id,
+          userId: user.userId,
+          metadata: {
+            invitedEmail: invitation!.email,
+            assignedRole: invitation!.role,
+          },
+        },
+        tx,
+      );
       return createdMember;
     });
-
     return member;
   },
 };

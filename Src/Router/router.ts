@@ -8,9 +8,9 @@ import { organizationInvitationRouter } from "./organizationInvitation.Router";
 import { clientsRouter } from "./clients.Router";
 import { dealRouter } from "./deal.Router";
 import { taskRouter } from "./task.Router";
-import { activities } from "../Database/Schemas/activity.Schema";
 import { activityRouter } from "./activity.Router";
 import { notificationRouter } from "./notification.Router";
+import { auditLogRouter } from "./auditLog.Router";
 export const router = async (app: FastifyInstance) => {
   app.register(authRouter, { prefix: "/auth" });
   app.register(userRouter, { prefix: "/user" });
@@ -29,4 +29,5 @@ export const router = async (app: FastifyInstance) => {
   app.register(notificationRouter, {
     prefix: "/:organizationId/notifications",
   });
+  app.register(auditLogRouter, { prefix: "/:organizationId/audit-logs" });
 };

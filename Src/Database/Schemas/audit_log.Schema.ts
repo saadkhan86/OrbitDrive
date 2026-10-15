@@ -9,7 +9,6 @@ import {
 import { organizations } from "./organization.Schema";
 import { users } from "./users.Schema";
 
-
 export const auditLogs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
 
@@ -28,10 +27,6 @@ export const auditLogs = pgTable("audit_logs", {
   entityId: uuid("entity_id"),
 
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
-
-  ipAddress: varchar("ip_address", { length: 45 }),
-
-  userAgent: text("user_agent"),
 
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

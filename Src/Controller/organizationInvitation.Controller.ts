@@ -34,6 +34,7 @@ export const organizationInvitationController = {
   // DELETE /organizations/:organizationId/invitations/:invitationId
   async delete(request: FastifyRequest, reply: FastifyReply) {
     await organizationInvitationService.delete(
+      request.user as VAuth.userId,
       request.params as VOrganizationInvitation.invitationId,
     );
 
