@@ -3,6 +3,8 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import clientsService from "../Services/clients.Service";
 import { VOrganization } from "../Validators/organization.Validator";
 import { VClient } from "../Validators/clients.Validator";
+import { VAuditLog } from "../Validators/auditLog.Validator";
+import { VAuth } from "../Validators/auth.Validator";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -11,7 +13,8 @@ export const clientController = {
       message: "client created successfully",
       data: {
         client: await clientsService.create(
-          (request.params as VOrganization.getById).organizationId,
+          request.user as VAuth.userId,
+          request.params as VClient.OrganizationIdParams,
           request.body as VClient.CreateClientInput,
         ),
       },
@@ -48,6 +51,7 @@ export const clientController = {
       message: "client updated successfully",
       data: {
         client: await clientsService.update(
+          request.user as VAuth.userId,
           request.params as VClient.ClientIdParams,
           request.body as VClient.UpdateClientInput,
         ),
@@ -56,7 +60,10 @@ export const clientController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    await clientsService.delete(request.params as VClient.ClientIdParams);
+    await clientsService.delete(
+      request.user as VAuth.userId,
+      request.params as VClient.ClientIdParams,
+    );
 
     return reply.code(204).send({
       success: true,

@@ -1,11 +1,17 @@
 import dealRepo from "../Repositories/deal.Repo";
-import type { VTask } from "../Validators/task.Validator";
 import ClientRepo from "../Repositories/Client.Repo";
-import { CustomError } from "../Errors/CustomError";
 import TaskRepo from "../Repositories/Task.Repo";
+import auditLogRepo from "../Repositories/auditLog.Repo";
+import { CustomError } from "../Errors/CustomError";
+import type { VTask } from "../Validators/task.Validator";
+import type { VAuth } from "../Validators/auth.Validator";
 
 export const taskService = {
-  create: async (organization: VTask.organizationId, data: VTask.create) => {
+  create: async (
+    user: VAuth.userId,
+    organization: VTask.organizationId,
+    data: VTask.create,
+  ) => {
     if (data.clientId) {
       const client = await ClientRepo.getById({
         clientId: data.clientId,
@@ -36,10 +42,36 @@ export const taskService = {
       }
     }
 
-    return await TaskRepo.create({
+    const createdTask = await TaskRepo.create({
       ...data,
       organizationId: organization.organizationId,
     });
+
+    if (!createdTask) {
+      throw new CustomError(
+        500,
+        "Something went wrong while creating task",
+        "SOMETHING_WENT_WRONG",
+      );
+    }
+
+    await auditLogRepo.create({
+      organizationId: organization.organizationId,
+      userId: user.userId,
+      action: "TASK_CREATED",
+      entityType: "task",
+      entityId: createdTask.id,
+      metadata: {
+        title: createdTask.title,
+        assignedTo: createdTask.assignedTo,
+        clientId: createdTask.clientId,
+        dealId: createdTask.dealId,
+        priority: createdTask.priority,
+        status: createdTask.status,
+      },
+    });
+
+    return createdTask;
   },
 
   findById: async (taskId: VTask.taskId) => {
@@ -56,23 +88,84 @@ export const taskService = {
     return await TaskRepo.getAll({ ...organization });
   },
 
-  update: async (task: VTask.taskId, data: VTask.update) => {
-    const existingTask = await TaskRepo.findById({ ...task, ...data });
-
-    if (!existingTask) {
-      throw new CustomError(404, "Task not found", "TASK_NOT_FOUND");
-    }
-
-    return await TaskRepo.update({ ...task, ...data });
-  },
-
-  delete: async (task: VTask.taskId) => {
+  update: async (
+    user: VAuth.userId,
+    task: VTask.taskId,
+    data: VTask.update,
+  ) => {
     const existingTask = await TaskRepo.findById({ ...task });
 
     if (!existingTask) {
       throw new CustomError(404, "Task not found", "TASK_NOT_FOUND");
     }
 
-    return await TaskRepo.delete({ ...task });
+    const updatedTask = await TaskRepo.update({ ...task, ...data });
+
+    if (!updatedTask) {
+      throw new CustomError(
+        500,
+        "Something went wrong while updating task",
+        "SOMETHING_WENT_WRONG",
+      );
+    }
+
+    await auditLogRepo.create({
+      organizationId: updatedTask.organizationId,
+      userId: user.userId,
+      action: "TASK_UPDATED",
+      entityType: "task",
+      entityId: updatedTask.id,
+      metadata: {
+        previous: {
+          title: existingTask.title,
+          assignedTo: existingTask.assignedTo,
+          status: existingTask.status,
+          priority: existingTask.priority,
+        },
+        updated: {
+          title: updatedTask.title,
+          assignedTo: updatedTask.assignedTo,
+          status: updatedTask.status,
+          priority: updatedTask.priority,
+        },
+      },
+    });
+
+    return updatedTask;
+  },
+
+  delete: async (user: VAuth.userId, task: VTask.taskId) => {
+    const existingTask = await TaskRepo.findById({ ...task });
+
+    if (!existingTask) {
+      throw new CustomError(404, "Task not found", "TASK_NOT_FOUND");
+    }
+
+    const deletedTask = await TaskRepo.delete({ ...task });
+
+    if (!deletedTask) {
+      throw new CustomError(
+        500,
+        "Something went wrong while deleting task",
+        "SOMETHING_WENT_WRONG",
+      );
+    }
+
+    await auditLogRepo.create({
+      organizationId: existingTask.organizationId,
+      userId: user.userId,
+      action: "TASK_DELETED",
+      entityType: "task",
+      entityId: existingTask.id,
+      metadata: {
+        title: existingTask.title,
+        assignedTo: existingTask.assignedTo,
+        clientId: existingTask.clientId,
+        dealId: existingTask.dealId,
+        status: existingTask.status,
+      },
+    });
+
+    return deletedTask;
   },
 };

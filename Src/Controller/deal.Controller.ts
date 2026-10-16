@@ -2,10 +2,12 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type { VDeal } from "../Validators/deal.Validator";
 import dealService from "../Services/deal.Service";
+import { VAuth } from "../Validators/auth.Validator";
 
 class DealController {
   public async create(request: FastifyRequest, reply: FastifyReply) {
     const deal = await dealService.create(
+      request.user as VAuth.userId,
       request.params as VDeal.organizationId,
       request.body as VDeal.create,
     );
@@ -37,6 +39,7 @@ class DealController {
 
   public async update(request: FastifyRequest, reply: FastifyReply) {
     const deal = await dealService.update(
+      request.user as VAuth.userId,
       request.params as VDeal.dealId & VDeal.organizationId,
       request.body as VDeal.update,
     );
@@ -49,6 +52,7 @@ class DealController {
 
   public async delete(request: FastifyRequest, reply: FastifyReply) {
     const result = await dealService.delete(
+      request.user as VAuth.userId,
       request.params as VDeal.organizationId & VDeal.dealId,
     );
 
