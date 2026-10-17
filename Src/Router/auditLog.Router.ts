@@ -4,8 +4,11 @@ import { authenticate } from "../Hooks/AuthenticationHook";
 import { authorize } from "../Hooks/authorization.Hook";
 
 export const auditLogRouter = async (app: FastifyInstance) => {
+  app.addHook("onRoute", (route) => {
+    route.schema = { ...route.schema, tags: ["Audit Logs"] };
+  });
   app.addHook("preHandler", authenticate.user);
-  app.addHook("preHandler", authorize.role(["ADMIN"]));
+  app.addHook("preHandler", authorize.role(["ADMIN", "OWNER"]));
   app.get("/", auditLogController.findAll);
   app.get("/:auditLogId", auditLogController.findById);
 };

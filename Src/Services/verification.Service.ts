@@ -17,7 +17,9 @@ export const verificationService = {
         "Email verification link has been expired",
         "LINK_EXPIRED",
       );
+    
     const updatedUser = await AuthRepo.updateIsEmailVerified({ userId });
+    console.log(updatedUser);
     if (!updatedUser)
       throw new CustomError(
         500,
@@ -51,6 +53,7 @@ export const verificationService = {
       );
     const token = await tokenUtils.generateToken();
     hashedToken = await tokenUtils.hashToken(token);
+    console.log(token);
     await redisUtils.setRedis("verify-email", hashedToken, user.id);
     await redisUtils.setRedis("verify-email", user.id, hashedToken);
     await addEmailJob("verify-email", {

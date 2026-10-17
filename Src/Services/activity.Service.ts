@@ -2,16 +2,16 @@ import { CustomError } from "../Errors/CustomError";
 import ActivityRepo from "../Repositories/Activity.Repo";
 import ClientRepo from "../Repositories/Client.Repo";
 import dealRepo from "../Repositories/deal.Repo";
+import auditLogRepo from "../Repositories/auditLog.Repo";
 
 import type { VActivity } from "../Validators/activity.Validator";
-import { VAuth } from "../Validators/auth.Validator";
+import type { VAuth } from "../Validators/auth.Validator";
 
 export const activityService = {
-  // Create activity
   create: async (
+    user: VAuth.userId,
     organization: VActivity.organizationId,
     data: VActivity.create,
-    user: VAuth.userId,
   ) => {
     if (data.clientId) {
       const client = await ClientRepo.getById({
@@ -43,17 +43,36 @@ export const activityService = {
       }
     }
 
-    return await ActivityRepo.create({
+    const createdActivity = await ActivityRepo.create({
       ...data,
       organizationId: organization.organizationId,
       userId: user.userId,
     });
+    if (!createdActivity)
+      throw new CustomError(
+        500,
+        "Something went wrong",
+        "SOMETHING_WENT_WRONG",
+      );
+    await auditLogRepo.create({
+      organizationId: organization.organizationId,
+      userId: user.userId,
+      action: "ACTIVITY_CREATED",
+      entityType: "activity",
+      entityId: createdActivity.id,
+      metadata: {
+        title: createdActivity.title,
+        type: createdActivity.type,
+        clientId: createdActivity.clientId,
+        dealId: createdActivity.dealId,
+      },
+    });
+
+    return createdActivity;
   },
 
   findById: async (activity: VActivity.activityId) => {
-    const foundActivity = await ActivityRepo.findById({
-      ...activity,
-    });
+    const foundActivity = await ActivityRepo.findById({ ...activity });
 
     if (!foundActivity) {
       throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
@@ -88,17 +107,17 @@ export const activityService = {
     return await ActivityRepo.findByDeal({ dealId, organizationId });
   },
 
-  // Update activity
-  update: async (activity: VActivity.activityId, data: VActivity.update) => {
-    const existingActivity = await ActivityRepo.findById({
-      ...activity,
-    });
+  update: async (
+    user: VAuth.userId,
+    activity: VActivity.activityId,
+    data: VActivity.update,
+  ) => {
+    const existingActivity = await ActivityRepo.findById({ ...activity });
 
     if (!existingActivity) {
       throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
-    // Validate updated client
     if (data.clientId) {
       const client = await ClientRepo.getById({
         clientId: data.clientId,
@@ -132,20 +151,74 @@ export const activityService = {
       }
     }
 
-    return await ActivityRepo.update({ ...activity, ...data });
+    const updatedActivity = await ActivityRepo.update({
+      ...activity,
+      ...data,
+    });
+
+    if (!updatedActivity) {
+      throw new CustomError(
+        500,
+        "Something went wrong while updating activity",
+        "SOMETHING_WENT_WRONG",
+      );
+    }
+
+    await auditLogRepo.create({
+      organizationId: activity.organizationId,
+      userId: user.userId,
+      action: "ACTIVITY_UPDATED",
+      entityType: "activity",
+      entityId: updatedActivity.id,
+      metadata: {
+        previous: {
+          title: existingActivity.title,
+          type: existingActivity.type,
+          clientId: existingActivity.clientId,
+          dealId: existingActivity.dealId,
+        },
+        updated: {
+          title: updatedActivity.title,
+          type: updatedActivity.type,
+          clientId: updatedActivity.clientId,
+          dealId: updatedActivity.dealId,
+        },
+      },
+    });
+
+    return updatedActivity;
   },
 
-  // Delete activity
-  delete: async (activity: VActivity.activityId) => {
-    const existingActivity = await ActivityRepo.findById({
-      ...activity,
-    });
+  delete: async (user: VAuth.userId, activity: VActivity.activityId) => {
+    const existingActivity = await ActivityRepo.findById({ ...activity });
 
     if (!existingActivity) {
       throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
-    await ActivityRepo.delete({ ...activity });
+    const deletedActivity = await ActivityRepo.delete({ ...activity });
+
+    if (!deletedActivity) {
+      throw new CustomError(
+        500,
+        "Something went wrong while deleting activity",
+        "SOMETHING_WENT_WRONG",
+      );
+    }
+
+    await auditLogRepo.create({
+      organizationId: activity.organizationId,
+      userId: user.userId,
+      action: "ACTIVITY_DELETED",
+      entityType: "activity",
+      entityId: existingActivity.id,
+      metadata: {
+        title: existingActivity.title,
+        type: existingActivity.type,
+        clientId: existingActivity.clientId,
+        dealId: existingActivity.dealId,
+      },
+    });
 
     return {
       message: "Activity deleted successfully",

@@ -7,9 +7,9 @@ import { VAuth } from "../Validators/auth.Validator";
 export const activityController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
     const activity = await activityService.create(
+      request.user as VAuth.userId,
       request.params as VActivity.organizationId,
       request.body as VActivity.create,
-      request.user as VAuth.userId,
     );
 
     return reply.code(201).send({
@@ -77,6 +77,7 @@ export const activityController = {
 
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const activity = await activityService.update(
+      request.user as VAuth.userId,
       request.params as VActivity.activityId,
       request.body as VActivity.update,
     );
@@ -89,7 +90,8 @@ export const activityController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    const result = await activityService.delete(
+    await activityService.delete(
+      request.user as VAuth.userId,
       request.params as VActivity.activityId,
     );
 
