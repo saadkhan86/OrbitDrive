@@ -1,0 +1,33 @@
+import type { FastifyInstance } from "fastify";
+import { userRouter } from "./user.Router";
+import { authRouter } from "./auth.Router";
+import { verificationRouter } from "./verification.Router";
+import { organizationRouter } from "./organization.Router";
+import { organizationMemberRouter } from "./organizationMember.Router";
+import { organizationInvitationRouter } from "./organizationInvitation.Router";
+import { clientsRouter } from "./clients.Router";
+import { dealRouter } from "./deal.Router";
+import { taskRouter } from "./task.Router";
+import { activityRouter } from "./activity.Router";
+import { notificationRouter } from "./notification.Router";
+import { auditLogRouter } from "./auditLog.Router";
+export const router = async (app: FastifyInstance) => {
+  app.register(authRouter, { prefix: "/auth" });
+  app.register(userRouter, { prefix: "/user" });
+  app.register(verificationRouter, { prefix: "/verification" });
+  app.register(organizationRouter, { prefix: "/organization" });
+  app.register(organizationInvitationRouter, {
+    prefix: "/organization-invitation",
+  });
+  app.register(organizationMemberRouter, {
+    prefix: "/:organizationId/organization-member",
+  });
+  app.register(clientsRouter, { prefix: "/:organizationId/clients" });
+  app.register(dealRouter, { prefix: "/:organizationId/deals" });
+  app.register(taskRouter, { prefix: "/:organizationId/tasks" });
+  app.register(activityRouter, { prefix: "/:organizationId/activities" });
+  app.register(notificationRouter, {
+    prefix: "/:organizationId/notifications",
+  });
+  app.register(auditLogRouter, { prefix: "/:organizationId/audit-logs" });
+};

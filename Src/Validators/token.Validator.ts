@@ -1,0 +1,27 @@
+import z from "zod";
+
+export const tokenValidator = {
+  tokenSchema: z.object({
+    token: z.string().length(64, {
+      message: "Token must be 64 characters long",
+    }),
+  }),
+};
+export const refreshTokenSchema = z.object({
+  token: z
+    .string({
+      error: (issue) =>
+        issue.code === "invalid_type"
+          ? "Token must be a string"
+          : "Token is required",
+    })
+    .length(64, {
+      message: "Refresh Token must be 64 characters long",
+    }),
+});
+export type tokenValidator = z.infer<typeof tokenValidator.tokenSchema>;
+export type refreshTokenValidator = z.infer<typeof refreshTokenSchema>;
+export declare namespace VToken {
+  type token = z.infer<typeof tokenValidator.tokenSchema>;
+  type refreshToken = z.infer<typeof tokenValidator.tokenSchema>;
+}

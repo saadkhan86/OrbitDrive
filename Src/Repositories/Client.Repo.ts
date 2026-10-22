@@ -1,0 +1,75 @@
+import { and, eq } from "drizzle-orm";
+
+import { db } from "../Database";
+
+import { clients } from "../Database/Schemas/clients.Schema";
+import { VClient } from "../Validators/clients.Validator";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+
+class ClientRepo {
+  // Create Client
+  public async create(tx: NodePgDatabase, data: typeof clients.$inferInsert) {
+    return (await tx.insert(clients).values(data).returning())[0];
+  }
+
+  // Get All Clients
+  public async getAll(data: VClient.OrganizationIdParams) {
+    return await db
+      .select()
+      .from(clients)
+      .where(eq(clients.organizationId, data.organizationId));
+  }
+
+  // Get Single Client
+  public async getById(data: VClient.ClientIdParams) {
+    return (
+      await db
+        .select()
+        .from(clients)
+        .where(
+          and(
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
+          ),
+        )
+    )[0];
+  }
+
+  // Update Client
+  public async update(
+    tx: NodePgDatabase,
+    data: VClient.UpdateClientInput & VClient.ClientIdParams,
+  ) {
+    return (
+      await tx
+        .update(clients)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
+  }
+
+  public async delete(tx: NodePgDatabase, data: VClient.ClientIdParams) {
+    return (
+      await tx
+        .delete(clients)
+        .where(
+          and(
+            eq(clients.id, data.clientId),
+            eq(clients.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
+  }
+}
+
+export default new ClientRepo();
