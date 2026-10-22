@@ -1,7 +1,8 @@
 import { users } from "../Database/Schemas/users.Schema";
-import { eq } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { VAuth } from "../Validators/auth.Validator";
+import { VUser } from "../Validators/user.Validator";
 
 class UserRepo {
   public async findByEmail(data: VAuth.email) {
@@ -39,6 +40,22 @@ class UserRepo {
   public async logout(data: VAuth.userId) {
     await db.update(users).set({ refreshToken: null }).where(eq(users.id, data.userId));
     return true;
+  }
+  public async query(data: VUser.query) {
+    const { page = 1, limit = 5 } = data
+    const offset = (page - 1) * limit
+    const _query = []
+    if (data.userId) _query.push(eq(users.id, data.userId))
+    if (data.search) _query.push(or(ilike(users.fullName, `%${data.search}%`), ilike(users.email, `%${data.search}%`)))
+    const result = await db.select({ id: users.id, fullName: users.fullName, email: users.email }).from(users).where(and(..._query)).offset(offset).limit(limit)
+    const countResult = await db
+      .select({ count: count() })
+      .from(users)
+      .where(and(..._query));
+
+    const totalCount = countResult[0]?.count ?? 0;
+
+    return { result, count: totalCount };
   }
 }
 

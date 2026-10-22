@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1792081095435,
-      "tag": "0000_bright_frank_castle",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792346642393,
-      "tag": "0001_dashing_spyke",
+      "when": 1792670915993,
+      "tag": "0000_light_wallow",
       "breakpoints": true
     }
   ]

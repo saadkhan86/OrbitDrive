@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { userService } from "../Services/user.Service";
 import { VAuth } from "../Validators/auth.Validator";
 import { request } from "http";
+import { VUser } from "../Validators/user.Validator";
 
 export const userController = {
   me: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -24,11 +25,18 @@ export const userController = {
     });
   },
   logout: async (request: FastifyRequest, reply: FastifyReply) => {
-    console.log("logout")
     await userService.logout(request.user)
     return reply.status(200).send({
       success: true,
       message: "logout successfull"
     })
+  },
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const result = await userService.query(request.query as VUser.query)
+    return reply.status(200).send({
+      success: true,
+      message: "users fetched successfully",
+      data: { users: result },
+    });
   }
 };

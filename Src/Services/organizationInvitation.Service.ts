@@ -64,6 +64,17 @@ export const organizationInvitationService = {
           expiresAt: createdInvitation!.expiresAt,
         },
       });
+      if (targetUser) {
+        await notificationRepo.create(tx, {
+          organizationId: org.organizationId,
+          userId: targetUser.id,
+          title: "Invitation From Organization",
+          description: "New Invitation found.Check your email for further information",
+          type: "invitation",
+          isRead: false,
+          readAt: null
+        });
+      }
       return createdInvitation;
     })
 

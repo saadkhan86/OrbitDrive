@@ -1,6 +1,7 @@
 import UserRepo from "../Repositories/User.Repo";
 import { VAuth } from "../Validators/auth.Validator";
 import * as argon2 from "argon2";
+import { VUser } from "../Validators/user.Validator";
 export const userService = {
   me: async (user: VAuth.userId) => {
     return UserRepo.findById({ userId: user.userId });
@@ -17,5 +18,9 @@ export const userService = {
   logout: async (user: VAuth.userId) => {
     await UserRepo.logout(user)
     return true;
+  }, query: async (search: VUser.query) => {
+    const users = await UserRepo.query(search)
+    return users;
   }
+
 };

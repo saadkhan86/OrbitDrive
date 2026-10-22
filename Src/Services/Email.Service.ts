@@ -8,7 +8,7 @@ export const EmailService = {
     expiresIn: number,
     fullName: string,
   ) {
-    const verificationUrl = `${process.env.VERIFICATION_URL}/verification/email-verification/${verificationToken}`;
+    const verificationUrl = `${process.env.APP_URL}/verify?type=email&token=${verificationToken}`;
 
     const minutes = Math.round(expiresIn);
 
@@ -31,7 +31,7 @@ export const EmailService = {
     expiresIn: number,
     fullName: string,
   ) {
-    const verificationUrl = `http://localhost:3000/auth/password-reset/${verificationToken}`;
+    const verificationUrl = `${process.env.APP_URL}/verify?type=password-reset&token=${verificationToken}`;
 
     const minutes = Math.round(expiresIn);
 
@@ -56,7 +56,7 @@ export const EmailService = {
       organizationName: string,
       role: "ADMIN" | "MEMBER" | "VIEWER",
     ) {
-      const invitationUrl = `${process.env.APP_URL}/invitations/${verificationToken}`;
+      const invitationUrl = `${process.env.APP_URL}/verify?type=invitation&token=${verificationToken}`;
 
       const hours = Math.round(expiresIn);
 

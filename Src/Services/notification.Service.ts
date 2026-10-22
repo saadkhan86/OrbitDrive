@@ -2,7 +2,6 @@ import { CustomError } from "../Errors/CustomError";
 import notificationRepo from "../Repositories/notification.Repo";
 import { VAuth } from "../Validators/auth.Validator";
 import type { VNotification } from "../Validators/notification.Validator";
-import { VOrganization } from "../Validators/organization.Validator";
 
 export const notificationService = {
   // Get all notifications
@@ -19,7 +18,6 @@ export const notificationService = {
   ) => {
     const data = await notificationRepo.findById({
       notificationId: notification.notificationId,
-      organizationId: notification.organizationId,
       userId: user.userId,
     });
 
@@ -31,7 +29,7 @@ export const notificationService = {
       );
     }
 
-    return notification;
+    return data;
   },
 
   // Mark one notification as read
@@ -41,19 +39,16 @@ export const notificationService = {
   ) => {
     return await notificationRepo.markAsRead({
       notificationId: notification.notificationId,
-      organizationId: notification.organizationId,
       userId: user.userId,
     });
   },
 
   // Mark multiple notifications as read
   markManyAsRead: async (
-    organization: VOrganization.getById,
     user: VAuth.userId,
     data: VNotification.markAsRead,
   ) => {
     return await notificationRepo.markManyAsRead({
-      organizationId: organization.organizationId,
       userId: user.userId,
       ...data,
     });
@@ -66,7 +61,6 @@ export const notificationService = {
   ) => {
     return await notificationRepo.delete({
       notificationId: notification.notificationId,
-      organizationId: notification.organizationId,
       userId: user.userId,
     });
   },

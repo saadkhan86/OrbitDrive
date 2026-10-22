@@ -1,6 +1,6 @@
 {
-  "id": "5dda0029-02ee-4ca3-9e74-d5c8ec3aa79f",
-  "prevId": "e153594a-ae24-42ff-9582-c688db257f1f",
+  "id": "19f5a057-adea-4911-a68a-002adea845a7",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -809,13 +809,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "organizations_slug_unique": {
-          "name": "organizations_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        },
         "organizations_owner_slug_unique": {
           "name": "organizations_owner_slug_unique",
           "nullsNotDistinct": false,
@@ -1109,6 +1102,7 @@
         "task_assigned",
         "task_updated",
         "deal_updated",
+        "role",
         "invitation",
         "system"
       ]

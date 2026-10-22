@@ -8,6 +8,7 @@ export const GlobalErrorHandler = (
   request: FastifyRequest,
   reply: FastifyReply,
 ) => {
+  console.log(error)
   if (error instanceof DatabaseError) {
     request.log.error(
       { err: error },

@@ -9,11 +9,19 @@ class OrganizationRepo {
     tx: NodePgDatabase,
     data: typeof organizations.$inferInsert,
   ) {
+    console.log("data",data)
     return (
       await tx
         .insert(organizations)
         .values({ ownerId: data.ownerId, name: data.name, slug: data.slug })
-        .returning()
+        .returning({
+          id: organizations.id,
+          name: organizations.name,
+          slug: organizations.slug,
+          ownerId: organizations.ownerId,
+          createdAt: organizations.createdAt,
+          updatedAt: organizations.updatedAt,
+        })
     )[0];
   }
   public async getById(data: VAuth.userId & VOrganization.getById) {

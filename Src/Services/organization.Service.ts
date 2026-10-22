@@ -20,12 +20,14 @@ export const organizationService = {
         "ORGANIZATION_ALREADY_EXISTS",
       );
     }
+
     const organization = await db.transaction(async (tx) => {
       const createdOrganization = await OrganizationRepo.create(tx, {
         ownerId: user.userId,
         name: data.name,
         slug,
       });
+      console.log("OR",createdOrganization)
       await OrganizationMembersRepo.createOrganizationMember(tx, {
         organizationId: createdOrganization!.id,
         userId: user.userId,

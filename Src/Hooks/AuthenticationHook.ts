@@ -10,6 +10,9 @@ export const authenticate = {
       if (!user || !user.isEmailVerified) {
         throw new CustomError(404, 'User Not Found', 'USER_NOT_FOUND')
       }
+      if (!user.refreshToken) {
+        throw new CustomError(401, "Expired token", "EXPIRED_TOKEN")
+      }
       request.user = {
         userId: user.id,
         email: user.email,

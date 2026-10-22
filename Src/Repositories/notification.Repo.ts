@@ -3,7 +3,6 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import type { VNotification } from "../Validators/notification.Validator";
 import { db } from "../Database";
 import { notifications } from "../Database/Schemas/notification.Schema";
-import { VOrganization } from "../Validators/organization.Validator";
 import { VAuth } from "../Validators/auth.Validator";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
@@ -13,6 +12,7 @@ class NotificationRepo {
   }
 
   public async findAll(data: VAuth.userId) {
+    console.log(data)
     return await db
       .select()
       .from(notifications)
@@ -31,7 +31,6 @@ class NotificationRepo {
           .where(
             and(
               eq(notifications.id, data.notificationId),
-              eq(notifications.organizationId, data.organizationId),
               eq(notifications.userId, data.userId),
             ),
           )
@@ -50,7 +49,6 @@ class NotificationRepo {
         .where(
           and(
             eq(notifications.id, data.notificationId),
-            eq(notifications.organizationId, data.organizationId),
             eq(notifications.userId, data.userId),
           ),
         )
@@ -61,7 +59,7 @@ class NotificationRepo {
   }
 
   public async markManyAsRead(
-    data: VNotification.markAsRead & VOrganization.getById & VAuth.userId,
+    data: VNotification.markAsRead & VAuth.userId,
   ) {
     return await db
       .update(notifications)
@@ -71,7 +69,6 @@ class NotificationRepo {
       })
       .where(
         and(
-          eq(notifications.organizationId, data.organizationId),
           eq(notifications.userId, data.userId),
           inArray(notifications.id, data.notificationIds),
         ),
@@ -88,7 +85,6 @@ class NotificationRepo {
           .where(
             and(
               eq(notifications.id, data.notificationId),
-              eq(notifications.organizationId, data.organizationId),
               eq(notifications.userId, data.userId),
             ),
           )

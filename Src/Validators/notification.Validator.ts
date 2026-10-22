@@ -2,19 +2,9 @@ import z from "zod";
 
 export const notificationValidator = {
   notificationId: z.object({
-    organizationId: z
-      .string({ message: "Invalid organizationId" })
-      .uuid({ message: "Invalid organizationId" }),
-
     notificationId: z
       .string({ message: "Invalid notificationId" })
       .uuid({ message: "Invalid notificationId" }),
-  }),
-
-  organizationId: z.object({
-    organizationId: z
-      .string({ message: "Invalid organizationId" })
-      .uuid({ message: "Invalid organizationId" }),
   }),
 
   markAsRead: z.object({
@@ -31,8 +21,6 @@ export const notificationValidator = {
 
 export declare namespace VNotification {
   type notificationId = z.infer<typeof notificationValidator.notificationId>;
-
-  type organizationId = z.infer<typeof notificationValidator.organizationId>;
 
   type markAsRead = z.infer<typeof notificationValidator.markAsRead>;
 }

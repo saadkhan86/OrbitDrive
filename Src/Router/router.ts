@@ -13,7 +13,7 @@ import { notificationRouter } from "./notification.Router";
 import { auditLogRouter } from "./auditLog.Router";
 export const router = async (app: FastifyInstance) => {
   app.register(authRouter, { prefix: "/auth" });
-  app.register(userRouter, { prefix: "/user" });
+  app.register(userRouter, { prefix: "/users" });
   app.register(verificationRouter, { prefix: "/verification" });
   app.register(organizationRouter, { prefix: "/organization" });
   app.register(organizationInvitationRouter, {
