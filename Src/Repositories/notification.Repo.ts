@@ -12,15 +12,12 @@ class NotificationRepo {
     return (await tx.insert(notifications).values(data).returning())[0];
   }
 
-  public async findAll(data: VOrganization.getById & VAuth.userId) {
+  public async findAll(data: VAuth.userId) {
     return await db
       .select()
       .from(notifications)
       .where(
-        and(
-          eq(notifications.organizationId, data.organizationId),
-          eq(notifications.userId, data.userId),
-        ),
+        eq(notifications.userId, data.userId)
       )
       .orderBy(desc(notifications.createdAt));
   }

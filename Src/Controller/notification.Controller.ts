@@ -7,7 +7,6 @@ import { VAuth } from "../Validators/auth.Validator";
 export const notificationController = {
   findAll: async (request: FastifyRequest, reply: FastifyReply) => {
     const notifications = await notificationService.findAll(
-      request.params as VNotification.organizationId,
       request.user as VAuth.userId,
     );
 

@@ -37,7 +37,8 @@ class UserRepo {
     )[0];
   }
   public async logout(data: VAuth.userId) {
-    return await db.update(users).set({ refreshToken: null }).where(eq(users.id, data.userId));
+    await db.update(users).set({ refreshToken: null }).where(eq(users.id, data.userId));
+    return true;
   }
 }
 

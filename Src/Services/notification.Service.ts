@@ -6,9 +6,8 @@ import { VOrganization } from "../Validators/organization.Validator";
 
 export const notificationService = {
   // Get all notifications
-  findAll: async (organization: VOrganization.getById, user: VAuth.userId) => {
+  findAll: async (user: VAuth.userId) => {
     return await notificationRepo.findAll({
-      organizationId: organization.organizationId,
       userId: user.userId,
     });
   },
