@@ -4,7 +4,7 @@ import { CustomError } from "../Errors/CustomError";
 import OrganizationMembersRepo from "../Repositories/OrganizationMembers.Repo";
 
 export const authorize = {
-  role: (allowedRoles: OrganizationRole[]) => {
+  role: (allowedRoles: OrganizationRole[] = ["admin", "member", "owner", "viewer"]) => {
     return async (request: FastifyRequest) => {
       const { organizationId } = request.params as { organizationId: string };
       const userId = request.user.userId;

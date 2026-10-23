@@ -4,6 +4,15 @@ import { VOrganizationMember } from "../Validators/organizationMember.Validator"
 import { VAuth } from "../Validators/auth.Validator";
 
 export const organizationMemberController = {
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const { result, count } = await organizationMemberService.query(request.user, request.query as VOrganizationMember.query)
+    reply.status(200).send({
+      success: true, message: "organizations fetched successfully", data: {
+        count,
+        organizations: result
+      }
+    })
+  },
   getAllByOrganizationId: async (
     request: FastifyRequest,
     reply: FastifyReply,
@@ -19,9 +28,14 @@ export const organizationMemberController = {
     });
   },
   getByUserId: async (request: FastifyRequest, reply: FastifyReply) => {
-    return await organizationMemberService.getByUserId(
+    const member = await organizationMemberService.getByUserId(
       request.user as VAuth.userId,
     );
+    return reply.status(200).send({
+      success: true,
+      message: "organization member fetched successfully",
+      data: member,
+    });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const organizationMember =

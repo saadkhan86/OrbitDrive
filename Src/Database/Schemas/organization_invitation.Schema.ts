@@ -16,11 +16,11 @@ export const organization_invitations = pgTable("organization_invitations", {
       onDelete: "cascade",
     }),
   email: varchar("email", { length: 255 }).notNull(),
-  role: pgRoleEnum("role").notNull().default("MEMBER"),
+  role: pgRoleEnum("role").notNull().default("member"),
   tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).default(
     sql`now() + interval '24 hours'`,
   ),
-  acceptedAt: timestamp("accepted_at", { withTimezone: true }).default(sql `NULL`),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }).default(sql`NULL`),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

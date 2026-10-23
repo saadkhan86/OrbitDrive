@@ -17,7 +17,7 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
         params: organizationValidator.organizationId,
         body: organizationInvitationValidator.create,
       },
-      preHandler: [authorize.role(["ADMIN", "OWNER"])],
+      preHandler: [authorize.role(["admin", "owner"])],
     },
     organizationInvitationController.create,
   );
@@ -26,20 +26,27 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
     {
       schema: {
         params: organizationInvitationValidator.organizationId,
+        querystring: organizationInvitationValidator.query
       },
-      preHandler: [authorize.role(["ADMIN", "OWNER"])],
+      preHandler: [authorize.role(["admin", "owner"])],
     },
-    organizationInvitationController.getAll,
+    organizationInvitationController.query,
   );
+  app.get("/:organizationId/:invitationId", {
+    schema: {
+      params: organizationInvitationValidator.invitationId,
+    },
+    preHandler: [authorize.role(["admin", "owner"])],
+  }, organizationInvitationController.getById)
   app.delete(
     "/:organizationId/:invitationId",
     {
       schema: {
         params: organizationInvitationValidator.invitationId,
       },
-      preHandler: [authorize.role(["ADMIN", "OWNER"])],
+      preHandler: [authorize.role(["admin", "owner"])],
     },
     organizationInvitationController.delete,
   );
-  app.get("/accept/:token", organizationInvitationController.accept);
+  app.patch("/accept/:token", organizationInvitationController.accept);
 };

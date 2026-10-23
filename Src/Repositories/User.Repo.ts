@@ -53,9 +53,9 @@ class UserRepo {
       .from(users)
       .where(and(..._query));
 
-    const totalCount = countResult[0]?.count ?? 0;
 
-    return { result, count: totalCount };
+
+    return { result, count: countResult[0]?.count ?? 0 };
   }
 }
 

@@ -17,7 +17,7 @@ export const organizationRouter = async (app: FastifyInstance) => {
     },
     organizationController.create,
   );
-  app.get("/", organizationController.getAllByOwnerId);
+  app.get("/", { schema: { querystring: organizationValidator.query } }, organizationController.query);
   app.get(
     "/:organizationId",
     {

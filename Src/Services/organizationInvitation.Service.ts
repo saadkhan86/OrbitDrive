@@ -100,8 +100,21 @@ export const organizationInvitationService = {
     };
   },
 
-  async getAllByOrganizationId(org: VOrganizationInvitation.organizationId) {
-    return OrganizationInvitationRepo.getAllByOrganizationId(org);
+  async query(org: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
+    const { invitations, count } = await OrganizationInvitationRepo.query({ ...org, ...query });
+    return { invitations, count };
+  },
+
+  async getById(invitation: VOrganizationInvitation.invitationId) {
+    const foundInvitation = await OrganizationInvitationRepo.getById(invitation);
+    if (!foundInvitation) {
+      throw new CustomError(
+        404,
+        "Invitation not found",
+        "INVITATION_NOT_FOUND",
+      );
+    }
+    return foundInvitation;
   },
 
   async delete(
@@ -160,7 +173,6 @@ export const organizationInvitationService = {
       throw new CustomError(
         409,
         "Invitation has already been accepted",
-
         "INVITATION_ALREADY_ACCEPTED",
       );
     }
@@ -169,11 +181,9 @@ export const organizationInvitationService = {
       throw new CustomError(
         410,
         "Invitation has expired",
-
         "INVITATION_EXPIRED",
       );
     }
-
     if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
       throw new CustomError(
         403,
@@ -224,6 +234,6 @@ export const organizationInvitationService = {
       );
       return createdMember;
     });
-    return member;
+    return true;
   },
 };

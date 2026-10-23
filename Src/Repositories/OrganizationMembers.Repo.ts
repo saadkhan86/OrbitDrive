@@ -1,11 +1,21 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike } from "drizzle-orm";
 import { db } from "../Database";
-import { organization_members } from "../Database/Schemas/organization_members.Schema";
+import { organization_members, } from "../Database/Schemas/organization_members.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganizationMember } from "../Validators/organizationMember.Validator";
 import { VAuth } from "../Validators/auth.Validator";
 
 class OrganizationMembers {
+  public async query(data: VAuth.userId & VOrganizationMember.query) {
+    const { page = 1, limit = 5 } = data
+    const _query = [eq(organization_members.userId, data.userId)]
+    if (data.role) {
+      _query.push(eq(organization_members.role, data.role))
+    }
+    const result = await db.select().from(organization_members).where(and(..._query)).limit(limit).offset((page - 1) * limit).orderBy(desc(organization_members.createdAt))
+    const resultCount = await db.select({ count: count() }).from(organization_members).where(and(..._query))
+    return { result, count: resultCount[0]?.count ?? 0 }
+  }
   public async createOrganizationMember(
     tx: NodePgDatabase,
     data: typeof organization_members.$inferInsert,

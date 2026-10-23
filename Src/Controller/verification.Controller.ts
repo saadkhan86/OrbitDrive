@@ -1,29 +1,19 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import type { tokenValidator, VToken } from "../Validators/token.Validator";
+import type { VVerification } from "../Validators/verification.Validator";
 import { verificationService } from "../Services/verification.Service";
-import { VAuth } from "../Validators/auth.Validator";
 
 export const verificationController = {
-  resendEmailVerification: async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-  ) => {
-    await verificationService.resendEmailVerification(
-      request.body as VAuth.email,
-    );
-    return reply
-      .status(201)
-      .send({ success: true, message: "Verification email has been sent" });
-  },
-  verifyEmailVerification: async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-  ) => {
-    await verificationService.verifyEmailVerification(
-      request.params as VToken.token,
-    );
-    return reply
-      .status(200)
-      .send({ success: true, message: "Email verified successfully" });
-  },
+  emailVerification: async (request: FastifyRequest, reply: FastifyReply) => {
+    const query = request.query as VVerification.query;
+    if (query.action === "resend-email") {
+      await verificationService.resendEmailVerification({ email: query.email });
+      return reply.status(201).send({ success: true, message: "Verification email has been sent" });
+    }
+    else if (query.action === "verify-email") {
+      await verificationService.verifyEmailVerification({ token: query.token });
+      return reply.status(200).send({ success: true, message: "Email verified successfully" });
+    } else {
+      return reply.status(400).send({ success: false, message: "Check your query parameters" })
+    }
+  }
 };

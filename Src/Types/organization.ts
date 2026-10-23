@@ -1,8 +1,8 @@
 export const organizationRoles = [
-  "OWNER",
-  "ADMIN",
-  "MEMBER",
-  "VIEWER",
+  "owner",
+  "admin",
+  "member",
+  "viewer",
 ] as const;
 
 export type OrganizationRole = (typeof organizationRoles)[number];

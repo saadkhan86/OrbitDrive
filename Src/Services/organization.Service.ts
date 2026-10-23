@@ -27,7 +27,7 @@ export const organizationService = {
         name: data.name,
         slug,
       });
-      console.log("OR",createdOrganization)
+      console.log("OR", createdOrganization)
       await OrganizationMembersRepo.createOrganizationMember(tx, {
         organizationId: createdOrganization!.id,
         userId: user.userId,
@@ -37,8 +37,8 @@ export const organizationService = {
     });
     return organization;
   },
-  getAllByOwnerId: async (user: VAuth.userId) => {
-    return await OrganizationRepo.getAllByOwnerId(user);
+  query: async (user: VAuth.userId, query: VOrganization.query) => {
+    return await OrganizationRepo.query({ userId: user.userId, search: query.search });
   },
   getById: async (user: VAuth.userId, org: VOrganization.getById) => {
     const organization = await OrganizationRepo.getById({ ...user, ...org });

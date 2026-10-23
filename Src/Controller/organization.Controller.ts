@@ -41,16 +41,9 @@ export const organizationController = {
       },
     });
   },
-  getAllByOwnerId: async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.status(200).send({
-      success: true,
-      message: "Organizations fetched successfully",
-      data: {
-        organizations: await organizationService.getAllByOwnerId(
-          request.user as VAuth.userId,
-        ),
-      },
-    });
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const { result, count } = await organizationService.query(request.user, request.query as VOrganization.query);
+    reply.status(200).send({ success: true, message: "Ogranizations fetched successfully", organizations: { result }, count })
   },
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationService.delete(

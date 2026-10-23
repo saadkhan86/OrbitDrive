@@ -11,7 +11,15 @@ export const organizationInvitationValidator = {
   create: z.object({
     email: z.email({ message: "Invalid email address" }),
 
-    role: z.enum(["ADMIN", "MEMBER", "VIEWER"], { message: "invalid role" }),
+    role: z.enum(["admin", "member", "viewer"], { message: "invalid role" }),
+  }),
+  query: z.object({
+    search: z.string({ message: "search must be type of string" }).optional(),
+    role: z.enum(["admin", "member", "viewer"], { message: "invalid role" }).optional(),
+    createdBy: z.string({ message: "createdBy must be string" }).optional(),
+    page: z.coerce.number({ message: "page must be type of number" }).default(1).optional(),
+    limit: z.coerce.number({ message: "limit must be type of number" }).default(10).optional(),
+
   }),
   accept: z.object({
     token: z.string({ message: "invalid token" }),
@@ -28,4 +36,5 @@ export declare namespace VOrganizationInvitation {
     typeof organizationInvitationValidator.organizationId
   >;
   type token = z.infer<typeof organizationInvitationValidator.accept>;
+  type query = z.infer<typeof organizationInvitationValidator.query>;
 }

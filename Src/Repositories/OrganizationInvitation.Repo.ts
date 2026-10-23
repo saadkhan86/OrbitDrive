@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike } from "drizzle-orm";
 
 import { db } from "../Database";
 import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
@@ -31,13 +31,26 @@ class OrganizationInvitationRepo {
     )[0];
   }
 
-  public async getAllByOrganizationId(
-    data: VOrganizationInvitation.organizationId,
+  public async query(
+    data: VOrganizationInvitation.organizationId & VOrganizationInvitation.query,
   ) {
-    return db
-      .select()
-      .from(organization_invitations)
-      .where(eq(organization_invitations.organizationId, data.organizationId));
+    const { page = 1, limit = 10 } = data
+    const _query = [eq(organization_invitations.organizationId, data.organizationId)]
+    if (data.role) {
+      _query.push(eq(organization_invitations.role, data.role))
+    }
+    if (data.search) {
+      _query.push(ilike(organization_invitations.email, `%${data.search}%`))
+    }
+    const [invitations, totalCount] = await Promise.all([
+      db.select({}).from(organization_invitations).where(and(..._query)).limit(limit).offset((page - 1) * limit).orderBy(desc(organization_invitations.createdAt)),
+      db.select({ count: count() }).from(organization_invitations).where(and(..._query))
+    ]);
+    return {
+      invitations,
+      count: totalCount[0]?.count || 0
+    }
+
   }
 
   public async getPendingByEmail(

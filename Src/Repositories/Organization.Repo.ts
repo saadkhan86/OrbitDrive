@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -9,7 +9,7 @@ class OrganizationRepo {
     tx: NodePgDatabase,
     data: typeof organizations.$inferInsert,
   ) {
-    console.log("data",data)
+    console.log("data", data)
     return (
       await tx
         .insert(organizations)
@@ -50,11 +50,16 @@ class OrganizationRepo {
         )
     )[0];
   }
-  public async getAllByOwnerId(data: VAuth.userId) {
-    return await db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.ownerId, data.userId));
+  public async query(data: VAuth.userId & VOrganization.query) {
+    const { page = 1, limit = 10 } = data
+    const _query = [];
+    _query.push(eq(organizations.ownerId, data.userId))
+    if (data.search) {
+      _query.push(or(ilike(organizations.name, `%${data.search}%`), ilike(organizations.slug, `%${data.search}%`)))
+    }
+    const totalCount = await db.select({ count: count() }).from(organizations).where(and(..._query)).limit(limit).offset((page - 1) * limit);
+    const result = await db.select().from(organizations).where(and(..._query));
+    return { result, count: totalCount[0]?.count ?? 0 };
   }
   public async update(
     data: VOrganization.getById &

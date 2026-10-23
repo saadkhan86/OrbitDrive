@@ -19,15 +19,25 @@ export const organizationInvitationController = {
     });
   },
 
-  async getAll(request: FastifyRequest, reply: FastifyReply) {
-    const invitations =
-      await organizationInvitationService.getAllByOrganizationId(
+  async query(request: FastifyRequest, reply: FastifyReply) {
+    const { invitations, count } =
+      await organizationInvitationService.query(
         request.params as VOrganizationInvitation.organizationId,
+        request.query as VOrganizationInvitation.query,
       );
 
     return reply.status(200).send({
       success: true,
-      data: invitations,
+      data: { invitations, count },
+    });
+  },
+  async getById(request: FastifyRequest, reply: FastifyReply) {
+    const invitation = await organizationInvitationService.getById(
+      request.params as VOrganizationInvitation.invitationId,
+    );
+    return reply.status(200).send({
+      success: true,
+      data: invitation,
     });
   },
 
@@ -46,15 +56,13 @@ export const organizationInvitationController = {
 
   // POST /invitations/accept
   async accept(request: FastifyRequest, reply: FastifyReply) {
-    const member = await organizationInvitationService.accept(
-
+    await organizationInvitationService.accept(
       request.user as VAuth.userId & VAuth.email,
       request.params as VOrganizationInvitation.token,
     );
     return reply.status(204).send({
       success: true,
       message: "Invitation accepted successfully",
-      data: member,
     });
   },
 };

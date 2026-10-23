@@ -7,6 +7,9 @@ import notificationRepo from "../Repositories/notification.Repo";
 import { db } from "../Database";
 
 export const organizationMemberService = {
+  query: async (user: VAuth.userId, data: VOrganizationMember.query) => {
+    return await OrganizationMembersRepo.query({ ...user });
+  },
   getAllByOrganizationId: async (org: VOrganizationMember.organizationId) => {
     return await OrganizationMembersRepo.getAllByOrganizationId(org);
   },

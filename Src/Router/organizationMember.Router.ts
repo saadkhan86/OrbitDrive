@@ -8,42 +8,47 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     route.schema = { ...route.schema, tags: ["organization Member"] };
   });
   app.addHook("preHandler", authenticate.user);
+  app.get("/", {
+    schema: {
+      querystring: organizationMemberValidator.query,
+    }
+  }, organizationMemberController.query)
   app.get(
-    "/",
+    "/:organizationId",
     {
       schema: { params: organizationMemberValidator.organizationId },
-      preHandler: [authorize.role(["ADMIN", "MEMBER", "OWNER", "VIEWER"])],
+      preHandler: authorize.role(),
     },
     organizationMemberController.getAllByOrganizationId,
   );
   app.get(
-    "/:organizationMemberId",
+    "/:organizationId/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
       },
-      preHandler: [authorize.role(["ADMIN", "MEMBER", "OWNER", "VIEWER"])],
+      preHandler: [authorize.role()],
     },
     organizationMemberController.getByUserId,
   );
   app.patch(
-    "/:organizationMemberId",
+    "/:organizationId/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
         body: organizationMemberValidator.role,
       },
-      preHandler: [authorize.role(["ADMIN", "OWNER"])],
+      preHandler: [authorize.role()],
     },
     organizationMemberController.update,
   );
   app.delete(
-    "/:organizationMemberId",
+    "/:organizationId/:organizationMemberId",
     {
       schema: {
         params: organizationMemberValidator.organizationMemberId,
       },
-      preHandler: [authorize.role(["ADMIN", "OWNER"])],
+      preHandler: [authorize.role()],
     },
     organizationMemberController.delete,
   );

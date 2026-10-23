@@ -29,6 +29,11 @@ export const organizationValidator = {
   slug: z.object({
     slug: z.string(),
   }),
+  query: z.object({
+    search: z.string({ message: "search must be type of string" }).optional(),
+    page: z.coerce.number({ message: "page must be type of number" }).default(1).optional(),
+    limit: z.coerce.number({ message: "limit must be type of number" }).default(10).optional(),
+  })
 };
 export declare namespace VOrganization {
   type create = z.infer<typeof organizationValidator.create>;
@@ -36,4 +41,5 @@ export declare namespace VOrganization {
   type getById = z.infer<typeof organizationValidator.organizationId>;
   type remove = z.infer<typeof organizationValidator.organizationId>;
   type slug = z.infer<typeof organizationValidator.slug>;
+  type query = z.infer<typeof organizationValidator.query>
 }

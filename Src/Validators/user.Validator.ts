@@ -6,6 +6,9 @@ export const userValidator = {
         userId: z.uuid({ message: "invalid userId" }).optional(),
         limit: z.coerce.number({ message: "limit must be type of number" }).optional().default(10),
         page: z.coerce.number({ message: "page must be type of number" }).optional().default(1),
+    }).refine((data) => data.search || data.userId, {
+        abort: true,
+        message: "At least one of search or userId is required",
     })
 }
 export declare namespace VUser {
