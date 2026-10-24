@@ -84,8 +84,9 @@ export const taskService = {
     return task;
   },
 
-  findAll: async (organization: VTask.organizationId) => {
-    return await TaskRepo.getAll({ ...organization });
+  query: async (organization: VTask.organizationId, query: VTask.query) => {
+    const tasks = await TaskRepo.query({ ...organization, ...query });
+    return tasks;
   },
 
   update: async (

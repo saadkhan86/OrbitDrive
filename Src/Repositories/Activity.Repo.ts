@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { activities } from "../Database/Schemas/activity.Schema";
 import { VActivity } from "../Validators/activity.Validator";
@@ -46,12 +46,27 @@ class ActivityRepo {
     );
   }
 
-  public async findAll(data: VActivity.organizationId) {
-    return await db
-      .select()
-      .from(activities)
-      .where(eq(activities.organizationId, data.organizationId))
-      .orderBy(desc(activities.occurredAt));
+  public async query(data: VActivity.organizationId & VActivity.query) {
+    const { page = 1, limit = 10 } = data
+    const _query: any[] = [eq(activities.organizationId, data.organizationId)];
+    if (data.type) {
+      _query.push(eq(activities.type, data.type));
+    }
+    if (data.search) {
+      _query.push(or(ilike(activities.title, `%${data.search}%`)));
+    }
+    const [foundActivities, total] = await Promise.all([
+      db
+        .select()
+        .from(activities)
+        .where(and(..._query))
+        .orderBy(desc(activities.occurredAt)).limit(limit).offset((page - 1) * limit),
+      db
+        .select({ count: count() })
+        .from(activities)
+        .where(and(..._query))
+    ])
+    return { activities: foundActivities, count: total[0]?.count ?? 0 }
   }
 
   public async findByClient(

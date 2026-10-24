@@ -13,7 +13,7 @@ class OrganizationMembers {
       _query.push(eq(organization_members.role, data.role))
     }
     const [foundMembers, total] = await Promise.all([
-      db.select().from(organization_members).where(and(..._query)).offset((page - 1) * limit).limit(limit).orderBy(desc(organization_members.createdAt)),
+      db.select().from(organization_members).where(and(..._query)).orderBy(desc(organization_members.createdAt)).limit(limit).offset((page - 1) * limit),
       await db.select({ count: count() }).from(organization_members).where(and(..._query))
     ])
     return { organizationMembers: foundMembers, count: total[0]?.count ?? 0 }

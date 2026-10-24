@@ -56,10 +56,12 @@ class DealService {
     return foundDeal;
   }
 
-  public async query(deal: VDeal.organizationId) {
-    return await dealRepo.query({
-      organizationId: deal.organizationId,
+  public async query(organization: VDeal.organizationId, query: VDeal.query) {
+    const deals = await dealRepo.query({
+      ...organization,
+      ...query
     });
+    return deals
   }
 
   public async update(

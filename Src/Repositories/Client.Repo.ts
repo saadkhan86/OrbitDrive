@@ -23,7 +23,7 @@ class ClientRepo {
       _query.push(or(ilike(clients.name, `%${data.search}%`), ilike(clients.email, `%${data.search}%`), ilike(clients.phone, `%${data.search}%`), ilike(clients.company, `%${data.search}%`)))
     }
     const [foundClients, total] = await Promise.all([
-      db.select().from(clients).where(and(..._query)).offset((page - 1) * limit).limit(limit).orderBy(desc(clients.createdAt)),
+      db.select().from(clients).where(and(..._query)).orderBy(desc(clients.createdAt)).limit(limit).offset((page - 1) * limit),
       db.select({ count: count() }).from(clients).where(and(..._query))
     ])
     return { clients: foundClients, count: total[0]?.count ?? 0 }

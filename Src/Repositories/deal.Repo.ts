@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, ilike, or, count, desc } from "drizzle-orm";
 
 import type { VDeal } from "../Validators/deal.Validator";
 import { db } from "../Database";
@@ -39,11 +39,16 @@ class DealRepo {
     )[0];
   }
 
-  public async query(data: VDeal.organizationId) {
-    return await db
-      .select()
-      .from(deals)
-      .where(eq(deals.organizationId, data.organizationId));
+  public async query(data: VDeal.organizationId & VDeal.query) {
+    const { page, limit } = data
+    const _query: any[] = [eq(deals.organizationId, data.organizationId)]
+    if (data.stage) _query.push(eq(deals.stage, data.stage));
+    if (data.search) _query.push(or(ilike(deals.title, `%${data.search}%`), ilike(deals.value, `%${data.search}%`), ilike(deals.currency, `%${data.search}%`)));
+    const [foundDeals, total] = await Promise.all([
+      db.select().from(deals).where(and(..._query)).orderBy(desc(deals.createdAt)).limit(limit).offset((page - 1) * limit),
+      db.select({ count: count() }).from(deals).where(and(..._query))
+    ])
+    return { deals: foundDeals, count: total[0]?.count ?? 0 }
   }
 
   public async update(

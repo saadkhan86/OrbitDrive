@@ -27,14 +27,15 @@ export const taskController = {
     });
   },
 
-  findAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const tasks = await taskService.findAll(
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const tasks = await taskService.query(
       request.params as VTask.organizationId,
+      request.query as VTask.query
     );
 
     return reply.code(200).send({
       success: true,
-      data: tasks,
+      data: { result: tasks },
     });
   },
 

@@ -18,15 +18,16 @@ export const activityController = {
       data: { activity },
     });
   },
-  findAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const activities = await activityService.findAll(
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const activities = await activityService.query(
       request.params as VActivity.organizationId,
+      request.query as VActivity.query
     );
 
     return reply.code(200).send({
       success: true,
       message: "Activity fetched successfully",
-      data: { activities },
+      data: { result: activities },
     });
   },
 

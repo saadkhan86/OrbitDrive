@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { tasks } from "../Database/Schemas/tasks.Schema";
 import { db } from "../Database";
 import { VTask } from "../Validators/task.Validator";
@@ -43,11 +43,32 @@ class TaskRepo {
     return task ?? null;
   }
 
-  public async getAll(data: VTask.organizationId) {
-    return await db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.organizationId, data.organizationId));
+  public async query(data: VTask.organizationId & VTask.query) {
+    const { page = 1, limit = 10 } = data;
+    const _query: any[] = [eq(tasks.organizationId, data.organizationId)]
+
+    if (data.status) _query.push(eq(tasks.status, data.status))
+    if (data.priority) _query.push(eq(tasks.priority, data.priority))
+    if (data.search) {
+      _query.push(
+        or(
+          ilike(tasks.title, `%${data.search}%`),
+          ilike(tasks.description, `%${data.search}%`),
+        ),
+      )
+    }
+    const [foundTasks, total] = await Promise.all([
+      db
+        .select()
+        .from(tasks)
+        .where(and(..._query)).orderBy(desc(tasks.createdAt)).limit(limit).offset((page - 1) * limit),
+
+      db
+        .select({ count: count() })
+        .from(tasks)
+        .where(and(..._query)),
+    ])
+    return { tasks: foundTasks, total: total[0]?.count ?? 0 };
   }
 
   public async update(

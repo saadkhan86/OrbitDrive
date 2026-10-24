@@ -1,4 +1,4 @@
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -59,8 +59,8 @@ class OrganizationRepo {
       _query.push(or(ilike(organizations.name, `%${data.search}%`), ilike(organizations.slug, `%${data.search}%`)))
     }
     const [foundOrganizations, total] = await Promise.all([
-      db.select().from(organizations).where(and(..._query)),
-      db.select({ count: count() }).from(organizations).where(and(..._query)).limit(limit).offset((page - 1) * limit)
+      db.select().from(organizations).where(and(..._query)).orderBy(desc(organizations.createdAt)).limit(limit).offset((page - 1) * limit),
+      db.select({ count: count() }).from(organizations).where(and(..._query))
     ]);
     return { organizations: foundOrganizations, count: total[0]?.count ?? 0 };
   }

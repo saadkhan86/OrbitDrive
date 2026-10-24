@@ -78,10 +78,12 @@ export const activityService = {
     return foundActivity;
   },
 
-  findAll: async (organization: VActivity.organizationId) => {
-    return await ActivityRepo.findAll({
-      organizationId: organization.organizationId,
-    });
+  query: async (organization: VActivity.organizationId, query: VActivity.query) => {
+    const activities = await ActivityRepo.query({
+      ...organization,
+      ...query
+    })
+    return activities
   },
 
   findByClient: async (clientId: string, organizationId: string) => {
@@ -187,8 +189,8 @@ export const activityService = {
     }
 
     await db.transaction(async (tx) => {
-      await ActivityRepo.delete(tx,{ ...activity });
-      await auditLogRepo.create(tx,{
+      await ActivityRepo.delete(tx, { ...activity });
+      await auditLogRepo.create(tx, {
         organizationId: activity.organizationId,
         userId: user.userId,
         action: "ACTIVITY_DELETED",

@@ -3,12 +3,10 @@ import z from "zod";
 export const activityValidator = {
   create: z.object({
     clientId: z
-      .string({ message: "Invalid clientId" })
       .uuid({ message: "Invalid clientId" })
       .optional(),
 
     dealId: z
-      .string({ message: "Invalid dealId" })
       .uuid({ message: "Invalid dealId" })
       .optional(),
 
@@ -35,13 +33,11 @@ export const activityValidator = {
 
   update: z.object({
     clientId: z
-      .string({ message: "Invalid clientId" })
       .uuid({ message: "Invalid clientId" })
       .nullable()
       .optional(),
 
     dealId: z
-      .string({ message: "Invalid dealId" })
       .uuid({ message: "Invalid dealId" })
       .nullable()
       .optional(),
@@ -74,39 +70,43 @@ export const activityValidator = {
 
   organizationId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
   }),
 
   activityId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
 
     activityId: z
-      .string({ message: "Invalid activityId" })
       .uuid({ message: "Invalid activityId" }),
   }),
 
   clientId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
 
     clientId: z
-      .string({ message: "Invalid clientId" })
       .uuid({ message: "Invalid clientId" }),
   }),
 
   dealId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
 
     dealId: z
-      .string({ message: "Invalid dealId" })
       .uuid({ message: "Invalid dealId" }),
   }),
+  query: z.object({
+    search: z.string({ message: "search must be type of string" }).optional(),
+    type: z
+      .enum(["call", "email", "meeting", "note"], {
+        message: "Invalid activity type",
+      })
+      .optional(),
+    page: z.coerce.number().optional().default(1),
+    limit: z.coerce.number().optional().default(10)
+  })
+
 };
 
 export declare namespace VActivity {
@@ -121,4 +121,6 @@ export declare namespace VActivity {
   type clientId = z.infer<typeof activityValidator.clientId>;
 
   type dealId = z.infer<typeof activityValidator.dealId>;
+
+  type query = z.infer<typeof activityValidator.query>
 }

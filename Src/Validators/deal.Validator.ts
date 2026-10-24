@@ -76,8 +76,8 @@ export const dealValidator = {
   query: z.object({
     search: z.string().optional(),
     stage: z.enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"]).optional(),
-    page: z.number().optional(),
-    limit: z.number().optional(),
+    page: z.coerce.number().optional().default(1),
+    limit: z.coerce.number().optional().default(10),
 
   })
 };

@@ -10,7 +10,7 @@ export const activityRouter = async (app: FastifyInstance) => {
       tags: ["Activities"],
     };
   });
-  
+
   app.post(
     "/",
     {
@@ -30,9 +30,10 @@ export const activityRouter = async (app: FastifyInstance) => {
       preHandler: [authenticate.user],
       schema: {
         params: activityValidator.organizationId,
+        querystring: activityValidator.query
       },
     },
-    activityController.findAll,
+    activityController.query,
   );
 
   // Get activity by ID

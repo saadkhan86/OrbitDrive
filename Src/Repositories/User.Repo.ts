@@ -47,7 +47,7 @@ class UserRepo {
     if (data.userId) _query.push(eq(users.id, data.userId))
     if (data.search) _query.push(or(ilike(users.fullName, `%${data.search}%`), ilike(users.email, `%${data.search}%`)))
     const [foundUsers, total] = await Promise.all([
-      db.select({ id: users.id, fullName: users.fullName, email: users.email }).from(users).where(and(..._query)).offset((page - 1) * limit).limit(limit).orderBy(desc(users.createdAt)),
+      db.select({ id: users.id, fullName: users.fullName, email: users.email }).from(users).where(and(..._query)).orderBy(desc(users.createdAt)).offset((page - 1) * limit).limit(limit),
       db.select({ count: count() }).from(users).where(and(..._query))])
     return { users: foundUsers, count: total[0]?.count ?? 0 }
   }

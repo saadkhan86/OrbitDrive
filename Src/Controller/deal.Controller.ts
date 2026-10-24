@@ -19,11 +19,11 @@ class DealController {
   public async query(request: FastifyRequest, reply: FastifyReply) {
     const deals = await dealService.query(
       request.params as VDeal.organizationId,
+      request.query as VDeal.query
     );
-
     return reply.code(200).send({
       success: true,
-      data: { deals },
+      data: { result: deals },
     });
   }
   public async findById(request: FastifyRequest, reply: FastifyReply) {

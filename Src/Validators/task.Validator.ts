@@ -112,6 +112,23 @@ export const taskValidator = {
       .string({ message: "Invalid taskId" })
       .uuid({ message: "Invalid taskId" }),
   }),
+
+  query: z.object({
+
+    search: z.string().optional(),
+    status: z
+      .enum(["todo", "in_progress", "completed", "cancelled"], {
+        message: "Invalid status",
+      })
+      .optional(),
+    priority: z
+      .enum(["low", "medium", "high", "urgent"], {
+        message: "Invalid priority",
+      })
+      .optional(),
+    page: z.coerce.number().optional().default(1),
+    limit: z.coerce.number().optional().default(10),
+  }),
 };
 
 export declare namespace VTask {
@@ -122,4 +139,6 @@ export declare namespace VTask {
   type organizationId = z.infer<typeof taskValidator.organizationId>;
 
   type taskId = z.infer<typeof taskValidator.taskId>;
+
+  type query = z.infer<typeof taskValidator.query>
 }

@@ -43,7 +43,7 @@ class OrganizationInvitationRepo {
       _query.push(ilike(organization_invitations.email, `%${data.search}%`))
     }
     const [invitations, totalCount] = await Promise.all([
-      db.select({}).from(organization_invitations).where(and(..._query)).limit(limit).offset((page - 1) * limit).orderBy(desc(organization_invitations.createdAt)),
+      db.select({}).from(organization_invitations).where(and(..._query)).orderBy(desc(organization_invitations.createdAt)).limit(limit).offset((page - 1) * limit),
       db.select({ count: count() }).from(organization_invitations).where(and(..._query))
     ]);
     return {

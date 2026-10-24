@@ -12,7 +12,6 @@ export const taskRouter = async (app: FastifyInstance) => {
     };
   });
 
-  // Create task
   app.post(
     "/",
     {
@@ -25,19 +24,18 @@ export const taskRouter = async (app: FastifyInstance) => {
     taskController.create,
   );
 
-  // Get all tasks
   app.get(
     "/",
     {
       preHandler: [authenticate.user],
       schema: {
         params: taskValidator.organizationId,
+        querystring: taskValidator.query
       },
     },
-    taskController.findAll,
+    taskController.query,
   );
 
-  // Get task by ID
   app.get(
     "/:taskId",
     {
@@ -49,7 +47,6 @@ export const taskRouter = async (app: FastifyInstance) => {
     taskController.findById,
   );
 
-  // Update task
   app.patch(
     "/:taskId",
     {
@@ -62,7 +59,6 @@ export const taskRouter = async (app: FastifyInstance) => {
     taskController.update,
   );
 
-  // Delete task
   app.delete(
     "/:taskId",
     {
