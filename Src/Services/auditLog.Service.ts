@@ -3,8 +3,9 @@ import auditLogRepo from "../Repositories/auditLog.Repo";
 import { VAuditLog } from "../Validators/auditLog.Validator";
 
 export const auditLogService = {
-  findAll: async (organizationId: VAuditLog.organizationId) => {
-    return await auditLogRepo.findAll(organizationId);
+  query: async (organization: VAuditLog.organizationId, query: VAuditLog.query) => {
+    const auditLogs = auditLogRepo.query({ ...organization, ...query })
+    return auditLogs
   },
 
   findById: async (data: VAuditLog.auditLogId) => {

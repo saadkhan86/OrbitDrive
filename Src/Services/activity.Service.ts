@@ -53,7 +53,7 @@ export const activityService = {
       await auditLogRepo.create(tx, {
         organizationId: organization.organizationId,
         userId: user.userId,
-        action: "ACTIVITY_CREATED",
+        action: "create",
         entityType: "activity",
         entityId: created.id,
         metadata: {
@@ -158,7 +158,7 @@ export const activityService = {
       await auditLogRepo.create(tx, {
         organizationId: activity.organizationId,
         userId: user.userId,
-        action: "ACTIVITY_UPDATED",
+        action: "update",
         entityType: "activity",
         entityId: updated.id,
         metadata: {
@@ -193,7 +193,7 @@ export const activityService = {
       await auditLogRepo.create(tx, {
         organizationId: activity.organizationId,
         userId: user.userId,
-        action: "ACTIVITY_DELETED",
+        action: "delete",
         entityType: "activity",
         entityId: existingActivity.id,
         metadata: {

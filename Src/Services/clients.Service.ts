@@ -18,19 +18,20 @@ class ClientsService {
         ...data,
         organizationId: organization.organizationId,
       });
+      if (!createdClient) throw new CustomError(500, "client not created", "SOMETHING_WENT_WRONG")
       await auditLogRepo.create(tx, {
         organizationId: createdClient!.organizationId,
-        action: "CLIENT CREATED",
+        action: "create",
         userId: user.userId,
-        entityType: "Client",
-        entityId: createdClient!.id,
+        entityType: "client",
+        entityId: createdClient.id,
         metadata: {
-          company: createdClient!.company,
-          email: createdClient!.email,
+          company: createdClient.company,
+          email: createdClient.email,
         },
       });
       return createdClient;
-    });
+    })
     return client;
   }
 
@@ -56,15 +57,16 @@ class ClientsService {
   ) {
     const updatedClient = await db.transaction(async (tx) => {
       const updated = await ClientRepo.update(tx, { ...client, ...data });
+      if (!updated) throw new CustomError(500, "something went wrong while updating client", "SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: client.organizationId,
-        action: "CLIENT UPDATED",
+        action: "update",
         userId: user.userId,
-        entityType: "Client",
-        entityId: updated!.id,
+        entityType: "client",
+        entityId: updated.id,
         metadata: {
-          company: updated!.company,
-          email: updated!.email,
+          company: updated.company,
+          email: updated.email,
         },
       });
       return updated;
@@ -79,9 +81,9 @@ class ClientsService {
       await ClientRepo.delete(tx, { ...data });
       await auditLogRepo.create(tx, {
         organizationId: foundClient.organizationId,
-        action: "CLIENT DELETED",
+        action: "delete",
         userId: user.userId,
-        entityType: "Client",
+        entityType: "client",
         entityId: data.clientId,
         metadata: {
           company: foundClient.company,

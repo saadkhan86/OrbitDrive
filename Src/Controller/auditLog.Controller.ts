@@ -1,19 +1,19 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { auditLogService } from "../Services/auditLog.Service";
-import { VActivity } from "../Validators/activity.Validator";
 import { VAuditLog } from "../Validators/auditLog.Validator";
 
 export const auditLogController = {
-  findAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const auditLogs = await auditLogService.findAll(
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const auditLogs = await auditLogService.query(
       request.params as VAuditLog.organizationId,
+      request.query as VAuditLog.query
     );
 
     return reply.status(200).send({
       success: true,
       message: "Audit Logs fetched successfully",
-      data: auditLogs,
+      data: { result: auditLogs }
     });
   },
 

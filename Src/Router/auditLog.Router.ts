@@ -8,7 +8,7 @@ export const auditLogRouter = async (app: FastifyInstance) => {
     route.schema = { ...route.schema, tags: ["Audit Logs"] };
   });
   app.addHook("preHandler", authenticate.user);
-  app.addHook("preHandler", authorize.role(["ADMIN", "OWNER"]));
-  app.get("/", auditLogController.findAll);
+  app.addHook("preHandler", authorize.role(["admin", "owner"]));
+  app.get("/", auditLogController.query);
   app.get("/:auditLogId", auditLogController.findById);
 };

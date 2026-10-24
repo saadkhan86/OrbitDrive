@@ -49,19 +49,20 @@ export const taskService = {
         ...data,
         organizationId: organization.organizationId,
       });
+      if (!task) throw new CustomError(500, "task not created", "SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: organization.organizationId,
         userId: user.userId,
-        action: "TASK_CREATED",
+        action: "create",
         entityType: "task",
-        entityId: task!.id,
+        entityId: task.id,
         metadata: {
-          title: task!.title,
-          assignedTo: task!.assignedTo,
-          clientId: task!.clientId,
-          dealId: task!.dealId,
-          priority: task!.priority,
-          status: task!.status,
+          title: task.title,
+          assignedTo: task.assignedTo,
+          clientId: task.clientId,
+          dealId: task.dealId,
+          priority: task.priority,
+          status: task.status,
         },
       });
       notificationRepo.create(tx, {
@@ -102,13 +103,13 @@ export const taskService = {
 
     const updatedTask = await db.transaction(async (tx) => {
       const updated = await TaskRepo.update(tx, { ...task, ...data });
-
+      if (!updated) throw new CustomError(500, "task not updated", "SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: updated!.organizationId,
         userId: user.userId,
-        action: "TASK_UPDATED",
+        action: "update",
         entityType: "task",
-        entityId: updated!.id,
+        entityId: updated.id,
         metadata: {
           previous: {
             title: existingTask.title,
@@ -117,10 +118,10 @@ export const taskService = {
             priority: existingTask.priority,
           },
           updated: {
-            title: updated!.title,
-            assignedTo: updated!.assignedTo,
-            status: updated!.status,
-            priority: updated!.priority,
+            title: updated.title,
+            assignedTo: updated.assignedTo,
+            status: updated.status,
+            priority: updated.priority,
           },
         },
       });
@@ -141,7 +142,7 @@ export const taskService = {
       await auditLogRepo.create(tx, {
         organizationId: existingTask.organizationId,
         userId: user.userId,
-        action: "TASK_DELETED",
+        action: "delete",
         entityType: "task",
         entityId: existingTask.id,
         metadata: {

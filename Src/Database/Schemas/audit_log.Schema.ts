@@ -1,5 +1,6 @@
 import {
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -8,6 +9,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { organizations } from "./organization.Schema";
 import { users } from "./users.Schema";
+
+export const actionEnum = pgEnum("audit_log_action", ["create", "update", "delete", "invite", "join"])
+export const entityTypeEnum = pgEnum("audit_log_entity_type", ["organization_member", "organization_invite", "deal", "client", "task", "activity"])
 
 export const auditLogs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -20,11 +24,10 @@ export const auditLogs = pgTable("audit_logs", {
     onDelete: "set null",
   }),
 
-  action: varchar("action", { length: 100 }).notNull(),
+  entityType: entityTypeEnum("entity_type").notNull(),
+  action: actionEnum("action").notNull(),
 
-  entityType: varchar("entity_type", { length: 50 }).notNull(),
-
-  entityId: uuid("entity_id"),
+  entityId: uuid("entity_id").notNull(),
 
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
 

@@ -52,16 +52,17 @@ export const organizationInvitationService = {
         expiresAt,
         createdBy: currentUser.userId,
       });
+      if (!createdInvitation) throw new CustomError(500, "Internal server error", "INTERNAL_SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: org.organizationId,
-        action: "INVITE",
-        entityType: "ORGANIZATION_INVITATION",
-        entityId: createdInvitation!.id,
+        action: "invite",
+        entityType: "organization_invite",
+        entityId: createdInvitation.id,
         userId: currentUser.userId,
         metadata: {
-          invitedEmail: createdInvitation!.email,
-          assignedRole: createdInvitation!.role,
-          expiresAt: createdInvitation!.expiresAt,
+          invitedEmail: createdInvitation.email,
+          assignedRole: createdInvitation.role,
+          expiresAt: createdInvitation.expiresAt,
         },
       });
       if (targetUser) {
@@ -143,8 +144,8 @@ export const organizationInvitationService = {
 
       await auditLogRepo.create(tx, {
         organizationId: foundInvitation.organizationId,
-        action: "CANCEL",
-        entityType: "ORGANIZATION_INVITATION",
+        action: "delete",
+        entityType: "organization_invite",
         entityId: foundInvitation.id,
         userId: user.userId,
         metadata: {
@@ -222,8 +223,8 @@ export const organizationInvitationService = {
         tx,
         {
           organizationId: invitation.organizationId,
-          action: "ACCEPT",
-          entityType: "ORGANIZATION_INVITATION",
+          action: "join",
+          entityType: "organization_invite",
           entityId: invitation!.id,
           userId: user.userId,
           metadata: {

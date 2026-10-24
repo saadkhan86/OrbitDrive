@@ -1,4 +1,3 @@
-import { NotNull } from "drizzle-orm";
 import { db } from "../Database";
 import { CustomError } from "../Errors/CustomError";
 import auditLogRepo from "../Repositories/auditLog.Repo";
@@ -29,7 +28,7 @@ class DealService {
       await auditLogRepo.create(tx, {
         organizationId: createdDeal!.organizationId,
         userId: user.userId,
-        action: "DEAL_CREATED",
+        action: "create",
         entityType: "deal",
         entityId: createdDeal!.id,
         metadata: {
@@ -80,7 +79,7 @@ class DealService {
       await auditLogRepo.create(tx, {
         organizationId: updated!.organizationId,
         userId: user.userId,
-        action: "DEAL_UPDATED",
+        action: "update",
         entityType: "deal",
         entityId: updated!.id,
         metadata: {
@@ -115,7 +114,7 @@ class DealService {
       await auditLogRepo.create(tx, {
         organizationId: deal.organizationId,
         userId: user.userId,
-        action: "DEAL_DELETED",
+        action: "delete",
         entityType: "deal",
         entityId: foundDeal.id,
         metadata: {

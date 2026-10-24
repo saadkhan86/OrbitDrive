@@ -45,8 +45,8 @@ export const organizationMemberService = {
         });
       await auditLogRepo.create(tx, {
         organizationId: targetOrganizationMember.organizationId,
-        action: "ORGANIZATION MEMBER ROLE UPDATE",
-        entityType: "organizationMember",
+        action: "create",
+        entityType: "organization_member",
         entityId: targetOrganizationMember.id,
         userId: currentUser.userId,
         metadata: {
@@ -90,8 +90,8 @@ export const organizationMemberService = {
       });
       await auditLogRepo.create(tx, {
         organizationId: targetOrganizationMember.organizationId,
-        action: "ORGANIZATION MEMBER DELETED",
-        entityType: "organizationMember",
+        action: "delete",
+        entityType: "organization_member",
         entityId: targetOrganizationMember.id,
         metadata: {
           deletedBy: currentUser.userId,
