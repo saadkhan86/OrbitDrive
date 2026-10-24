@@ -3,13 +3,12 @@ import { CustomError } from "../Errors/CustomError";
 import { addEmailJob, EmailQueue } from "../Queues/Email.Queue";
 import UserRepo from "../Repositories/User.Repo";
 import { tokenUtils } from "../Utils/authTokenUtils";
-import type { tokenValidator } from "../Validators/token.Validator";
 import AuthRepo from "../Repositories/Auth.Repo";
 import { redisUtils } from "../Utils/redis.Utils";
-import { VAuth } from "../Validators/auth.Validator";
+import { VVerification } from "../Validators/verification.Validator";
 export const verificationService = {
-  verifyEmailVerification: async (data: tokenValidator) => {
-    const hashedToken = await tokenUtils.hashToken(data.token);
+  verifyEmailVerification: async (data: VVerification.query) => {
+    const hashedToken = await tokenUtils.hashToken(data.token!);
     const userId = await redisUtils.getRedis("verify-email", hashedToken);
     if (!userId)
       throw new CustomError(
@@ -28,8 +27,8 @@ export const verificationService = {
     await redisUtils.deleteRedis("verify-email", userId);
     return true;
   },
-  resendEmailVerification: async (data: VAuth.email) => {
-    const user = await UserRepo.findByEmail({ email: data.email });
+  resendEmailVerification: async (data: VVerification.query) => {
+    const user = await UserRepo.findByEmail({ email: data.email! });
     if (!user)
       throw new CustomError(
         404,
