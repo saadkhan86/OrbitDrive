@@ -18,8 +18,8 @@ export const userService = {
   logout: async (user: VAuth.userId) => {
     await UserRepo.logout(user)
     return true;
-  }, query: async (search: VUser.query) => {
-    const users = await UserRepo.query(search)
+  }, query: async (query: VUser.query) => {
+    const users = await UserRepo.query(query)
     return users;
   }
 

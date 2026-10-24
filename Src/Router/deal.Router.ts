@@ -17,7 +17,7 @@ export const dealRouter = async (app: FastifyInstance) => {
         params: dealValidator.organizationId,
         body: dealValidator.create,
       },
-      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
+      preHandler: authorize.role(["admin", "member", "owner"]),
     },
     dealController.create,
   );
@@ -29,9 +29,9 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.organizationId,
       },
-      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
+      preHandler: authorize.role(["admin", "member", "owner"]),
     },
-    dealController.findAll,
+    dealController.query,
   );
 
   // Get Deal By ID
@@ -41,7 +41,7 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.dealId,
       },
-      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
+      preHandler: authorize.role(["admin", "member", "owner"]),
     },
     dealController.findById,
   );
@@ -54,7 +54,7 @@ export const dealRouter = async (app: FastifyInstance) => {
         params: dealValidator.dealId,
         body: dealValidator.update,
       },
-      preHandler: authorize.role(["ADMIN", "MEMBER", "OWNER"]),
+      preHandler: authorize.role(["admin", "member", "owner"]),
     },
     dealController.update,
   );
@@ -66,7 +66,7 @@ export const dealRouter = async (app: FastifyInstance) => {
       schema: {
         params: dealValidator.dealId,
       },
-      preHandler: authorize.role(["ADMIN", "OWNER"]),
+      preHandler: authorize.role(["admin", "owner"]),
     },
     dealController.delete,
   );

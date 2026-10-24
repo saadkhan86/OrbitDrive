@@ -8,7 +8,8 @@ import { db } from "../Database";
 
 export const organizationMemberService = {
   query: async (user: VAuth.userId, data: VOrganizationMember.query) => {
-    return await OrganizationMembersRepo.query({ ...user });
+    const members = await OrganizationMembersRepo.query({ ...user, ...data });
+    return members
   },
   getAllByOrganizationId: async (org: VOrganizationMember.organizationId) => {
     return await OrganizationMembersRepo.getAllByOrganizationId(org);

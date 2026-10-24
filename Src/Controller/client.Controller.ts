@@ -20,14 +20,16 @@ export const clientController = {
     });
   },
 
-  getAll: async (request: FastifyRequest, reply: FastifyReply) => {
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const clients = await clientsService.query(
+      request.params as VOrganization.getById,
+      request.query as VClient.query
+    )
     return reply.code(200).send({
       success: true,
       message: "clients fetched successfully",
       data: {
-        clients: await clientsService.getAll(
-          request.params as VOrganization.getById,
-        ),
+        result: clients
       },
     });
   },

@@ -18,7 +18,7 @@ export const clientValidator = {
       .min(1, "Client name is required")
       .max(255, "Client name is too long"),
 
-    email: z.string().trim().toLowerCase().email("Invalid email address"),
+    email: z.email("Invalid email address"),
 
     phone: z.string().trim().max(30, "Phone number is too long"),
 
@@ -43,9 +43,6 @@ export const clientValidator = {
         .optional(),
 
       email: z
-        .string()
-        .trim()
-        .toLowerCase()
         .email("Invalid email address")
         .optional(),
 
@@ -66,6 +63,12 @@ export const clientValidator = {
     .refine((data) => Object.keys(data).length > 0, {
       message: "At least one field is required",
     }),
+  query: z.object({
+    search: z.string(),
+    status: z.enum(["active", "inactive", "prospect", "customer", "lead", "vip"]).optional(),
+    page: z.coerce.number().optional().default(1),
+    limit: z.coerce.number().optional().default(10),
+  })
 };
 
 export declare namespace VClient {
@@ -73,4 +76,5 @@ export declare namespace VClient {
   type ClientIdParams = z.infer<typeof clientValidator.clientId>;
   type CreateClientInput = z.infer<typeof clientValidator.create>;
   type UpdateClientInput = z.infer<typeof clientValidator.update>;
+  type query = z.infer<typeof clientValidator.query>;
 }

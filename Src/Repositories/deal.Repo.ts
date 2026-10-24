@@ -39,7 +39,7 @@ class DealRepo {
     )[0];
   }
 
-  public async findAll(data: VDeal.organizationId) {
+  public async query(data: VDeal.organizationId) {
     return await db
       .select()
       .from(deals)

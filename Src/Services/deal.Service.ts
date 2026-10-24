@@ -56,8 +56,8 @@ class DealService {
     return foundDeal;
   }
 
-  public async findAll(deal: VDeal.organizationId) {
-    return await dealRepo.findAll({
+  public async query(deal: VDeal.organizationId) {
+    return await dealRepo.query({
       organizationId: deal.organizationId,
     });
   }

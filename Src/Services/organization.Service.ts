@@ -30,15 +30,15 @@ export const organizationService = {
       console.log("OR", createdOrganization)
       await OrganizationMembersRepo.createOrganizationMember(tx, {
         organizationId: createdOrganization!.id,
-        userId: user.userId,
-        role: "OWNER",
+        userId: user.userId
       });
       return createdOrganization;
     });
     return organization;
   },
   query: async (user: VAuth.userId, query: VOrganization.query) => {
-    return await OrganizationRepo.query({ userId: user.userId, search: query.search });
+    const organizations = await OrganizationRepo.query({ userId: user.userId, search: query.search });
+    return organizations;
   },
   getById: async (user: VAuth.userId, org: VOrganization.getById) => {
     const organization = await OrganizationRepo.getById({ ...user, ...org });

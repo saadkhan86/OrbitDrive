@@ -4,6 +4,7 @@ import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
+import { promise } from "zod";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
@@ -57,9 +58,11 @@ class OrganizationRepo {
     if (data.search) {
       _query.push(or(ilike(organizations.name, `%${data.search}%`), ilike(organizations.slug, `%${data.search}%`)))
     }
-    const totalCount = await db.select({ count: count() }).from(organizations).where(and(..._query)).limit(limit).offset((page - 1) * limit);
-    const result = await db.select().from(organizations).where(and(..._query));
-    return { result, count: totalCount[0]?.count ?? 0 };
+    const [foundOrganizations, total] = await Promise.all([
+      db.select().from(organizations).where(and(..._query)),
+      db.select({ count: count() }).from(organizations).where(and(..._query)).limit(limit).offset((page - 1) * limit)
+    ]);
+    return { organizations: foundOrganizations, count: total[0]?.count ?? 0 };
   }
   public async update(
     data: VOrganization.getById &

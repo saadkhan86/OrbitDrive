@@ -42,8 +42,8 @@ export const organizationController = {
     });
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { result, count } = await organizationService.query(request.user, request.query as VOrganization.query);
-    reply.status(200).send({ success: true, message: "Ogranizations fetched successfully", organizations: { result }, count })
+    const organizations = await organizationService.query(request.user, request.query as VOrganization.query);
+    reply.status(200).send({ success: true, message: "Ogranizations fetched successfully", data: { result: organizations } })
   },
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationService.delete(

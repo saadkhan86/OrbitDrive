@@ -101,8 +101,8 @@ export const organizationInvitationService = {
   },
 
   async query(org: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
-    const { invitations, count } = await OrganizationInvitationRepo.query({ ...org, ...query });
-    return { invitations, count };
+    const invitations = await OrganizationInvitationRepo.query({ ...org, ...query });
+    return invitations
   },
 
   async getById(invitation: VOrganizationInvitation.invitationId) {

@@ -16,8 +16,8 @@ class DealController {
       data: { deal },
     });
   }
-  public async findAll(request: FastifyRequest, reply: FastifyReply) {
-    const deals = await dealService.findAll(
+  public async query(request: FastifyRequest, reply: FastifyReply) {
+    const deals = await dealService.query(
       request.params as VDeal.organizationId,
     );
 

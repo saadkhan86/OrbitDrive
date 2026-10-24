@@ -12,9 +12,11 @@ class OrganizationMembers {
     if (data.role) {
       _query.push(eq(organization_members.role, data.role))
     }
-    const result = await db.select().from(organization_members).where(and(..._query)).limit(limit).offset((page - 1) * limit).orderBy(desc(organization_members.createdAt))
-    const resultCount = await db.select({ count: count() }).from(organization_members).where(and(..._query))
-    return { result, count: resultCount[0]?.count ?? 0 }
+    const [foundMembers, total] = await Promise.all([
+      db.select().from(organization_members).where(and(..._query)).offset((page - 1) * limit).limit(limit).orderBy(desc(organization_members.createdAt)),
+      await db.select({ count: count() }).from(organization_members).where(and(..._query))
+    ])
+    return { organizationMembers: foundMembers, count: total[0]?.count ?? 0 }
   }
   public async createOrganizationMember(
     tx: NodePgDatabase,

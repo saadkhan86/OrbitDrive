@@ -73,6 +73,13 @@ export const dealValidator = {
   organizationId: z.object({
     organizationId: z.string().uuid({ message: "invalid organizationId" }),
   }),
+  query: z.object({
+    search: z.string().optional(),
+    stage: z.enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"]).optional(),
+    page: z.number().optional(),
+    limit: z.number().optional(),
+
+  })
 };
 
 export declare namespace VDeal {
@@ -81,4 +88,5 @@ export declare namespace VDeal {
   type dealId = z.infer<typeof dealValidator.dealId>;
   type clientId = z.infer<typeof dealValidator.clientId>;
   type organizationId = z.infer<typeof dealValidator.organizationId>;
+  type query = z.infer<typeof dealValidator.query>
 }

@@ -6,7 +6,7 @@ import { VOrganizationInvitation } from "../Validators/organizationInvitation.Va
 
 export const organizationInvitationController = {
   async create(request: FastifyRequest, reply: FastifyReply) {
-    const result = await organizationInvitationService.create(
+    const { invitation } = await organizationInvitationService.create(
       request.user as VAuth.userId & VAuth.email,
       request.params as VOrganizationInvitation.organizationId,
       request.body as VOrganizationInvitation.create,
@@ -15,12 +15,12 @@ export const organizationInvitationController = {
     return reply.status(201).send({
       success: true,
       message: "Invitation created successfully",
-      data: result.invitation,
+      data: invitation,
     });
   },
 
   async query(request: FastifyRequest, reply: FastifyReply) {
-    const { invitations, count } =
+    const invitations =
       await organizationInvitationService.query(
         request.params as VOrganizationInvitation.organizationId,
         request.query as VOrganizationInvitation.query,
@@ -28,7 +28,7 @@ export const organizationInvitationController = {
 
     return reply.status(200).send({
       success: true,
-      data: { invitations, count },
+      data: { result: invitations },
     });
   },
   async getById(request: FastifyRequest, reply: FastifyReply) {

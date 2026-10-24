@@ -32,11 +32,11 @@ export const userController = {
     })
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const result = await userService.query(request.query as VUser.query)
+    const users = await userService.query(request.query as VUser.query)
     return reply.status(200).send({
       success: true,
       message: "users fetched successfully",
-      data: { users: result },
+      data: { result: users },
     });
   }
 };

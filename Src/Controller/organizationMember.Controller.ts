@@ -5,11 +5,10 @@ import { VAuth } from "../Validators/auth.Validator";
 
 export const organizationMemberController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { result, count } = await organizationMemberService.query(request.user, request.query as VOrganizationMember.query)
+    const members = await organizationMemberService.query(request.user, request.query as VOrganizationMember.query)
     reply.status(200).send({
       success: true, message: "organizations fetched successfully", data: {
-        count,
-        organizations: result
+        result: members
       }
     })
   },

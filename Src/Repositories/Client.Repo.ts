@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 
 import { db } from "../Database";
 
@@ -13,11 +13,20 @@ class ClientRepo {
   }
 
   // Get All Clients
-  public async getAll(data: VClient.OrganizationIdParams) {
-    return await db
-      .select()
-      .from(clients)
-      .where(eq(clients.organizationId, data.organizationId));
+  public async query(data: VClient.OrganizationIdParams & VClient.query) {
+    const { page = 1, limit = 5 } = data;
+    const _query: any[] = [eq(clients.organizationId, data.organizationId)];
+    if (data.status) {
+      _query.push(eq(clients.status, data.status))
+    }
+    if (data.search) {
+      _query.push(or(ilike(clients.name, `%${data.search}%`), ilike(clients.email, `%${data.search}%`), ilike(clients.phone, `%${data.search}%`), ilike(clients.company, `%${data.search}%`)))
+    }
+    const [foundClients, total] = await Promise.all([
+      db.select().from(clients).where(and(..._query)).offset((page - 1) * limit).limit(limit).orderBy(desc(clients.createdAt)),
+      db.select({ count: count() }).from(clients).where(and(..._query))
+    ])
+    return { clients: foundClients, count: total[0]?.count ?? 0 }
   }
 
   // Get Single Client

@@ -13,7 +13,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
-      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER"])],
+      preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: clientValidator.organizationId,
         body: clientValidator.create,
@@ -25,18 +25,18 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.get(
     "/",
     {
-      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"])],
+      preHandler: [authorize.role()],
       schema: {
         params: clientValidator.organizationId,
       },
     },
-    clientController.getAll,
+    clientController.query,
   );
 
   app.get(
     "/:clientId",
     {
-      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER", "VIEWER"])],
+      preHandler: [authorize.role()],
       schema: {
         params: clientValidator.clientId,
       },
@@ -47,7 +47,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:clientId",
     {
-      preHandler: [authorize.role(["OWNER", "ADMIN", "MEMBER"])],
+      preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: clientValidator.clientId,
         body: clientValidator.update,
@@ -59,7 +59,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:clientId",
     {
-      preHandler: [authorize.role(["OWNER", "ADMIN"])],
+      preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: clientValidator.clientId,
       },

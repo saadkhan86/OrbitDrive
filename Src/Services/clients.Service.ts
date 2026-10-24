@@ -5,6 +5,7 @@ import { VClient } from "../Validators/clients.Validator";
 import auditLogRepo from "../Repositories/auditLog.Repo";
 import { VAuth } from "../Validators/auth.Validator";
 import { db } from "../Database";
+import { clients } from "../Database/Schemas/clients.Schema";
 
 class ClientsService {
   public async create(
@@ -33,8 +34,9 @@ class ClientsService {
     return client;
   }
 
-  public async getAll(organization: VClient.OrganizationIdParams) {
-    return await ClientRepo.getAll(organization);
+  public async query(organization: VClient.OrganizationIdParams, query: VClient.query) {
+    const clients = await ClientRepo.query({ ...organization, ...query });
+    return clients;
   }
 
   public async getById(client: VClient.ClientIdParams) {
