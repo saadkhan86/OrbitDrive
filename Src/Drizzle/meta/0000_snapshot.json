@@ -1,5 +1,5 @@
 {
-  "id": "19f5a057-adea-4911-a68a-002adea845a7",
+  "id": "90066fdf-edb4-4055-80ac-d9f76998cf04",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -164,15 +164,17 @@
           "primaryKey": false,
           "notNull": false
         },
-        "action": {
-          "name": "action",
-          "type": "varchar(100)",
+        "entity_type": {
+          "name": "entity_type",
+          "type": "audit_log_entity_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "entity_type": {
-          "name": "entity_type",
-          "type": "varchar(50)",
+        "action": {
+          "name": "action",
+          "type": "audit_log_action",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -180,7 +182,7 @@
           "name": "entity_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "metadata": {
           "name": "metadata",
@@ -584,7 +586,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'MEMBER'"
+          "default": "'member'"
         },
         "token_hash": {
           "name": "token_hash",
@@ -686,7 +688,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'MEMBER'"
+          "default": "'member'"
         },
         "created_at": {
           "name": "created_at",
@@ -1071,6 +1073,29 @@
         "note"
       ]
     },
+    "public.audit_log_action": {
+      "name": "audit_log_action",
+      "schema": "public",
+      "values": [
+        "create",
+        "update",
+        "delete",
+        "invite",
+        "join"
+      ]
+    },
+    "public.audit_log_entity_type": {
+      "name": "audit_log_entity_type",
+      "schema": "public",
+      "values": [
+        "organization_member",
+        "organization_invite",
+        "deal",
+        "client",
+        "task",
+        "activity"
+      ]
+    },
     "public.client_status": {
       "name": "client_status",
       "schema": "public",
@@ -1111,10 +1136,10 @@
       "name": "organization_member_role",
       "schema": "public",
       "values": [
-        "OWNER",
-        "ADMIN",
-        "MEMBER",
-        "VIEWER"
+        "owner",
+        "admin",
+        "member",
+        "viewer"
       ]
     },
     "public.task_priority": {

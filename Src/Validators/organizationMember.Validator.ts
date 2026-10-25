@@ -7,7 +7,7 @@ export const organizationMemberValidator = {
   organizationId: z.object({
     organizationId: z.uuid({ message: "Invalid Organization Id" }),
   }),
-  organizationMemberId: z.object({
+  memberId: z.object({
     organizationId: z.uuid({ message: "Invalid Organization Id" }),
     organizationMemberId: z.uuid({ message: "Invalid Organization Member Id" }),
   }),
@@ -17,15 +17,15 @@ export const organizationMemberValidator = {
     ).optional(),
     page: z.coerce.number({ message: "page must be type of number" }).default(1).optional(),
     limit: z.coerce.number({ message: "limit must be type of number" }).default(5).optional()
-  })
+  }),
 };
 export declare namespace VOrganizationMember {
   type role = z.infer<typeof organizationMemberValidator.role>;
   type organizationId = z.infer<
     typeof organizationMemberValidator.organizationId
   >;
-  type organizationMemberId = z.infer<
-    typeof organizationMemberValidator.organizationMemberId
+  type memberId = z.infer<
+    typeof organizationMemberValidator.memberId
   >;
   type query = z.infer<typeof organizationMemberValidator.query>
 }

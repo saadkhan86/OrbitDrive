@@ -7,39 +7,30 @@ import notificationRepo from "../Repositories/notification.Repo";
 import { db } from "../Database";
 
 export const organizationMemberService = {
-  query: async (user: VAuth.userId, data: VOrganizationMember.query) => {
-    const members = await OrganizationMembersRepo.query({ ...user, ...data });
+  query: async (organization: VOrganizationMember.organizationId, query: VOrganizationMember.query) => {
+    const members = await OrganizationMembersRepo.query({ ...organization, ...query });
     return members
   },
-  getAllByOrganizationId: async (org: VOrganizationMember.organizationId) => {
-    return await OrganizationMembersRepo.getAllByOrganizationId(org);
+  getById: async (organizationMember: VOrganizationMember.memberId) => {
+    const member = await OrganizationMembersRepo.getById({ ...organizationMember });
+    if (!member) throw new CustomError(404, "organization member not found", "NOT_FOUND");
+    return member
   },
-  getByUserId: async (user: VAuth.userId) => {
-    return await OrganizationMembersRepo.getByUserId({ ...user });
-  },
-  updateOrganizationMember: async (
+  update: async (
     currentUser: VAuth.userId,
-    orgMember: VOrganizationMember.organizationMemberId,
+    orgMember: VOrganizationMember.memberId,
     data: VOrganizationMember.role,
   ) => {
     const targetOrganizationMember = await OrganizationMembersRepo.getById({
-      ...currentUser,
       ...orgMember,
     });
     if (!targetOrganizationMember) {
       throw new CustomError(404, "organization member not found", "NOT_FOUND");
     }
-    if (targetOrganizationMember?.userId == currentUser.userId) {
-      throw new CustomError(
-        403,
-        "You cannot update your own role",
-        "CANNOT_UPDATE_SELF_ROLE",
-      );
-    }
     const member = await db.transaction(async (tx) => {
 
       const updatedMember =
-        await OrganizationMembersRepo.updateOrganizationMember({
+        await OrganizationMembersRepo.update({
           ...orgMember,
           ...data,
         });
@@ -67,9 +58,9 @@ export const organizationMemberService = {
 
     return member;
   },
-  deleteOrganizationMember: async (
+  delete: async (
     currentUser: VAuth.userId,
-    orgMember: VOrganizationMember.organizationMemberId,
+    orgMember: VOrganizationMember.memberId,
   ) => {
     const targetOrganizationMember = await OrganizationMembersRepo.getById({
       ...orgMember,
@@ -85,7 +76,7 @@ export const organizationMemberService = {
       );
     }
     const member = await db.transaction(async (tx) => {
-      await OrganizationMembersRepo.deleteOrganizationMember(tx, {
+      await OrganizationMembersRepo.delete(tx, {
         ...orgMember,
       });
       await auditLogRepo.create(tx, {

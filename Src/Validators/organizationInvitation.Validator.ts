@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export const organizationInvitationValidator = {
   organizationId: z.object({
-    organizationId: z.string().uuid({ message: "Invalid organizationId" }),
+    organizationId: z.uuid({ message: "Invalid organizationId" }),
   }),
   invitationId: z.object({
-    organizationId: z.string().uuid({ message: "Invalid organizationId" }),
-    invitationId: z.string().uuid({ message: "Invalid invitationId" }),
+    organizationId: z.uuid({ message: "Invalid organizationId" }),
+    invitationId: z.uuid({ message: "Invalid invitationId" }),
   }),
   create: z.object({
     email: z.email({ message: "Invalid email address" }),

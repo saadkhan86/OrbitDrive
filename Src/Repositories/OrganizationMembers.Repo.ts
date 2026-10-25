@@ -6,9 +6,9 @@ import { VOrganizationMember } from "../Validators/organizationMember.Validator"
 import { VAuth } from "../Validators/auth.Validator";
 
 class OrganizationMembers {
-  public async query(data: VAuth.userId & VOrganizationMember.query) {
+  public async query(data: VOrganizationMember.organizationId & VOrganizationMember.query) {
     const { page = 1, limit = 5 } = data
-    const _query = [eq(organization_members.userId, data.userId)]
+    const _query = [eq(organization_members.organizationId, data.organizationId)]
     if (data.role) {
       _query.push(eq(organization_members.role, data.role))
     }
@@ -18,7 +18,7 @@ class OrganizationMembers {
     ])
     return { organizationMembers: foundMembers, count: total[0]?.count ?? 0 }
   }
-  public async createOrganizationMember(
+  public async create(
     tx: NodePgDatabase,
     data: typeof organization_members.$inferInsert,
   ) {
@@ -33,52 +33,8 @@ class OrganizationMembers {
         .returning()
     )[0];
   }
-  public async getAllByOrganizationId(
-    data: VOrganizationMember.organizationId,
-  ) {
-    return await db
-      .select()
-      .from(organization_members)
-      .where(eq(organization_members.organizationId, data.organizationId));
-  }
-  public async getById(data: VOrganizationMember.organizationMemberId) {
-    return (
-      await db
-        .select()
-        .from(organization_members)
-        .where(
-          and(
-            eq(organization_members.userId, data.organizationMemberId),
-            eq(organization_members.organizationId, data.organizationId),
-          ),
-        )
-    )[0];
-  }
-  public async getByOrganizationAndUserId(
-    data: VOrganizationMember.organizationMemberId,
-  ) {
-    return (
-      await db
-        .select()
-        .from(organization_members)
-        .where(
-          and(
-            eq(organization_members.userId, data.organizationMemberId),
-            eq(organization_members.organizationId, data.organizationId),
-          ),
-        )
-    )[0];
-  }
-  public async getByUserId(data: VAuth.userId) {
-    return (
-      await db
-        .select()
-        .from(organization_members)
-        .where(eq(organization_members.userId, data.userId))
-    )[0];
-  }
-  public async updateOrganizationMember(
-    data: VOrganizationMember.role & VOrganizationMember.organizationMemberId,
+  public async update(
+    data: VOrganizationMember.role & VOrganizationMember.memberId,
   ) {
     return await db
       .update(organization_members)
@@ -91,9 +47,9 @@ class OrganizationMembers {
       )
       .returning();
   }
-  public async deleteOrganizationMember(
+  public async delete(
     tx: NodePgDatabase,
-    data: VOrganizationMember.organizationMemberId,
+    data: VOrganizationMember.memberId,
   ) {
     await tx
       .delete(organization_members)
@@ -104,6 +60,40 @@ class OrganizationMembers {
         ),
       );
     return;
+  }
+
+  public async getById(data: VOrganizationMember.memberId) {
+    return (
+      await db
+        .select()
+        .from(organization_members)
+        .where(
+          and(
+            eq(organization_members.id, data.organizationMemberId),
+            eq(organization_members.organizationId, data.organizationId),
+          ),
+        )
+    )[0];
+  }
+  // public async getByOrganizationMemberUserId(
+  //   data: VOrganizationMember.organizationId & VAuth.userId
+  // ) {
+  //   return (
+  //     await db
+  //       .select()
+  //       .from(organization_members)
+  //       .where(
+  //         and(eq(organization_members.userId, data.userId), eq(organization_members.organizationId, data.organizationId))
+  //       )
+  //   )[0];
+  // }
+  public async getByUserId(data: VOrganizationMember.organizationId & VAuth.userId) {
+    return (
+      await db
+        .select()
+        .from(organization_members)
+        .where(and(eq(organization_members.userId, data.userId), eq(organization_members.organizationId, data.organizationId)))
+    )[0];
   }
 }
 export default new OrganizationMembers();

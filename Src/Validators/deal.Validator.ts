@@ -2,7 +2,7 @@ import z from "zod";
 
 export const dealValidator = {
   create: z.object({
-    clientId: z.string().uuid({ message: "invalid clientId" }),
+    clientId: z.uuid({ message: "invalid clientId" }),
 
     title: z
       .string({ message: "title must be of type string" })
@@ -63,15 +63,15 @@ export const dealValidator = {
     }),
 
   dealId: z.object({
-    dealId: z.string().uuid({ message: "invalid dealId" }),
-    organizationId: z.string().uuid({ message: "invalid organizationId" }),
+    dealId: z.uuid({ message: "invalid dealId" }),
+    organizationId: z.uuid({ message: "invalid organizationId" }),
   }),
 
   clientId: z.object({
-    clientId: z.string().uuid({ message: "invalid clientId" }),
+    clientId: z.uuid({ message: "invalid clientId" }),
   }),
   organizationId: z.object({
-    organizationId: z.string().uuid({ message: "invalid organizationId" }),
+    organizationId: z.uuid({ message: "invalid organizationId" }),
   }),
   query: z.object({
     search: z.string().optional(),

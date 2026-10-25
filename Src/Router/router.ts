@@ -13,8 +13,8 @@ import { notificationRouter } from "./notification.Router";
 import { auditLogRouter } from "./auditLog.Router";
 export const router = async (app: FastifyInstance) => {
   app.register(authRouter, { prefix: "/auth" });
-  app.register(userRouter, { prefix: "/users" });
   app.register(verificationRouter, { prefix: "/verification" });
+  app.register(userRouter, { prefix: "/users" });
   app.register(organizationRouter, { prefix: "/organization" });
   app.register(organizationInvitationRouter, {
     prefix: "/organization-invitation",
@@ -26,7 +26,6 @@ export const router = async (app: FastifyInstance) => {
   app.register(dealRouter, { prefix: "/:organizationId/deals" });
   app.register(taskRouter, { prefix: "/:organizationId/tasks" });
   app.register(activityRouter, { prefix: "/:organizationId/activities" });
-  //done
   app.register(auditLogRouter, { prefix: "/:organizationId/audit-logs" });
   app.register(notificationRouter, { prefix: "/notifications" })
 };

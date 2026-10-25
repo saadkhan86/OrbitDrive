@@ -101,8 +101,8 @@ export const organizationInvitationService = {
     };
   },
 
-  async query(org: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
-    const invitations = await OrganizationInvitationRepo.query({ ...org, ...query });
+  async query(organization: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
+    const invitations = await OrganizationInvitationRepo.query({ ...organization, ...query });
     return invitations
   },
 
@@ -194,9 +194,9 @@ export const organizationInvitationService = {
     }
 
     const existingMember =
-      await OrganizationMembersRepo.getByOrganizationAndUserId({
+      await OrganizationMembersRepo.getByUserId({
         organizationId: invitation.organizationId,
-        organizationMemberId: user.userId,
+        userId: user.userId,
       });
 
     if (existingMember) {
@@ -208,7 +208,7 @@ export const organizationInvitationService = {
     }
     const member = await db.transaction(async (tx) => {
       const createdMember =
-        await OrganizationMembersRepo.createOrganizationMember(tx, {
+        await OrganizationMembersRepo.create(tx, {
           organizationId: invitation.organizationId,
           userId: user.userId,
           role: invitation.role,

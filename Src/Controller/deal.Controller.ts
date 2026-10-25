@@ -13,6 +13,7 @@ class DealController {
     );
     return reply.code(201).send({
       success: true,
+      message: "deal created successfully",
       data: { deal },
     });
   }
@@ -23,6 +24,7 @@ class DealController {
     );
     return reply.code(200).send({
       success: true,
+      message: "deals fetched successfully",
       data: { result: deals },
     });
   }
@@ -33,6 +35,7 @@ class DealController {
 
     return reply.code(200).send({
       success: true,
+      message: "deal fetched successfully",
       data: { deal },
     });
   }
@@ -46,7 +49,8 @@ class DealController {
 
     return reply.code(200).send({
       success: true,
-      data: deal,
+      message: "deal updated successfully",
+      data: { deal },
     });
   }
 

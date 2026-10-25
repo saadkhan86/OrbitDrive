@@ -5,30 +5,16 @@ import { VAuth } from "../Validators/auth.Validator";
 
 export const organizationMemberController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const members = await organizationMemberService.query(request.user, request.query as VOrganizationMember.query)
+    const members = await organizationMemberService.query(request.params as VOrganizationMember.organizationId, request.query as VOrganizationMember.query)
     reply.status(200).send({
       success: true, message: "organizations fetched successfully", data: {
         result: members
       }
     })
   },
-  getAllByOrganizationId: async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-  ) => {
-    const organizationMembers =
-      await organizationMemberService.getAllByOrganizationId(
-        request.params as VOrganizationMember.organizationId,
-      );
-    return reply.status(200).send({
-      success: true,
-      message: "organization members fetched successfully",
-      data: { organizationMembers },
-    });
-  },
-  getByUserId: async (request: FastifyRequest, reply: FastifyReply) => {
-    const member = await organizationMemberService.getByUserId(
-      request.user as VAuth.userId,
+  getById: async (request: FastifyRequest, reply: FastifyReply) => {
+    const member = await organizationMemberService.getById(
+      request.params as VOrganizationMember.memberId
     );
     return reply.status(200).send({
       success: true,
@@ -38,9 +24,9 @@ export const organizationMemberController = {
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const organizationMember =
-      await organizationMemberService.updateOrganizationMember(
+      await organizationMemberService.update(
         request.user as VAuth.userId,
-        request.params as VOrganizationMember.organizationMemberId,
+        request.params as VOrganizationMember.memberId,
         request.body as VOrganizationMember.role,
       );
     return reply.status(200).send({
@@ -51,9 +37,9 @@ export const organizationMemberController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    await organizationMemberService.deleteOrganizationMember(
+    await organizationMemberService.delete(
       request.user as VAuth.userId,
-      request.params as VOrganizationMember.organizationMemberId,
+      request.params as VOrganizationMember.memberId,
     );
     return reply.status(204).send({
       success: true,

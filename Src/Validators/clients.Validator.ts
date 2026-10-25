@@ -3,12 +3,12 @@ import { z } from "zod";
 export const clientValidator = {
   // Params
   organizationId: z.object({
-    organizationId: z.string().uuid("Invalid organization ID"),
+    organizationId: z.uuid("Invalid organization ID"),
   }),
 
   clientId: z.object({
-    organizationId: z.string().uuid("Invalid organization ID"),
-    clientId: z.string().uuid("Invalid client ID"),
+    organizationId: z.uuid("Invalid organization ID"),
+    clientId: z.uuid("Invalid client ID"),
   }),
 
   create: z.object({

@@ -27,13 +27,13 @@
     "zod": "^4.6.1"
   },
   "devDependencies": {
+    "@fastify/swagger": "^9.9.1",
+    "@fastify/swagger-ui": "^6.1.1",
     "@types/node": "^22.20.2",
     "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2",
-    "@fastify/swagger": "^9.9.1",
-    "@fastify/swagger-ui": "^6.1.1"
+    "typescript": "^7.0.2"
   }
 }

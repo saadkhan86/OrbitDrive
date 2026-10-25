@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { notificationController } from "../Controller/notification.Controller";
 import { authenticate } from "../Hooks/AuthenticationHook";
+import { notificationValidator } from "../Validators/notification.Validator";
 
 export const notificationRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (routeOptions) => {
@@ -18,7 +19,12 @@ export const notificationRouter = async (app: FastifyInstance) => {
 
   app.patch(
     "/read",
-    { preHandler: [authenticate.user] },
+    {
+      preHandler: [authenticate.user],
+      schema: {
+        body: notificationValidator.markAsRead,
+      },
+    },
     notificationController.markManyAsRead,
   );
 

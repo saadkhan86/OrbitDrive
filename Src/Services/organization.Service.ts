@@ -27,10 +27,11 @@ export const organizationService = {
         name: data.name,
         slug,
       });
-      console.log("OR", createdOrganization)
-      await OrganizationMembersRepo.createOrganizationMember(tx, {
-        organizationId: createdOrganization!.id,
-        userId: user.userId
+      if (!createdOrganization) throw new CustomError(500, "organization not created", "SERVER_ERROR")
+      await OrganizationMembersRepo.create(tx, {
+        organizationId: createdOrganization.id,
+        userId: user.userId,
+        role: "owner"
       });
       return createdOrganization;
     });

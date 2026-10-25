@@ -1,8 +1,10 @@
 CREATE TYPE "public"."activity_type" AS ENUM('call', 'email', 'meeting', 'note');--> statement-breakpoint
+CREATE TYPE "public"."audit_log_action" AS ENUM('create', 'update', 'delete', 'invite', 'join');--> statement-breakpoint
+CREATE TYPE "public"."audit_log_entity_type" AS ENUM('organization_member', 'organization_invite', 'deal', 'client', 'task', 'activity');--> statement-breakpoint
 CREATE TYPE "public"."client_status" AS ENUM('active', 'inactive', 'prospect', 'customer', 'lead', 'vip');--> statement-breakpoint
 CREATE TYPE "public"."deal_stage" AS ENUM('lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost');--> statement-breakpoint
 CREATE TYPE "public"."notification_type" AS ENUM('task_assigned', 'task_updated', 'deal_updated', 'role', 'invitation', 'system');--> statement-breakpoint
-CREATE TYPE "public"."organization_member_role" AS ENUM('OWNER', 'ADMIN', 'MEMBER', 'VIEWER');--> statement-breakpoint
+CREATE TYPE "public"."organization_member_role" AS ENUM('owner', 'admin', 'member', 'viewer');--> statement-breakpoint
 CREATE TYPE "public"."task_priority" AS ENUM('high', 'medium', 'low', 'urgent');--> statement-breakpoint
 CREATE TYPE "public"."task_status" AS ENUM('todo', 'in_progress', 'completed', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."auth_provider" AS ENUM('password', 'google');--> statement-breakpoint
@@ -24,9 +26,9 @@ CREATE TABLE "audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
 	"user_id" uuid,
-	"action" varchar(100) NOT NULL,
-	"entity_type" varchar(50) NOT NULL,
-	"entity_id" uuid,
+	"entity_type" "audit_log_entity_type" NOT NULL,
+	"action" "audit_log_action" NOT NULL,
+	"entity_id" uuid NOT NULL,
 	"metadata" jsonb DEFAULT '{}'::jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -77,7 +79,7 @@ CREATE TABLE "organization_invitations" (
 	"organization_id" uuid NOT NULL,
 	"created_by" uuid NOT NULL,
 	"email" varchar(255) NOT NULL,
-	"role" "organization_member_role" DEFAULT 'MEMBER' NOT NULL,
+	"role" "organization_member_role" DEFAULT 'member' NOT NULL,
 	"token_hash" varchar(64) NOT NULL,
 	"expires_at" timestamp with time zone DEFAULT now() + interval '24 hours',
 	"accepted_at" timestamp with time zone DEFAULT NULL,
@@ -89,7 +91,7 @@ CREATE TABLE "organization_members" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
 	"user_id" uuid,
-	"role" "organization_member_role" DEFAULT 'MEMBER' NOT NULL,
+	"role" "organization_member_role" DEFAULT 'member' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "organization_member_org_user_unique" UNIQUE("organization_id","user_id")
