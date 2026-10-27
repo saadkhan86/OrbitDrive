@@ -22,7 +22,6 @@ export const dealRouter = async (app: FastifyInstance) => {
     dealController.create,
   );
 
-  // Get All Deals
   app.get(
     "/",
     {
@@ -34,7 +33,6 @@ export const dealRouter = async (app: FastifyInstance) => {
     dealController.query,
   );
 
-  // Get Deal By ID
   app.get(
     "/:dealId",
     {
@@ -46,7 +44,6 @@ export const dealRouter = async (app: FastifyInstance) => {
     dealController.findById,
   );
 
-  // Update Deal
   app.patch(
     "/:dealId",
     {
@@ -59,7 +56,6 @@ export const dealRouter = async (app: FastifyInstance) => {
     dealController.update,
   );
 
-  // Delete Deal
   app.delete(
     "/:dealId",
     {

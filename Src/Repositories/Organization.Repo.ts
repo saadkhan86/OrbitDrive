@@ -1,10 +1,11 @@
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
 import { promise } from "zod";
+import { users } from "../Database/Schemas/users.Schema";
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
@@ -25,17 +26,19 @@ class OrganizationRepo {
         })
     )[0];
   }
-  public async getById(data: VAuth.userId & VOrganization.getById) {
+  public async getById(data: VOrganization.getById) {
     return (
       await db
-        .select()
+        .select({
+          ...getTableColumns(organizations),
+          owner: { name: users.fullName }
+        })
         .from(organizations)
         .where(
           and(
-            eq(organizations.id, data.organizationId),
-            eq(organizations.ownerId, data.userId),
+            eq(organizations.id, data.organizationId)
           ),
-        )
+        ).innerJoin(users, eq(organizations.ownerId, users.id))
     )[0];
   }
   public async findByOwnerAndSlug(data: VAuth.userId & VOrganization.slug) {

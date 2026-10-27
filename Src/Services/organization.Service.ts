@@ -41,8 +41,8 @@ export const organizationService = {
     const organizations = await OrganizationRepo.query({ userId: user.userId, search: query.search });
     return organizations;
   },
-  getById: async (user: VAuth.userId, org: VOrganization.getById) => {
-    const organization = await OrganizationRepo.getById({ ...user, ...org });
+  getById: async (org: VOrganization.getById) => {
+    const organization = await OrganizationRepo.getById({ organizationId: org.organizationId });
     if (!organization) {
       throw new CustomError(
         404,

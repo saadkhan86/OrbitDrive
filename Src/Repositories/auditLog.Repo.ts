@@ -1,8 +1,9 @@
-import { and, count, desc, eq } from "drizzle-orm";
-import { auditLogs } from "../Database/Schemas/audit_log.Schema";
+import { and, count, desc, eq, getTableColumns } from "drizzle-orm";
+import { audit_logs } from "../Database/Schemas/audit_log.Schema";
 import { db } from "../Database";
 import { VAuditLog } from "../Validators/auditLog.Validator";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { users } from "../Database/Schemas/users.Schema";
 
 class AuditLogRepo {
   //issue resolved
@@ -10,51 +11,54 @@ class AuditLogRepo {
   //i have changed the signature of the create method
   public async create(
     tx: NodePgDatabase,
-    data: typeof auditLogs.$inferInsert,
+    data: typeof audit_logs.$inferInsert,
   ) {
-    return (await tx.insert(auditLogs).values(data).returning())[0];
+    return (await tx.insert(audit_logs).values(data).returning())[0];
   }
 
   public async query(data: VAuditLog.organizationId & VAuditLog.query) {
     const { page, limit } = data
-    const _query: any[] = [eq(auditLogs.organizationId, data.organizationId)];
+    const _query: any[] = [eq(audit_logs.organizationId, data.organizationId)];
     if (data.action) {
-      _query.push(eq(auditLogs.action, data.action));
+      _query.push(eq(audit_logs.action, data.action));
     }
     if (data.entityType) {
-      _query.push(eq(auditLogs.entityType, data.entityType));
+      _query.push(eq(audit_logs.entityType, data.entityType));
     }
     const [foundAuditLogs, total] = await Promise.all([
       db
         .select()
-        .from(auditLogs)
+        .from(audit_logs)
         .where(and(..._query))
-        .orderBy(desc(auditLogs.createdAt))
+        .orderBy(desc(audit_logs.createdAt))
         .limit(limit)
         .offset((page - 1) * limit),
       db
         .select({ count: count() })
-        .from(auditLogs)
+        .from(audit_logs)
         .where(and(..._query))
     ])
     return { auditLogs: foundAuditLogs, count: total[0]?.count ?? 0 }
   }
 
   public async findById(data: VAuditLog.auditLogId) {
-    return (
-      (
-        await db
-          .select()
-          .from(auditLogs)
-          .where(
-            and(
-              eq(auditLogs.id, data.auditLogId),
-              eq(auditLogs.organizationId, data.organizationId),
-            ),
-          )
-          .limit(1)
-      )[0] ?? null
-    );
+    const auditLog = (
+      await db
+        .select({
+          ...getTableColumns(audit_logs),
+          user: { name: users.fullName },
+        })
+        .from(audit_logs)
+        .innerJoin(users, eq(users.id, audit_logs.userId))
+        .where(
+          and(
+            eq(audit_logs.id, data.auditLogId),
+            eq(audit_logs.organizationId, data.organizationId),
+          ),
+        )
+        .limit(1)
+    )[0] ?? null
+    return auditLog
   }
 }
 

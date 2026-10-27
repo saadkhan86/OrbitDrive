@@ -1,8 +1,10 @@
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
 import { tasks } from "../Database/Schemas/tasks.Schema";
 import { db } from "../Database";
 import { VTask } from "../Validators/task.Validator";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { clients } from "../Database/Schemas/clients.Schema";
+import { deals } from "../Database/Schemas/deals.Schema";
 
 class TaskRepo {
   public async create(
@@ -29,16 +31,22 @@ class TaskRepo {
   }
 
   public async findById(data: VTask.taskId) {
-    const [task] = await db
-      .select()
+    const task = (await db
+      .select({
+        ...getTableColumns(tasks),
+        client: { name: clients.name },
+        deal: { title: deals.title }
+      })
       .from(tasks)
+      .leftJoin(clients, eq(tasks.clientId, clients.id))
+      .leftJoin(deals, eq(tasks.dealId, deals.id))
       .where(
         and(
           eq(tasks.id, data.taskId),
           eq(tasks.organizationId, data.organizationId),
         ),
       )
-      .limit(1);
+      .limit(1))[0]
 
     return task ?? null;
   }

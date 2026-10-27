@@ -28,43 +28,27 @@ export const notificationController = {
       data: notification,
     });
   },
-
   markAsRead: async (request: FastifyRequest, reply: FastifyReply) => {
-    const notification = await notificationService.markAsRead(
-      request.params as VNotification.notificationId,
+    const notifications = await notificationService.markAsRead(
       request.user as VAuth.userId,
-    );
-
-    return reply.status(200).send({
-      success: true,
-      message: "notification read successfully",
-      data: notification,
-    });
-  },
-
-  markManyAsRead: async (request: FastifyRequest, reply: FastifyReply) => {
-    const notifications = await notificationService.markManyAsRead(
-      request.user as VAuth.userId,
-      request.body as VNotification.markAsRead,
+      request.body as VNotification.notificationArray,
     );
 
     return reply.status(200).send({
       success: true,
       message: "notifications read successfully",
-      data: notifications,
     });
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     const result = await notificationService.delete(
-      request.params as VNotification.notificationId,
+      request.body as VNotification.notificationArray,
       request.user as VAuth.userId,
     );
 
     return reply.status(200).send({
       success: true,
       message: "notification deleted successfully",
-      ...result,
     });
   },
 };

@@ -76,22 +76,23 @@ class DealService {
         organizationId: deal.organizationId,
         ...(data as VDeal.update),
       });
+      if (!updated) throw new CustomError(500, "deal not updated", "SOMETHING_WENT_WRONG")
       await auditLogRepo.create(tx, {
-        organizationId: updated!.organizationId,
+        organizationId: updated.organizationId,
         userId: user.userId,
         action: "update",
         entityType: "deal",
-        entityId: updated!.id,
+        entityId: updated.id,
         metadata: {
           previous: {
-            title: found!.title,
-            clientId: found!.clientId,
-            value: found!.value,
+            title: found.title,
+            clientId: found.clientId,
+            value: found.value,
           },
           updated: {
-            title: updated!.title,
-            clientId: updated!.clientId,
-            value: updated!.value,
+            title: updated.title,
+            clientId: updated.clientId,
+            value: updated.value,
           },
         },
       });

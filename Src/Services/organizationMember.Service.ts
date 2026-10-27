@@ -7,6 +7,10 @@ import notificationRepo from "../Repositories/notification.Repo";
 import { db } from "../Database";
 
 export const organizationMemberService = {
+  getForCurrentUser: async (user: VAuth.userId) => {
+    const organizations = await OrganizationMembersRepo.getForCurrentUser({ userId: user.userId })
+    return organizations
+  },
   query: async (organization: VOrganizationMember.organizationId, query: VOrganizationMember.query) => {
     const members = await OrganizationMembersRepo.query({ ...organization, ...query });
     return members
@@ -51,7 +55,7 @@ export const organizationMemberService = {
         type: "role",
         userId: targetOrganizationMember.userId!,
         organizationId: targetOrganizationMember.organizationId,
-        title: "Your role has been updated",
+        title: `You role has been updated from ${targetOrganizationMember.role} to ${data.role}`,
       });
       return updatedMember;
     })

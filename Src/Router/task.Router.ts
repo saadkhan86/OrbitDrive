@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { taskController } from "../Controller/task.Controller";
 import { taskValidator } from "../Validators/task.Validator";
 import { authenticate } from "../Hooks/AuthenticationHook";
+import { authorize } from "../Hooks/authorization.Hook";
 
 export const taskRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {
@@ -11,11 +12,11 @@ export const taskRouter = async (app: FastifyInstance) => {
       tags: ["Tasks"],
     };
   });
-
+  app.addHook("preHandler", authenticate.user)
   app.post(
     "/",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: taskValidator.organizationId,
         body: taskValidator.create,
@@ -27,7 +28,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.get(
     "/",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authorize.role()],
       schema: {
         params: taskValidator.organizationId,
         querystring: taskValidator.query
@@ -39,7 +40,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.get(
     "/:taskId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authorize.role()],
       schema: {
         params: taskValidator.taskId,
       },
@@ -50,7 +51,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:taskId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: taskValidator.taskId,
         body: taskValidator.update,
@@ -62,7 +63,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:taskId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: taskValidator.taskId,
       },

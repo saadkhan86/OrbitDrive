@@ -6,7 +6,7 @@ export const notificationValidator = {
       .uuid({ message: "Invalid notificationId" }),
   }),
 
-  markAsRead: z.object({
+  notificationArray: z.object({
     notificationIds: z
       .array(z.uuid({ message: "Invalid notification ID" }), {
         message: "Notification IDs must be an array",
@@ -18,5 +18,5 @@ export const notificationValidator = {
 export declare namespace VNotification {
   type notificationId = z.infer<typeof notificationValidator.notificationId>;
 
-  type markAsRead = z.infer<typeof notificationValidator.markAsRead>;
+  type notificationArray = z.infer<typeof notificationValidator.notificationArray>;
 }

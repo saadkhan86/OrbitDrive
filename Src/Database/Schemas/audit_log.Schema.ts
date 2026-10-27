@@ -13,7 +13,7 @@ import { users } from "./users.Schema";
 export const actionEnum = pgEnum("audit_log_action", ["create", "update", "delete", "invite", "join"])
 export const entityTypeEnum = pgEnum("audit_log_entity_type", ["organization_member", "organization_invite", "deal", "client", "task", "activity"])
 
-export const auditLogs = pgTable("audit_logs", {
+export const audit_logs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
 
   organizationId: uuid("organization_id")

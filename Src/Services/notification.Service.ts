@@ -32,35 +32,25 @@ export const notificationService = {
     return data;
   },
 
-  // Mark one notification as read
+
+
   markAsRead: async (
-    notification: VNotification.notificationId,
     user: VAuth.userId,
+    notificationArray: VNotification.notificationArray,
   ) => {
     return await notificationRepo.markAsRead({
-      notificationId: notification.notificationId,
       userId: user.userId,
-    });
-  },
-
-  // Mark multiple notifications as read
-  markManyAsRead: async (
-    user: VAuth.userId,
-    data: VNotification.markAsRead,
-  ) => {
-    return await notificationRepo.markManyAsRead({
-      userId: user.userId,
-      ...data,
+      ...notificationArray,
     });
   },
 
   // Delete notification
   delete: async (
-    notification: VNotification.notificationId,
+    notificationArray: VNotification.notificationArray,
     user: VAuth.userId,
   ) => {
     return await notificationRepo.delete({
-      notificationId: notification.notificationId,
+      ...notificationArray,
       userId: user.userId,
     });
   },

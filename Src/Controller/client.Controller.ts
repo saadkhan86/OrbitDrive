@@ -35,13 +35,14 @@ export const clientController = {
   },
 
   getById: async (request: FastifyRequest, reply: FastifyReply) => {
+    const client = await clientsService.getById(
+      request.params as VClient.ClientIdParams,
+    )
     return reply.code(200).send({
       success: true,
       message: "client fetched successfully",
       data: {
-        client: await clientsService.getById(
-          request.params as VClient.ClientIdParams,
-        ),
+        client
       },
     });
   },

@@ -37,6 +37,7 @@ export const organizationInvitationController = {
     );
     return reply.status(200).send({
       success: true,
+      message: "Organization fetched successfully",
       data: invitation,
     });
   },
@@ -53,14 +54,12 @@ export const organizationInvitationController = {
       message: "Invitation cancelled successfully",
     });
   },
-
-  // POST /invitations/accept
   async accept(request: FastifyRequest, reply: FastifyReply) {
     await organizationInvitationService.accept(
       request.user as VAuth.userId & VAuth.email,
       request.params as VOrganizationInvitation.token,
     );
-    return reply.status(204).send({
+    return reply.status(200).send({
       success: true,
       message: "Invitation accepted successfully",
     });

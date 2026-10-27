@@ -3,17 +3,14 @@ import z from "zod";
 export const taskValidator = {
   create: z.object({
     clientId: z
-      .string({ message: "Invalid clientId" })
       .uuid({ message: "Invalid clientId" })
       .optional(),
 
     dealId: z
-      .string({ message: "Invalid dealId" })
       .uuid({ message: "Invalid dealId" })
       .optional(),
 
     assignedTo: z
-      .string({ message: "Invalid assignedTo ID" })
       .uuid({ message: "Invalid assignedTo ID" }),
 
     title: z
@@ -54,7 +51,6 @@ export const taskValidator = {
 
   update: z.object({
     assignedTo: z
-      .string({ message: "Invalid assignedTo ID" })
       .uuid({ message: "Invalid assignedTo ID" })
       .optional(),
 
@@ -99,17 +95,14 @@ export const taskValidator = {
 
   organizationId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
   }),
 
   taskId: z.object({
     organizationId: z
-      .string({ message: "Invalid organizationId" })
       .uuid({ message: "Invalid organizationId" }),
 
     taskId: z
-      .string({ message: "Invalid taskId" })
       .uuid({ message: "Invalid taskId" }),
   }),
 

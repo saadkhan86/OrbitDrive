@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { CustomError } from "./CustomError";
 import { DatabaseError } from "pg";
 import { hasZodFastifySchemaValidationErrors } from "fastify-type-provider-zod";
+import { DrizzleError, DrizzleQueryError } from "drizzle-orm";
 
 export const GlobalErrorHandler = (
   error: any,
@@ -9,6 +10,32 @@ export const GlobalErrorHandler = (
   reply: FastifyReply,
 ) => {
   console.log(error)
+  if (error instanceof DrizzleQueryError) {
+    request.log.error(
+      { err: error },
+      "-------------------------Drizzle error occurred---------------------",
+    );
+    if ((error.cause as any)?.code as string == "23505") {
+      const match = (error.cause as any).detail.match(/Key \(([^)]+)\)=\(([^)]+)\)/);
+      return reply.code(400).send({
+        success: false,
+        cause: (error.cause as any).code as string,
+        message: `The ${match[1]} already exists`,
+      });
+    }
+    if ((error.cause as any)?.code as string == "1048") {
+      return reply.code(400).send({
+        success: false,
+        cause: (error.cause as any).code as string,
+        message: (error.cause as any).message,
+      });
+    }
+    return reply.code(500).send({
+      success: false,
+      cause: (error.cause as any).code,
+      message: (error.cause as any).message as string
+    });
+  }
   if (error instanceof DatabaseError) {
     request.log.error(
       { err: error },

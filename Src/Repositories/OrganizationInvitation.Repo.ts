@@ -1,10 +1,11 @@
-import { and, count, desc, eq, ilike } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike } from "drizzle-orm";
 
 import { db } from "../Database";
 import { organization_invitations } from "../Database/Schemas/organization_invitation.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganizationInvitation } from "../Validators/organizationInvitation.Validator";
 import { VAuth } from "../Validators/auth.Validator";
+import { users } from "../Database/Schemas/users.Schema";
 
 class OrganizationInvitationRepo {
   public async create(tx: NodePgDatabase, data: typeof organization_invitations.$inferInsert) {
@@ -19,8 +20,12 @@ class OrganizationInvitationRepo {
   public async getById(data: VOrganizationInvitation.invitationId) {
     return (
       await db
-        .select()
+        .select({
+          ...getTableColumns(organization_invitations),
+          createdBy: { name: users.fullName }
+        })
         .from(organization_invitations)
+        .innerJoin(users, eq(organization_invitations.createdBy, users.id))
         .where(
           and(
             eq(organization_invitations.id, data.invitationId),

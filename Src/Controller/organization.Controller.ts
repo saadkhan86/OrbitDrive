@@ -30,14 +30,14 @@ export const organizationController = {
     });
   },
   getById: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organization = await organizationService.getById(
+      request.params as VOrganization.getById,
+    )
     return reply.status(200).send({
       success: true,
       message: "Organization fetched successfully",
       data: {
-        organization: await organizationService.getById(
-          request.user as VAuth.userId,
-          request.params as VOrganization.getById,
-        ),
+        organization
       },
     });
   },
@@ -50,8 +50,9 @@ export const organizationController = {
       request.user as VAuth.userId,
       request.params as VOrganization.getById,
     );
-    reply
-      .status(204)
-      .send({ success: true, message: "organization deleted successfully" });
+    return reply.status(200).send({
+      success: true,
+      message: "Organization deleted successfully",
+    });
   },
 };

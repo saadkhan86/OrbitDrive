@@ -1,9 +1,10 @@
-import { eq, and, ilike, or, count, desc } from "drizzle-orm";
+import { eq, and, ilike, or, count, desc, getTableColumns } from "drizzle-orm";
 
 import type { VDeal } from "../Validators/deal.Validator";
 import { db } from "../Database";
 import { deals } from "../Database/Schemas/deals.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { clients } from "../Database/Schemas/clients.Schema";
 
 class DealRepo {
   public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId) {
@@ -27,15 +28,18 @@ class DealRepo {
   public async findById(data: VDeal.dealId) {
     return (
       await db
-        .select()
+        .select({
+          ...getTableColumns(deals),
+          client: { name: clients.name, email: clients.email }
+        })
         .from(deals)
+        .innerJoin(clients, eq(clients.id, deals.clientId))
         .where(
           and(
             eq(deals.id, data.dealId),
             eq(deals.organizationId, data.organizationId),
           ),
-        )
-        .limit(1)
+        ).limit(1)
     )[0];
   }
 

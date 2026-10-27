@@ -16,33 +16,25 @@ export const notificationRouter = async (app: FastifyInstance) => {
     { preHandler: [authenticate.user] },
     notificationController.findAll,
   );
-
-  app.patch(
-    "/read",
-    {
-      preHandler: [authenticate.user],
-      schema: {
-        body: notificationValidator.markAsRead,
-      },
-    },
-    notificationController.markManyAsRead,
-  );
-
   app.get(
     "/:notificationId",
     { preHandler: [authenticate.user] },
     notificationController.findById,
   );
-
   app.patch(
-    "/:notificationId/read",
-    { preHandler: [authenticate.user] },
+    "/read",
+    {
+      preHandler: [authenticate.user],
+      schema: {
+        body: notificationValidator.notificationArray,
+      },
+    },
     notificationController.markAsRead,
   );
 
   app.delete(
-    "/:notificationId",
-    { preHandler: [authenticate.user] },
+    "/delete",
+    { preHandler: [authenticate.user], schema: { body: notificationValidator.notificationArray } },
     notificationController.delete,
   );
 };

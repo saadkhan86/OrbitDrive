@@ -1,8 +1,11 @@
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { activities } from "../Database/Schemas/activity.Schema";
 import { VActivity } from "../Validators/activity.Validator";
 import { NodePgClient, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { users } from "../Database/Schemas/users.Schema";
+import { clients } from "../Database/Schemas/clients.Schema";
+import { deals } from "../Database/Schemas/deals.Schema";
 
 class ActivityRepo {
   public async create(
@@ -29,23 +32,6 @@ class ActivityRepo {
     )[0];
   }
 
-  public async findById(data: VActivity.activityId) {
-    return (
-      (
-        await db
-          .select()
-          .from(activities)
-          .where(
-            and(
-              eq(activities.id, data.activityId),
-              eq(activities.organizationId, data.organizationId),
-            ),
-          )
-          .limit(1)
-      )[0] ?? null
-    );
-  }
-
   public async query(data: VActivity.organizationId & VActivity.query) {
     const { page = 1, limit = 10 } = data
     const _query: any[] = [eq(activities.organizationId, data.organizationId)];
@@ -67,6 +53,31 @@ class ActivityRepo {
         .where(and(..._query))
     ])
     return { activities: foundActivities, count: total[0]?.count ?? 0 }
+  }
+
+  public async findById(data: VActivity.activityId) {
+    return (
+      (
+        await db
+          .select({
+            ...getTableColumns(activities),
+            user: { name: users.fullName },
+            client: { name: clients.name },
+            deal: { name: deals.title },
+          })
+          .from(activities)
+          .leftJoin(users, eq(activities.userId, users.id))
+          .leftJoin(clients, eq(activities.clientId, clients.id))
+          .leftJoin(deals, eq(activities.dealId, deals.id))
+          .where(
+            and(
+              eq(activities.id, data.activityId),
+              eq(activities.organizationId, data.organizationId),
+            ),
+          )
+          .limit(1)
+      )[0] ?? null
+    );
   }
 
   public async findByClient(

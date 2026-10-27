@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { activityValidator } from "../Validators/activity.Validator";
 import { authenticate } from "../Hooks/AuthenticationHook";
 import { activityController } from "../Controller/activity.Controller";
+import { authorize } from "../Hooks/authorization.Hook";
 
 export const activityRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {
@@ -14,7 +15,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.organizationId,
         body: activityValidator.create,
@@ -27,7 +28,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.get(
     "/",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.organizationId,
         querystring: activityValidator.query
@@ -40,7 +41,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.get(
     "/:activityId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.activityId,
       },
@@ -52,7 +53,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.get(
     "/client/:clientId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.clientId,
       },
@@ -64,7 +65,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.get(
     "/deal/:dealId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.dealId,
       },
@@ -76,7 +77,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:activityId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role(["admin", "member", "owner"])],
       schema: {
         params: activityValidator.activityId,
         body: activityValidator.update,
@@ -89,7 +90,7 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:activityId",
     {
-      preHandler: [authenticate.user],
+      preHandler: [authenticate.user, authorize.role(["owner", "admin"])],
       schema: {
         params: activityValidator.activityId,
       },

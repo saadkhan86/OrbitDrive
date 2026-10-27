@@ -28,6 +28,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
       preHandler: [authorize.role()],
       schema: {
         params: clientValidator.organizationId,
+        querystring: clientValidator.query
       },
     },
     clientController.query,

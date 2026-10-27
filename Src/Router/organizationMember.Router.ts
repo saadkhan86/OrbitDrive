@@ -8,11 +8,12 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
     route.schema = { ...route.schema, tags: ["organization Member"] };
   });
   app.addHook("preHandler", authenticate.user);
+  app.get("/", organizationMemberController.getForCurrentUser)
   app.get(
     "/:organizationId",
     {
       schema: { params: organizationMemberValidator.organizationId, querystring: organizationMemberValidator.query },
-      preHandler: authorize.role(),
+      preHandler: [authorize.role()],
     },
     organizationMemberController.query,
   );
@@ -33,7 +34,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
         params: organizationMemberValidator.memberId,
         body: organizationMemberValidator.role,
       },
-      preHandler: [authorize.role(["owner", "admin"]),authorize.manageMember()],
+      preHandler: [authorize.role(["owner", "admin"]), authorize.manageMember()],
     },
     organizationMemberController.update,
   );
