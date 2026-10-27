@@ -21,20 +21,21 @@ class DealService {
       throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
     }
     const deal = await db.transaction(async (tx) => {
-      const createdDeal = await dealRepo.create(tx, {
+      const createdDeal: NonNullable<any> = await dealRepo.create(tx, {
         ...data,
         organizationId: organization.organizationId,
       });
+
       await auditLogRepo.create(tx, {
-        organizationId: createdDeal!.organizationId,
+        organizationId: createdDeal.organizationId,
         userId: user.userId,
         action: "create",
         entityType: "deal",
-        entityId: createdDeal!.id,
+        entityId: createdDeal.id,
         metadata: {
-          title: createdDeal!.title,
-          clientId: createdDeal!.clientId,
-          value: createdDeal!.value,
+          title: createdDeal.title,
+          clientId: createdDeal.clientId,
+          value: createdDeal.value,
         },
       });
       return createdDeal

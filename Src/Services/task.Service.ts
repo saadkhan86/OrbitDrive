@@ -45,11 +45,10 @@ export const taskService = {
     }
 
     const createdTask = await db.transaction(async (tx) => {
-      const task = await TaskRepo.create(tx, {
+      const task: NonNullable<any> = await TaskRepo.create(tx, {
         ...data,
         organizationId: organization.organizationId,
       });
-      if (!task) throw new CustomError(500, "task not created", "SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: organization.organizationId,
         userId: user.userId,

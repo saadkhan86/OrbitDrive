@@ -44,7 +44,7 @@ export const organizationInvitationService = {
     const tokenHash = await tokenUtils.hashToken(token);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const invitation = await db.transaction(async (tx) => {
-      const createdInvitation = await OrganizationInvitationRepo.create(tx, {
+      const createdInvitation: NonNullable<any> = await OrganizationInvitationRepo.create(tx, {
         organizationId: org.organizationId,
         email: data.email,
         role: data.role,
@@ -52,7 +52,6 @@ export const organizationInvitationService = {
         expiresAt,
         createdBy: currentUser.userId,
       });
-      if (!createdInvitation) throw new CustomError(500, "Internal server error", "INTERNAL_SERVER_ERROR")
       await auditLogRepo.create(tx, {
         organizationId: org.organizationId,
         action: "invite",

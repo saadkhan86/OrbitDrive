@@ -14,13 +14,13 @@ class ClientsService {
     data: VClient.CreateClientInput,
   ) {
     const client = await db.transaction(async (tx) => {
-      const createdClient = await ClientRepo.create(tx, {
+      const createdClient: NonNullable<any> = await ClientRepo.create(tx, {
         ...data,
         organizationId: organization.organizationId,
       });
-      if (!createdClient) throw new CustomError(500, "client not created", "SOMETHING_WENT_WRONG")
+
       await auditLogRepo.create(tx, {
-        organizationId: createdClient!.organizationId,
+        organizationId: createdClient.organizationId,
         action: "create",
         userId: user.userId,
         entityType: "client",
