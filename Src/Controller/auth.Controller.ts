@@ -12,6 +12,7 @@ export const authController = {
     });
   },
   login: async (request: FastifyRequest, reply: FastifyReply) => {
+    console.log("login")
     const { user, refreshToken } = await authService.login(
       request.body as VAuth.login,
     );
