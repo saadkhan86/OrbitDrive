@@ -19,21 +19,27 @@ export const GlobalErrorHandler = (
       const match = (error.cause as any).detail.match(/Key \(([^)]+)\)=\(([^)]+)\)/);
       return reply.code(400).send({
         success: false,
-        cause: (error.cause as any).code as string,
-        message: `The ${match[1]} already exists`,
+        error: {
+          code: (error.cause as any).code as string,
+          message: `The ${match[1]} already exists`,
+        }
       });
     }
     if ((error.cause as any)?.code as string == "1048") {
       return reply.code(400).send({
         success: false,
-        cause: (error.cause as any).code as string,
-        message: (error.cause as any).message,
+        error: {
+          cause: (error.cause as any).code as string,
+          message: (error.cause as any).message,
+        }
       });
     }
     return reply.code(500).send({
       success: false,
-      cause: (error.cause as any).code,
-      message: (error.cause as any).message as string
+      error: {
+        code: (error.cause as any).code,
+        message: (error.cause as any).message as string
+      }
     });
   }
   if (error instanceof DatabaseError) {
@@ -89,7 +95,7 @@ export const GlobalErrorHandler = (
     error,
     "-------------------Something went wrong------------",
   );
-  return reply.code(error.status || 500).send({
+  return reply.code(error.statusCode || error.status || 500).send({
     success: false,
     error: {
       code: error.code || "INTERNAL_SERVER_ERROR",

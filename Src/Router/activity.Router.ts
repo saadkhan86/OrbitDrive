@@ -15,6 +15,8 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authenticate.user, authorize.role()],
       schema: {
         params: activityValidator.organizationId,
@@ -77,6 +79,8 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:activityId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authenticate.user, authorize.role(["admin", "member", "owner"])],
       schema: {
         params: activityValidator.activityId,
@@ -90,6 +94,8 @@ export const activityRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:activityId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authenticate.user, authorize.role(["owner", "admin"])],
       schema: {
         params: activityValidator.activityId,

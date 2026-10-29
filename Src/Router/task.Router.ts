@@ -16,6 +16,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: taskValidator.organizationId,
@@ -51,6 +52,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:taskId",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: taskValidator.taskId,
@@ -63,6 +65,7 @@ export const taskRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:taskId",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: taskValidator.taskId,

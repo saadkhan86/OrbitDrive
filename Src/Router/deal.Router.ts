@@ -13,6 +13,8 @@ export const dealRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: dealValidator.organizationId,
         body: dealValidator.create,
@@ -47,6 +49,8 @@ export const dealRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:dealId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: dealValidator.dealId,
         body: dealValidator.update,
@@ -59,6 +63,8 @@ export const dealRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:dealId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: dealValidator.dealId,
       },

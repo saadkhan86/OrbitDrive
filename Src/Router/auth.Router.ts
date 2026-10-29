@@ -8,17 +8,18 @@ export const authRouter = async (app: FastifyInstance) => {
   });
   app.post(
     "/signup",
-    { schema: { body: authValidator.signup } },
+    { config: { rateLimit: { max: 3, timeWindow: "1 minute" } }, schema: { body: authValidator.signup } },
     authController.signup,
   );
   app.post(
     "/login",
-    { schema: { body: authValidator.login } },
+    { config: { rateLimit: { max: 5, timeWindow: "1 minute" } }, schema: { body: authValidator.login } },
     authController.login,
   );
   app.post(
     "/forgot-password",
     {
+      config: { rateLimit: { max: 1, timeWindow: "3 minute" } },
       schema: { body: authValidator.email },
     },
     authController.forgotPassword,
@@ -26,6 +27,7 @@ export const authRouter = async (app: FastifyInstance) => {
   app.patch(
     "/reset-password",
     {
+      config: { rateLimit: { max: 1, timeWindow: "5 minute", } },
       schema: { body: authValidator.passwordReset },
     },
     authController.passwordReset,
@@ -33,6 +35,9 @@ export const authRouter = async (app: FastifyInstance) => {
   app.post(
     "/refresh",
     {
+      config: {
+        rateLimit: { max: 1, timeWindow: '5 minute' }
+      },
       schema: {
         body: authValidator.refreshToken,
       },

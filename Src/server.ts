@@ -12,7 +12,7 @@ import cors from "@fastify/cors";
 import { router } from "./Router/router";
 import { shutdownServer } from "./Config/shutdownServer.Config";
 import { swaggerConfig } from "./Config/swagger.Config";
-
+import rateLimit from "@fastify/rate-limit";
 const server = Fastify({
   logger: false,
 });
@@ -25,12 +25,15 @@ server.register(JWTPlugin);
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.setErrorHandler(GlobalErrorHandler);
-server.get("/ping", async function (request, reply) {
-  return {
-    message: "pong",
-  };
+server.register(rateLimit, {
+  global: true,
+  max: 100,
+  timeWindow: "1 minute",
 });
+
 server.register(router, { prefix: "/api/v1" });
+
 process.on("SIGINT", () => shutdownServer(server, "SIGINT"));
 process.on("SIGTERM", () => shutdownServer(server, "SIGTERM"));
+
 StartServer(server);

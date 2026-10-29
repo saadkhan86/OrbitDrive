@@ -13,6 +13,7 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.post(
     "/",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: clientValidator.organizationId,
@@ -48,6 +49,8 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:clientId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin", "member"])],
       schema: {
         params: clientValidator.clientId,
@@ -60,6 +63,8 @@ export const clientsRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:clientId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authorize.role(["owner", "admin"])],
       schema: {
         params: clientValidator.clientId,

@@ -30,6 +30,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
   app.patch(
     "/:organizationId/:organizationMemberId",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: organizationMemberValidator.memberId,
         body: organizationMemberValidator.role,
@@ -41,6 +42,7 @@ export const organizationMemberRouter = async (app: FastifyInstance) => {
   app.delete(
     "/:organizationId/:organizationMemberId",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: organizationMemberValidator.memberId,
       },

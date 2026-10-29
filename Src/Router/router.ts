@@ -12,6 +12,11 @@ import { activityRouter } from "./activity.Router";
 import { notificationRouter } from "./notification.Router";
 import { auditLogRouter } from "./auditLog.Router";
 export const router = async (app: FastifyInstance) => {
+  app.get("/ping", async function (request, reply) {
+    return {
+      message: "pong",
+    };
+  });
   app.register(authRouter, { prefix: "/auth" });
   app.register(verificationRouter, { prefix: "/verification" });
   app.register(userRouter, { prefix: "/users" });

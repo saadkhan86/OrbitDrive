@@ -13,6 +13,7 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
   app.post(
     "/:organizationId",
     {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: organizationValidator.organizationId,
         body: organizationInvitationValidator.create,
@@ -41,6 +42,8 @@ export const organizationInvitationRouter = (app: FastifyInstance) => {
   app.delete(
     "/:organizationId/:invitationId",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         params: organizationInvitationValidator.invitationId,
       },

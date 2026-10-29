@@ -24,6 +24,8 @@ export const notificationRouter = async (app: FastifyInstance) => {
   app.patch(
     "/read",
     {
+
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       preHandler: [authenticate.user],
       schema: {
         body: notificationValidator.notificationArray,
@@ -34,7 +36,9 @@ export const notificationRouter = async (app: FastifyInstance) => {
 
   app.delete(
     "/delete",
-    { preHandler: [authenticate.user], schema: { body: notificationValidator.notificationArray } },
+    {
+      config: { rateLimit: { max: 30, timeWindow: "1 minute" } }, preHandler: [authenticate.user], schema: { body: notificationValidator.notificationArray }
+    },
     notificationController.delete,
   );
 };

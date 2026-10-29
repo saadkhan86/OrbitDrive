@@ -9,6 +9,7 @@ export const verificationRouter = async (app: FastifyInstance) => {
   app.post(
     "/email-verification",
     {
+      config: { rateLimit: { max: 5, timeWindow: "10 minutes" } },
       schema: { querystring: verificationValidator.query },
     },
     verificationController.emailVerification,
