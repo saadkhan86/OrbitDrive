@@ -6,21 +6,23 @@ import { VUser } from "../Validators/user.Validator";
 
 export const userController = {
   me: async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = await userService.me(request.user)
     reply.status(200).send({
       success: true,
       message: "profile fetched successfully",
-      data: { user: await userService.me(request.user) },
+      data: { user },
     });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = await userService.update(
+      request.user,
+      request.body as VAuth.update,
+    )
     return reply.status(200).send({
       success: true,
       message: "User updated successfully",
       data: {
-        user: await userService.update(
-          request.user,
-          request.body as VAuth.update,
-        ),
+        user,
       },
     });
   },

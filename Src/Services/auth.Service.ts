@@ -88,7 +88,6 @@ export const authService = {
       );
     }
     const token = await tokenUtils.generateToken();
-    console.log(token);
     const hashedToken = await tokenUtils.hashToken(token);
     await addEmailJob("password-reset", {
       email: user.email,

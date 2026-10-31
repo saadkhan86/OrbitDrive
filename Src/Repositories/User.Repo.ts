@@ -12,13 +12,13 @@ class UserRepo {
   }
 
   public async findById(user: VAuth.userId) {
-    return (
-      await db.select().from(users).where(eq(users.id, user.userId)).limit(1)
-    )[0];
+    const foundUser = (await db.select().from(users).where(eq(users.id, user.userId)).limit(1))[0]
+    return foundUser
   }
 
   public async update(data: VAuth.userId & VAuth.update) {
     const newData: Partial<typeof users.$inferInsert> = {};
+    console.log(data)
     if (data.fullName) newData.fullName = data.fullName;
     if (data.password) newData.passwordHash = data.password;
     return (

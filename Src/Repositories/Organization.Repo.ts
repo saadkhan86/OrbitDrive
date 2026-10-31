@@ -27,19 +27,20 @@ class OrganizationRepo {
     )[0];
   }
   public async getById(data: VOrganization.getById) {
-    return (
-      await db
-        .select({
-          ...getTableColumns(organizations),
-          owner: { name: users.fullName }
-        })
-        .from(organizations)
-        .where(
-          and(
-            eq(organizations.id, data.organizationId)
-          ),
-        ).innerJoin(users, eq(organizations.ownerId, users.id))
-    )[0];
+
+    const organization = (await db
+      .select({
+        ...getTableColumns(organizations),
+        owner: { name: users.fullName }
+      })
+      .from(organizations)
+      .where(
+        and(
+          eq(organizations.id, data.organizationId)
+        ),
+      ).innerJoin(users, eq(organizations.ownerId, users.id))
+    )[0]
+    return organization
   }
   public async findByOwnerAndSlug(data: VAuth.userId & VOrganization.slug) {
     return (

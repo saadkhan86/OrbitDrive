@@ -46,7 +46,7 @@ export const organizationService = {
     if (!organization) {
       throw new CustomError(
         404,
-        "You don't have permission to access this organization",
+        "organization not found",
         "UNAUTHORIZED",
       );
     }
