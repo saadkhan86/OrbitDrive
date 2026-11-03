@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { authValidator } from "../Validators/auth.Validator";
 import { authController } from "../Controller/auth.Controller";
+import { authenticate } from "../Hooks/AuthenticationHook";
 
 export const authRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {
@@ -19,7 +20,7 @@ export const authRouter = async (app: FastifyInstance) => {
   app.post(
     "/forgot-password",
     {
-      config: { rateLimit: { max: 1, timeWindow: "3 minute" } },
+      config: { rateLimit: { max: 2, timeWindow: "1 minute" } },
       schema: { body: authValidator.email },
     },
     authController.forgotPassword,
@@ -35,8 +36,9 @@ export const authRouter = async (app: FastifyInstance) => {
   app.post(
     "/refresh",
     {
+      preHandler: [authenticate.user],
       config: {
-        rateLimit: { max: 1, timeWindow: '5 minute' }
+        rateLimit: { max: 2, timeWindow: '1 minute' }
       },
       schema: {
         body: authValidator.refreshToken,

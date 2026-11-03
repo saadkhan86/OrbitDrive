@@ -47,7 +47,7 @@ export const organizationService = {
       throw new CustomError(
         404,
         "organization not found",
-        "UNAUTHORIZED",
+        "NOT_FOUND",
       );
     }
     return organization;

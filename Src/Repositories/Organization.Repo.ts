@@ -27,7 +27,7 @@ class OrganizationRepo {
     )[0];
   }
   public async getById(data: VOrganization.getById) {
-
+    console.log(data)
     const organization = (await db
       .select({
         ...getTableColumns(organizations),
