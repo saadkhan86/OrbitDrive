@@ -3,6 +3,7 @@ import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "../Database";
 import { VAuth } from "../Validators/auth.Validator";
 import { VUser } from "../Validators/user.Validator";
+import { profile } from "node:console";
 
 class UserRepo {
   public async findByEmail(data: VAuth.email) {
@@ -18,9 +19,9 @@ class UserRepo {
 
   public async update(data: VAuth.userId & VAuth.update) {
     const newData: Partial<typeof users.$inferInsert> = {};
-    console.log(data)
     if (data.fullName) newData.fullName = data.fullName;
     if (data.password) newData.passwordHash = data.password;
+    if (data.profile) newData.profile = data.profile
     return (
       await db
         .update(users)
@@ -33,6 +34,7 @@ class UserRepo {
           id: users.id,
           fullName: users.fullName,
           email: users.email,
+          profile: users.profile,
           updatedAt: users.updatedAt,
         })
     )[0];
@@ -47,7 +49,7 @@ class UserRepo {
     if (data.userId) _query.push(eq(users.id, data.userId))
     if (data.search) _query.push(or(ilike(users.fullName, `%${data.search}%`), ilike(users.email, `%${data.search}%`)))
     const [foundUsers, total] = await Promise.all([
-      db.select({ id: users.id, fullName: users.fullName, email: users.email }).from(users).where(and(..._query)).orderBy(desc(users.createdAt)).offset((page - 1) * limit).limit(limit),
+      db.select({ id: users.id, fullName: users.fullName, email: users.email, profile: users.profile }).from(users).where(and(..._query)).orderBy(desc(users.createdAt)).offset((page - 1) * limit).limit(limit),
       db.select({ count: count() }).from(users).where(and(..._query))])
     return { users: foundUsers, count: total[0]?.count ?? 0 }
   }

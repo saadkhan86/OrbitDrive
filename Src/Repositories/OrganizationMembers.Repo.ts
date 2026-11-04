@@ -92,7 +92,7 @@ class OrganizationMembers {
       await db
         .select({
           ...getTableColumns(organization_members),
-          user: { name: users.fullName }
+          user: { name: users.fullName, profile: users.profile }
         })
         .from(organization_members)
         .where(

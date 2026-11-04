@@ -61,7 +61,7 @@ class ActivityRepo {
         await db
           .select({
             ...getTableColumns(activities),
-            user: { name: users.fullName },
+            user: { name: users.fullName, profile: users.profile },
             client: { name: clients.name },
             deal: { name: deals.title },
           })

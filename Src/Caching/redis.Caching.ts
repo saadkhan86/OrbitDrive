@@ -1,6 +1,6 @@
 
 import type { Redis } from "ioredis";
-import { redis } from "../../Config/Redis.Config";
+import { redis } from "../Config/Redis.Config";
 
 class RedisCache {
     constructor(private readonly redis: Redis) { }

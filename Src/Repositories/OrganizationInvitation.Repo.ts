@@ -22,7 +22,7 @@ class OrganizationInvitationRepo {
       await db
         .select({
           ...getTableColumns(organization_invitations),
-          createdBy: { name: users.fullName }
+          createdBy: { name: users.fullName, profile: users.profile }
         })
         .from(organization_invitations)
         .innerJoin(users, eq(organization_invitations.createdBy, users.id))

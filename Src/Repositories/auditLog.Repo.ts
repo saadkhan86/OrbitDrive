@@ -46,7 +46,7 @@ class AuditLogRepo {
       await db
         .select({
           ...getTableColumns(audit_logs),
-          user: { name: users.fullName },
+          user: { name: users.fullName, profile: users.profile },
         })
         .from(audit_logs)
         .innerJoin(users, eq(users.id, audit_logs.userId))

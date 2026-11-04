@@ -2,7 +2,7 @@ import UserRepo from "../Repositories/User.Repo";
 import { VAuth } from "../Validators/auth.Validator";
 import * as argon2 from "argon2";
 import { VUser } from "../Validators/user.Validator";
-import redisCaching from "../Infrastructure/Caching/redis.Caching";
+import redisCaching from "../Caching/redis.Caching";
 import { cleanerUtils } from "../Utils/cleaner.Utils";
 export const userService = {
   me: async (user: VAuth.userId) => {
@@ -22,6 +22,8 @@ export const userService = {
       newData.password = await argon2.hash(data.password!);
     if (data.fullName && data.fullName !== undefined)
       newData.fullName = data.fullName;
+    if (data.profile && data.profile !== undefined)
+      newData.profile = data.profile
     const updatedUser = await UserRepo.update({ userId: user.userId, ...newData });
     await redisCaching.delete(user.userId)
     await redisCaching.set(user.userId, updatedUser, 5 * 60)
