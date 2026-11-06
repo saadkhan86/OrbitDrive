@@ -1,9 +1,7 @@
 import { db } from "../Database";
-import { conversations } from "../Database/Schemas/conversations.Schema";
 import { CustomError } from "../Errors/CustomError";
 import ConversationRepo from "../Repositories/Conversation.Repo";
 import ConversationMemberRepo from "../Repositories/ConversationMember.Repo";
-import { redisUtils } from "../Utils/redis.Utils";
 import { VAuth } from "../Validators/auth.Validator";
 import { VConversation } from "../Validators/conversation.Validator";
 

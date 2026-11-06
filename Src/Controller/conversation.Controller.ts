@@ -13,5 +13,6 @@ export const conversationController = {
     },
     getById: async (request: FastifyRequest, reply: FastifyReply) => {
         const conversation = await conversationService.getById(request.user, request.params as VConversation.ConversationId)
+        reply.status(200).send({ success: true, message: "conversation fecthed successfully", data: { conversation } })
     }
 }
