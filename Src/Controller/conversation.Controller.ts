@@ -6,10 +6,12 @@ export const conversationController = {
     create: async (request: FastifyRequest, reply: FastifyReply) => {
         const conversation = await conversationService.create(request.user, request.body as VConversation.Create)
         reply.status(201).send({ success: true, message: "conversation created successfully", data: { conversation } })
-
     },
-    query: async (request:FastifyRequest,reply:FastifyReply) => {
-        const conversations = await conversationService.query()
+    query: async (request: FastifyRequest, reply: FastifyReply) => {
+        const conversations = await conversationService.query(request.user, request.query as VConversation.Query)
+        reply.status(200).send({ success: true, message: "conversation fetched successfully", data: { conversations } })
     },
-    delete: async () => { }
+    getById: async (request: FastifyRequest, reply: FastifyReply) => {
+        const conversation = await conversationService.getById(request.user, request.params as VConversation.ConversationId)
+    }
 }

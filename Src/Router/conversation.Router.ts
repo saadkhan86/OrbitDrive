@@ -9,6 +9,6 @@ export const conversationRouter = (app: FastifyInstance) => {
         route.schema = { ...route.schema, tags: ["conversations"] }
     })
     app.post("/", { schema: { body: conversationValidator.create } }, conversationController.create)
-    app.get("/", conversationController.get)
-    app.delete("/", conversationController.delete)
+    app.get("/", { schema: { querystring: conversationValidator.query } }, conversationController.query)
+    app.get("/:conversationId", { schema: { params: conversationValidator.conversationId } }, conversationController.getById)
 }
