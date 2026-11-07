@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VConversation } from "../Validators/conversation.Validator";
 import { VAuth } from "../Validators/auth.Validator";
-import { and, count, desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or, SQL, sql } from "drizzle-orm";
 import { conversation_members } from "../Database/Schemas/conversation_members.Schema";
 import { db } from "../Database";
 import { conversations } from "../Database/Schemas/conversations.Schema";
@@ -37,12 +37,7 @@ class ConversationRepo {
             .limit(1).as("latest_message")
 
         const result = await db.select({
-            id: conversations.id,
-            type: conversations.type,
-            name: conversations.name,
-            createdBy: conversations.createdBy,
-            createdAt: conversations.createdAt,
-            updatedAt: conversations.updatedAt,
+            ...getTableColumns(conversations),
             lastMessage: {
                 id: latestMessage.id,
                 content: latestMessage.content,
@@ -59,16 +54,28 @@ class ConversationRepo {
             .limit(limit)
             .offset((page - 1) * limit)
     }
-    public async getById(data: VConversation.ConversationId & VAuth.userId) {
+    public async getById(data: VConversation.ConversationId & VConversation.ConversationAndMessages & VAuth.userId) {
         const [conversation, members, latestMessages] = await Promise.all([
             db.select().from(conversations).where(eq(conversations.id, data.conversationId)),
-            db.select({ user: { id: users.id, name: users.fullName }, joinedAt: conversation_members.joinedAt })
-                .from(conversation_members).innerJoin(users, eq(conversation_members.conversationId, data.conversationId)),
-            db.select().from(messages).innerJoin(users, eq(users.id,))
+            db.select({
+                user: { id: users.id, name: users.fullName },
+                joinedAt: conversation_members.joinedAt
+            })
+                .from(conversation_members)
+                .innerJoin(users, eq(conversation_members.conversationId, data.conversationId))
+                .orderBy(desc(conversation_members.joinedAt))
+                .limit(data.members),
+            db.select({
+                ...getTableColumns(messages),
+                sender: { id: users.id, name: users.fullName }
+            })
+                .from(messages).innerJoin(users, eq(users.id, messages.senderId))
+                .where(eq(messages.conversationId, data.conversationId))
+                .limit(data.messages)
         ])
         const isMember = members.some(mbr => mbr.user.id == data.userId)
         if (!isMember) return null
-        return { ...conversation[0], members }
+        return { ...conversation[0], members, latestMessages }
 
     }
 }

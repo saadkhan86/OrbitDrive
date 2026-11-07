@@ -10,18 +10,22 @@ export const conversationValidator = {
         { abort: true, message: "group name is required" }
     ),
     query: z.object({
-        search: z.coerce.string(),
-        page: z.coerce.number(),
-        limit: z.coerce.number()
+        search: z.coerce.string().optional(),
+        page: z.coerce.number().optional(),
+        limit: z.coerce.number().optional()
     }),
     conversationId: z.object({
-        conversationId: z.uuid({ message: "invalid conversation id" })
+        conversationId: z.uuid({ message: "invalid conversation id" }).nonempty()
+    }),
+    membersAndmessages: z.object({
+        members: z.coerce.number().optional().default(5),
+        messages: z.coerce.number().optional().default(30)
     })
-
 }
 
 export declare namespace VConversation {
     type Create = z.infer<typeof conversationValidator.create>
     type Query = z.infer<typeof conversationValidator.query>
     type ConversationId = z.infer<typeof conversationValidator.conversationId>
+    type ConversationAndMessages = z.infer<typeof conversationValidator.membersAndmessages>
 }

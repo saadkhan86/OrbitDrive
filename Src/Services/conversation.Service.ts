@@ -19,10 +19,8 @@ export const conversationService = {
     query: async (user: VAuth.userId, query: VConversation.Query) => {
         const conversations = await ConversationRepo.query({ userId: user.userId, ...query })
         return conversations
-    }, getById: async (user: VAuth.userId, conversation: VConversation.ConversationId) => {
-        const foundConversation = await ConversationRepo.getById({ userId: user.userId, conversationId: conversation.conversationId })
-        if (!foundConversation) throw new CustomError(404, "conversation not found", "NOT_FOUND")
-        const members = await ConversationMemberRepo.getById({ userId: user.userId, conversationId: foundConversation.id })
+    }, getById: async (user: VAuth.userId, conversation: VConversation.ConversationId, ConversationAndMessages: VConversation.ConversationAndMessages) => {
+        const foundConversation = await ConversationRepo.getById({ ...user, ...conversation, ...ConversationAndMessages })
         return foundConversation
     }
 }

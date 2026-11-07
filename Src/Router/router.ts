@@ -11,7 +11,7 @@ import { taskRouter } from "./task.Router";
 import { activityRouter } from "./activity.Router";
 import { notificationRouter } from "./notification.Router";
 import { auditLogRouter } from "./auditLog.Router";
-import { chatRouter } from "./message.Router";
+import { messageRouter } from "./message.Router";
 import { conversationRouter } from "./conversation.Router";
 export const router = async (app: FastifyInstance) => {
   app.get("/ping", async function (request, reply) {
@@ -34,7 +34,7 @@ export const router = async (app: FastifyInstance) => {
   app.register(taskRouter, { prefix: "/:organizationId/task" });
   app.register(activityRouter, { prefix: "/:organizationId/activity" });
   app.register(conversationRouter, { prefix: "/conversations" })
-  app.register(chatRouter, { prefix: "/chats" })
+  app.register(messageRouter, { prefix: "/:conversationId" })
   app.register(auditLogRouter, { prefix: "/:organizationId/audit-log" });
   app.register(notificationRouter, { prefix: "/notification" })
 };
