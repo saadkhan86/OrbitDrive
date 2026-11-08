@@ -64,18 +64,21 @@ class ConversationRepo {
                 .from(conversation_members)
                 .innerJoin(users, eq(conversation_members.conversationId, data.conversationId))
                 .orderBy(desc(conversation_members.joinedAt))
-                .limit(data.members),
+                .limit(data.members || 5),
             db.select({
                 ...getTableColumns(messages),
                 sender: { id: users.id, name: users.fullName }
             })
                 .from(messages).innerJoin(users, eq(users.id, messages.senderId))
                 .where(eq(messages.conversationId, data.conversationId))
-                .limit(data.messages)
+                .limit(data.messages || 30)
         ])
         const isMember = members.some(mbr => mbr.user.id == data.userId)
         if (!isMember) return null
         return { ...conversation[0], members, latestMessages }
+
+    }
+    public async update(data: { name: string, userId: string, conversationId: string }) {
 
     }
 }

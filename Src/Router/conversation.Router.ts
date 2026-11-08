@@ -10,6 +10,6 @@ export const conversationRouter = (app: FastifyInstance) => {
     })
     app.post("/", { schema: { body: conversationValidator.create } }, conversationController.create)
     app.get("/", { schema: { querystring: conversationValidator.query } }, conversationController.query)
-    app.post("/:conversationId", { schema: { params: conversationValidator.conversationId } }, conversationController.create)
-    app.get("/:conversationId", { schema: { params: conversationValidator.conversationId, querystring: conversationValidator.membersAndmessages } }, conversationController.update)
+    app.get("/:conversationId", { schema: { params: conversationValidator.conversationId, querystring: conversationValidator.membersAndmessages } }, conversationController.getById)
+    app.patch("/:conversationId", { schema: { params: conversationValidator.conversationId, body: conversationValidator.update } }, conversationController.update)
 }
