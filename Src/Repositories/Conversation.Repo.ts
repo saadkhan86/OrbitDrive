@@ -11,14 +11,13 @@ import { alias } from "drizzle-orm/pg-core";
 
 class ConversationRepo {
     public async create(tx: NodePgDatabase, data: VConversation.Create & VAuth.userId) {
-        const conversation = (await tx.insert(conversations).values({
+        return (await tx.insert(conversations).values({
             type: data.type,
             name: data.name ?? "",
             createdBy: data.userId,
             createdAt: new Date(),
             updatedAt: new Date()
         }).returning())[0]
-        return conversation
     }
     public async query(data: VConversation.Query & VAuth.userId) {
         const { page = 1, limit = 15 } = data
