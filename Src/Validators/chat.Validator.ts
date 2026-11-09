@@ -7,6 +7,10 @@ export const messageValidator = {
     messageId: z.object({
         messageId: z.uuid({ message: "invalid message id" })
     }),
+    query: z.object({
+        page: z.coerce.number().optional().default(1),
+        limit: z.coerce.number().optional().default(100)
+    })
 
 }
 export declare namespace VMessageValidator {
