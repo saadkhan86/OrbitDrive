@@ -13,6 +13,7 @@ import { router } from "./Router/router";
 import { shutdownServer } from "./Config/shutdownServer.Config";
 import { swaggerConfig } from "./Config/swagger.Config";
 import rateLimit from "@fastify/rate-limit";
+import { initializeSocket } from "./Config/Socket.Config";
 const server = Fastify({
   logger: false,
 });
@@ -20,6 +21,7 @@ swaggerConfig(server);
 server.register(cors, {
   origin: "*", methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
+
 server.register(ResponseTimeHook);
 server.register(JWTPlugin);
 server.setValidatorCompiler(validatorCompiler);
@@ -33,6 +35,7 @@ server.register(rateLimit, {
 
 server.register(router, { prefix: "/api/v1" });
 
+initializeSocket(server.server)
 process.on("SIGINT", () => shutdownServer(server, "SIGINT"));
 process.on("SIGTERM", () => shutdownServer(server, "SIGTERM"));
 
