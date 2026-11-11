@@ -27,9 +27,9 @@ export const conversationValidator = {
 }
 
 export declare namespace VConversation {
-    type Create = z.infer<typeof conversationValidator.create>
-    type Query = z.infer<typeof conversationValidator.query>
-    type ConversationId = z.infer<typeof conversationValidator.conversationId>
-    type ConversationAndMessages = z.infer<typeof conversationValidator.membersAndmessages>
-    type Update = z.infer<typeof conversationValidator.update>
+    type create = z.infer<typeof conversationValidator.create>
+    type query = z.infer<typeof conversationValidator.query>
+    type conversationId = z.infer<typeof conversationValidator.conversationId>
+    type conversationAndMessages = z.infer<typeof conversationValidator.membersAndmessages>
+    type update = z.infer<typeof conversationValidator.update>
 }

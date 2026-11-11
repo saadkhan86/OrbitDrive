@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VConversation } from "../Validators/conversation.Validator";
 import { VAuth } from "../Validators/auth.Validator";
-import { and, count, desc, eq, getTableColumns, ilike, or, SQL, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, ilike, SQL, sql } from "drizzle-orm";
 import { conversation_members } from "../Database/Schemas/conversation_members.Schema";
 import { db } from "../Database";
 import { conversations } from "../Database/Schemas/conversations.Schema";
@@ -10,7 +10,7 @@ import { messages } from "../Database/Schemas/messages.Schema";
 import { alias } from "drizzle-orm/pg-core";
 
 class ConversationRepo {
-    public async create(tx: NodePgDatabase, data: VConversation.Create & VAuth.userId) {
+    public async create(tx: NodePgDatabase, data: VConversation.create & VAuth.userId) {
         return (await tx.insert(conversations).values({
             type: data.type,
             name: data.name ?? "",
@@ -19,7 +19,7 @@ class ConversationRepo {
             updatedAt: new Date()
         }).returning())[0]
     }
-    public async query(data: VConversation.Query & VAuth.userId) {
+    public async query(data: VConversation.query & VAuth.userId) {
         const { page = 1, limit = 15 } = data
         const _query: SQL[] = [eq(conversation_members.userId, data.userId)]
         if (data.search) _query.push(ilike(conversations.name, `%${data.search}%`))
@@ -53,7 +53,7 @@ class ConversationRepo {
             .limit(limit)
             .offset((page - 1) * limit)
     }
-    public async getById(data: VConversation.ConversationId & VConversation.ConversationAndMessages & VAuth.userId) {
+    public async getById(data: VConversation.conversationId & VConversation.conversationAndMessages & VAuth.userId) {
         const [conversation, members, latestMessages] = await Promise.all([
             db.select().from(conversations).where(eq(conversations.id, data.conversationId)),
             db.select({
@@ -78,7 +78,7 @@ class ConversationRepo {
 
     }
     public async update(data: { name: string, userId: string, conversationId: string }) {
-
+        return (await db.update(conversations).set({ name: data.name, updatedAt: new Date() }).where(eq(conversations.id, data.conversationId)).returning())[0]
     }
 }
 export default new ConversationRepo()

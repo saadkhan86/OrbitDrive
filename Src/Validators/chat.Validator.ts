@@ -14,6 +14,7 @@ export const messageValidator = {
 
 }
 export declare namespace VMessageValidator {
-    type MessageContent = z.infer<typeof messageValidator.Messagecontent>
+    type messageContent = z.infer<typeof messageValidator.Messagecontent>
     type messageId = z.infer<typeof messageValidator.messageId>
+    type query = z.infer<typeof messageValidator.query>
 }

@@ -1,4 +1,4 @@
-import { pgTable, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users.Schema";
 
 export const organizations = pgTable(

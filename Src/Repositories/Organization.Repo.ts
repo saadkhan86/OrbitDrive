@@ -4,14 +4,13 @@ import { organizations } from "../Database/Schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Validators/auth.Validator";
 import { VOrganization } from "../Validators/organization.Validator";
-import { promise } from "zod";
 import { users } from "../Database/Schemas/users.Schema";
+
 class OrganizationRepo {
   public async create(
     tx: NodePgDatabase,
     data: typeof organizations.$inferInsert,
   ) {
-    console.log("data", data)
     return (
       await tx
         .insert(organizations)

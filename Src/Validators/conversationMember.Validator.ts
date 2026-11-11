@@ -12,6 +12,6 @@ export const conversationMemberValidator = {
     })
 }
 export declare namespace VConversationMember {
-    type Update = z.infer<typeof conversationMemberValidator.update>
+    type update = z.infer<typeof conversationMemberValidator.update>
     type query = z.infer<typeof conversationMemberValidator.query>
 }
