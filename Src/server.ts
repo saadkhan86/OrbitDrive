@@ -32,10 +32,9 @@ server.register(rateLimit, {
   max: 100,
   timeWindow: "1 minute",
 });
-
 server.register(router, { prefix: "/api/v1" });
 
-initializeSocket(server.server)
+initializeSocket(server.server, server)
 process.on("SIGINT", () => shutdownServer(server, "SIGINT"));
 process.on("SIGTERM", () => shutdownServer(server, "SIGTERM"));
 
