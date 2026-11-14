@@ -1,24 +1,24 @@
-import ClientRepo from "../repositories/Client.repo";
-
-import { CustomError } from "../errorHandler/CustomError";
-import { VClient } from "../validators/clients.validator";
-import auditLogRepo from "../repositories/AuditLog.repo";
-import { VAuth } from "../validators/auth.validator";
-import { db } from "../database";
+import { Client } from "pg";
+import { db } from "../../Database";
+import { CustomError } from "../../ErrorHandler/CustomError";
+import AuditLogRepo from "../AuditLog/AuditLog.repo";
+import { VAuth } from "../Auth/auth.validator";
+import ClientRepo from "./Client.repo";
+import { VClient } from "./clients.validator";
 
 class ClientsService {
   public async create(
     user: VAuth.userId,
-    organization: VClient.OrganizationIdParams,
-    data: VClient.CreateClientInput,
+    param: VClient.organizationId,
+    body: VClient.create,
   ) {
     const client = await db.transaction(async (tx) => {
       const createdClient: NonNullable<any> = await ClientRepo.create(tx, {
-        ...data,
-        organizationId: organization.organizationId,
+        ...body,
+        organizationId: param.organizationId,
       });
 
-      await auditLogRepo.create(tx, {
+      await AuditLogRepo.create(tx, {
         organizationId: createdClient.organizationId,
         action: "create",
         userId: user.userId,
@@ -33,14 +33,12 @@ class ClientsService {
     })
     return client;
   }
-
-  public async query(organization: VClient.OrganizationIdParams, query: VClient.query) {
-    const clients = await ClientRepo.query({ ...organization, ...query });
+  public async query(param: VClient.organizationId, query: VClient.query) {
+    const clients = await ClientRepo.query({ ...param, ...query });
     return clients;
   }
-
-  public async getById(client: VClient.ClientIdParams) {
-    const foundClient = await ClientRepo.getById({ ...client });
+  public async getById(param: VClient.clientId) {
+    const foundClient = await ClientRepo.getById({ ...param });
 
     if (!foundClient) {
       throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
@@ -48,17 +46,16 @@ class ClientsService {
 
     return foundClient;
   }
-
   public async update(
     user: VAuth.userId,
-    client: VClient.ClientIdParams,
-    data: VClient.UpdateClientInput,
+    param: VClient.clientId,
+    body: VClient.update,
   ) {
     const updatedClient = await db.transaction(async (tx) => {
-      const updated = await ClientRepo.update(tx, { ...client, ...data });
+      const updated = await ClientRepo.update(tx, { ...param, ...body });
       if (!updated) throw new CustomError(500, "something went wrong while updating client", "SERVER_ERROR")
-      await auditLogRepo.create(tx, {
-        organizationId: client.organizationId,
+      await AuditLogRepo.create(tx, {
+        organizationId: param.organizationId,
         action: "update",
         userId: user.userId,
         entityType: "client",
@@ -72,13 +69,12 @@ class ClientsService {
     });
     return updatedClient;
   }
-
-  public async delete(user: VAuth.userId, data: VClient.ClientIdParams) {
+  public async delete(user: VAuth.userId, data: VClient.clientId) {
     const client = await db.transaction(async (tx) => {
       const foundClient = await ClientRepo.getById({ ...data });
       if (!foundClient) throw new CustomError(404, "Client Not Found", "NOT_FOUND");
       await ClientRepo.delete(tx, { ...data });
-      await auditLogRepo.create(tx, {
+      await AuditLogRepo.create(tx, {
         organizationId: foundClient.organizationId,
         action: "delete",
         userId: user.userId,

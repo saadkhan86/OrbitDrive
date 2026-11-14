@@ -1,11 +1,13 @@
 import z from "zod";
 
 export const notificationValidator = {
+  query:z.object({
+    
+  }),
   notificationId: z.object({
     notificationId: z
       .uuid({ message: "Invalid notificationId" }),
   }),
-
   notificationArray: z.object({
     notificationIds: z
       .array(z.uuid({ message: "Invalid notification ID" }), {

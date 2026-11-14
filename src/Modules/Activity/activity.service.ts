@@ -1,23 +1,22 @@
-import { CustomError } from "../errorHandler/CustomError";
-import ActivityRepo from "../repositories/Activity.repo";
-import ClientRepo from "../repositories/Client.repo";
-import dealRepo from "../repositories/Deal.repo";
-import auditLogRepo from "../repositories/AuditLog.repo";
-
-import type { VActivity } from "../validators/activity.validator";
-import type { VAuth } from "../validators/auth.validator";
-import { db } from "../database";
+import { db } from "../../Database";
+import { CustomError } from "../../ErrorHandler/CustomError";
+import AuditLogRepo from "../AuditLog/AuditLog.repo";
+import { VAuth } from "../Auth/auth.validator";
+import ClientRepo from "../Clients/Client.repo";
+import DealRepo from "../Deal/Deal.repo";
+import ActivityRepo from "./Activity.repo";
+import { VActivity } from "./activity.validator";
 
 export const activityService = {
   create: async (
     user: VAuth.userId,
-    organization: VActivity.organizationId,
-    data: VActivity.create,
+    param: VActivity.organizationId,
+    body: VActivity.create,
   ) => {
-    if (data.clientId) {
+    if (body.clientId) {
       const client = await ClientRepo.getById({
-        clientId: data.clientId,
-        organizationId: organization.organizationId,
+        clientId: body.clientId,
+        organizationId: param.organizationId,
       });
 
       if (!client) {
@@ -25,17 +24,17 @@ export const activityService = {
       }
     }
 
-    if (data.dealId) {
-      const deal = await dealRepo.findById({
-        dealId: data.dealId,
-        organizationId: organization.organizationId,
+    if (body.dealId) {
+      const deal = await DealRepo.findById({
+        dealId: body.dealId,
+        organizationId: param.organizationId,
       });
 
       if (!deal) {
         throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
       }
 
-      if (data.clientId && deal.clientId !== data.clientId) {
+      if (body.clientId && deal.clientId !== body.clientId) {
         throw new CustomError(
           400,
           "Deal does not belong to the specified client",
@@ -46,12 +45,12 @@ export const activityService = {
 
     const createdActivity = await db.transaction(async (tx) => {
       const created: NonNullable<any> = await ActivityRepo.create(tx, {
-        ...data,
-        organizationId: organization.organizationId,
+        ...body,
+        organizationId: param.organizationId,
         userId: user.userId,
       })
-      await auditLogRepo.create(tx, {
-        organizationId: organization.organizationId,
+      await AuditLogRepo.create(tx, {
+        organizationId: param.organizationId,
         userId: user.userId,
         action: "create",
         entityType: "activity",
@@ -67,17 +66,6 @@ export const activityService = {
 
     return createdActivity;
   },
-
-  findById: async (activity: VActivity.activityId) => {
-    const foundActivity = await ActivityRepo.findById({ ...activity });
-
-    if (!foundActivity) {
-      throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
-    }
-
-    return foundActivity;
-  },
-
   query: async (organization: VActivity.organizationId, query: VActivity.query) => {
     const activities = await ActivityRepo.query({
       ...organization,
@@ -85,42 +73,44 @@ export const activityService = {
     })
     return activities
   },
+  findById: async (param: VActivity.activityId) => {
+    const foundActivity = await ActivityRepo.findById({ ...param });
 
-  findByClient: async (clientId: string, organizationId: string) => {
-    const client = await ClientRepo.getById({ clientId, organizationId });
+    if (!foundActivity) {
+      throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
+    }
 
+    return foundActivity;
+  },
+  findByClient: async (param: { clientId: string, organizationId: string }) => {
+    const client = await ClientRepo.getById(param);
     if (!client) {
       throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
     }
-
-    return await ActivityRepo.findByClient({ clientId, organizationId });
+    return await ActivityRepo.findByClient(param);
   },
-
-  findByDeal: async (dealId: string, organizationId: string) => {
-    const deal = await dealRepo.findById({ dealId, organizationId });
-
+  findByDeal: async (param: { dealId: string, organizationId: string }) => {
+    const deal = await DealRepo.findById(param);
     if (!deal) {
       throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
     }
-
-    return await ActivityRepo.findByDeal({ dealId, organizationId });
+    return await ActivityRepo.findByDeal(param);
   },
-
   update: async (
     user: VAuth.userId,
-    activity: VActivity.activityId,
-    data: VActivity.update,
+    param: VActivity.activityId,
+    body: VActivity.update,
   ) => {
-    const existingActivity = await ActivityRepo.findById({ ...activity });
+    const existingActivity = await ActivityRepo.findById({ ...param });
 
     if (!existingActivity) {
       throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
-    if (data.clientId) {
+    if (body.clientId) {
       const client = await ClientRepo.getById({
-        clientId: data.clientId,
-        ...activity,
+        clientId: body.clientId,
+        ...param,
       });
 
       if (!client) {
@@ -128,10 +118,10 @@ export const activityService = {
       }
     }
 
-    if (data.dealId) {
-      const deal = await dealRepo.findById({
-        dealId: data.dealId,
-        ...activity,
+    if (body.dealId) {
+      const deal = await DealRepo.findById({
+        dealId: body.dealId,
+        ...param,
       });
 
       if (!deal) {
@@ -139,7 +129,7 @@ export const activityService = {
       }
 
       const clientId =
-        data.clientId !== undefined ? data.clientId : existingActivity.clientId;
+        body.clientId !== undefined ? body.clientId : existingActivity.clientId;
 
       if (clientId && deal.clientId !== clientId) {
         throw new CustomError(
@@ -152,11 +142,11 @@ export const activityService = {
 
     const updatedActivity = await db.transaction(async (tx) => {
       const updated: NonNullable<any> = await ActivityRepo.update(tx, {
-        ...activity,
-        ...data,
+        ...param,
+        ...body,
       })
-      await auditLogRepo.create(tx, {
-        organizationId: activity.organizationId,
+      await AuditLogRepo.create(tx, {
+        organizationId: param.organizationId,
         userId: user.userId,
         action: "update",
         entityType: "activity",
@@ -180,18 +170,17 @@ export const activityService = {
 
     return updatedActivity;
   },
-
-  delete: async (user: VAuth.userId, activity: VActivity.activityId) => {
-    const existingActivity = await ActivityRepo.findById({ ...activity });
+  delete: async (user: VAuth.userId, param: VActivity.activityId) => {
+    const existingActivity = await ActivityRepo.findById({ ...param });
 
     if (!existingActivity) {
       throw new CustomError(404, "Activity not found", "ACTIVITY_NOT_FOUND");
     }
 
     await db.transaction(async (tx) => {
-      await ActivityRepo.delete(tx, { ...activity });
-      await auditLogRepo.create(tx, {
-        organizationId: activity.organizationId,
+      await ActivityRepo.delete(tx, { ...param });
+      await AuditLogRepo.create(tx, {
+        organizationId: param.organizationId,
         userId: user.userId,
         action: "delete",
         entityType: "activity",

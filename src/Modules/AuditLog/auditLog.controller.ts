@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import { auditLogService } from "../services/auditLog.service";
-import { VAuditLog } from "../validators/auditLog.validator";
+import { auditLogService } from "./auditLog.service";
+import { VAuditLog } from "./auditLog.validator";
 
 export const auditLogController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {

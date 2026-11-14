@@ -1,15 +1,15 @@
-import { CustomError } from "../errorHandler/CustomError";
-import auditLogRepo from "../repositories/AuditLog.repo";
-import { VAuditLog } from "../validators/auditLog.validator";
+import { CustomError } from "../../ErrorHandler/CustomError";
+import AuditLogRepo from "./AuditLog.repo";
+import { VAuditLog } from "./auditLog.validator";
 
 export const auditLogService = {
-  query: async (organization: VAuditLog.organizationId, query: VAuditLog.query) => {
-    const auditLogs = auditLogRepo.query({ ...organization, ...query })
+  query: async (param: VAuditLog.organizationId, query: VAuditLog.query) => {
+    const auditLogs = AuditLogRepo.query({ ...param, ...query })
     return auditLogs
   },
 
-  findById: async (data: VAuditLog.auditLogId) => {
-    const auditLog = await auditLogRepo.findById(data);
+  findById: async (param: VAuditLog.auditLogId) => {
+    const auditLog = await AuditLogRepo.findById(param);
 
     if (!auditLog) {
       throw new CustomError(404, "Audit log not found", "AUDIT_LOG_NOT_FOUND");

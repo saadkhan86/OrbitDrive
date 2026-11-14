@@ -1,28 +1,27 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-
-import clientsService from "../services/clients.service";
-import { VOrganization } from "../validators/organization.validator";
-import { VClient } from "../validators/clients.validator";
-import { VAuth } from "../validators/auth.validator";
+import clientsService from "./clients.service";
+import { VAuth } from "../Auth/auth.validator";
+import { VClient } from "./clients.validator";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
+    const client = await clientsService.create(
+      request.user as VAuth.userId,
+      request.params as VClient.organizationId,
+      request.body as VClient.create,
+    )
     return reply.code(201).send({
       success: true,
       message: "client created successfully",
       data: {
-        client: await clientsService.create(
-          request.user as VAuth.userId,
-          request.params as VClient.OrganizationIdParams,
-          request.body as VClient.CreateClientInput,
-        ),
+        client
       },
     });
   },
 
   query: async (request: FastifyRequest, reply: FastifyReply) => {
     const clients = await clientsService.query(
-      request.params as VOrganization.getById,
+      request.params as VClient.organizationId,
       request.query as VClient.query
     )
     return reply.code(200).send({
@@ -36,7 +35,7 @@ export const clientController = {
 
   getById: async (request: FastifyRequest, reply: FastifyReply) => {
     const client = await clientsService.getById(
-      request.params as VClient.ClientIdParams,
+      request.params as VClient.clientId,
     )
     return reply.code(200).send({
       success: true,
@@ -48,15 +47,16 @@ export const clientController = {
   },
 
   update: async (request: FastifyRequest, reply: FastifyReply) => {
+    const client = await clientsService.update(
+      request.user as VAuth.userId,
+      request.params as VClient.clientId,
+      request.body as VClient.update,
+    )
     return reply.code(200).send({
       success: true,
       message: "client updated successfully",
       data: {
-        client: await clientsService.update(
-          request.user as VAuth.userId,
-          request.params as VClient.ClientIdParams,
-          request.body as VClient.UpdateClientInput,
-        ),
+        client
       },
     });
   },
@@ -64,7 +64,7 @@ export const clientController = {
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await clientsService.delete(
       request.user as VAuth.userId,
-      request.params as VClient.ClientIdParams,
+      request.params as VClient.clientId,
     );
 
     return reply.code(204).send({

@@ -1,10 +1,9 @@
 import { and, asc, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 
-import { db } from "../database";
-
-import { clients } from "../database/schemas/clients.Schema";
-import { VClient } from "../validators/clients.validator";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { clients } from "../../Database/schemas/clients.Schema";
+import { VClient } from "./clients.validator";
+import { db } from "../../Database";
 
 class ClientRepo {
   // Create Client
@@ -13,7 +12,7 @@ class ClientRepo {
   }
 
   // Get All Clients
-  public async query(data: VClient.OrganizationIdParams & VClient.query) {
+  public async query(data: VClient.organizationId & VClient.query) {
     const { page = 1, limit = 5 } = data;
     const _query: any[] = [eq(clients.organizationId, data.organizationId)];
     if (data.status) {
@@ -30,7 +29,7 @@ class ClientRepo {
   }
 
   // Get Single Client
-  public async getById(data: VClient.ClientIdParams) {
+  public async getById(data: VClient.clientId) {
     return (
       await db
         .select()
@@ -47,7 +46,7 @@ class ClientRepo {
   // Update Client
   public async update(
     tx: NodePgDatabase,
-    data: VClient.UpdateClientInput & VClient.ClientIdParams,
+    data: VClient.update & VClient.clientId,
   ) {
     return (
       await tx
@@ -66,7 +65,7 @@ class ClientRepo {
     )[0];
   }
 
-  public async delete(tx: NodePgDatabase, data: VClient.ClientIdParams) {
+  public async delete(tx: NodePgDatabase, data: VClient.clientId) {
     return (
       await tx
         .delete(clients)

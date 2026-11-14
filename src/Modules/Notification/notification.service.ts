@@ -1,12 +1,10 @@
-import { CustomError } from "../errorHandler/CustomError";
-import notificationRepo from "../repositories/Notification.repo";
-import { VAuth } from "../validators/auth.validator";
-import type { VNotification } from "../validators/notification.validator";
+import { VAuth } from "../Auth/auth.validator";
+import NotificationRepo from "./Notification.repo";
 
 export const notificationService = {
   // Get all notifications
-  findAll: async (user: VAuth.userId) => {
-    return await notificationRepo.findAll({
+  query: async (user: VAuth.userId) => {
+    return await NotificationRepo.query({
       userId: user.userId,
     });
   },

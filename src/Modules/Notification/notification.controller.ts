@@ -1,11 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { notificationService } from "../services/notification.service";
-import { VNotification } from "../validators/notification.validator";
-import { VAuth } from "../validators/auth.validator";
+import { VAuth } from "../Auth/auth.validator";
+import { notificationService } from "./notification.service";
+import { VNotification } from "./notification.validator";
 
 export const notificationController = {
-  findAll: async (request: FastifyRequest, reply: FastifyReply) => {
-    const notifications = await notificationService.findAll(
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const notifications = await notificationService.query(
       request.user as VAuth.userId,
     );
 

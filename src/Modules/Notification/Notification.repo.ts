@@ -11,7 +11,7 @@ class NotificationRepo {
     return (await tx.insert(notifications).values(data).returning())[0];
   }
 
-  public async findAll(data: VAuth.userId) {
+  public async query(data: VAuth.userId) {
     return await db
       .select()
       .from(notifications)

@@ -1,8 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import { activityService } from "../services/activity.service";
-import { VActivity } from "../validators/activity.validator";
-import { VAuth } from "../validators/auth.validator";
+import { activityService } from "./activity.service";
+import { VAuth } from "../Auth/auth.validator";
+import { VActivity } from "./activity.validator";
 
 export const activityController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -44,16 +43,9 @@ export const activityController = {
   },
 
   findByClient: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, clientId } = request.params as {
-      organizationId: string;
-      clientId: string;
-    };
-
     const activities = await activityService.findByClient(
-      clientId,
-      organizationId,
+      request.params as { clientId: string, organizationId: string }
     );
-
     return reply.code(200).send({
       success: true,
       message: "Activity fetched successfully",
@@ -62,13 +54,10 @@ export const activityController = {
   },
 
   findByDeal: async (request: FastifyRequest, reply: FastifyReply) => {
-    const { organizationId, dealId } = request.params as {
+    const activities = await activityService.findByDeal(request.params as {
       organizationId: string;
       dealId: string;
-    };
-
-    const activities = await activityService.findByDeal(dealId, organizationId);
-
+    });
     return reply.code(200).send({
       success: true,
       message: "Activity fetched successfully",
@@ -82,14 +71,12 @@ export const activityController = {
       request.params as VActivity.activityId,
       request.body as VActivity.update,
     );
-
     return reply.code(200).send({
       success: true,
       message: "Activity updated successfully",
       data: { activity },
     });
   },
-
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await activityService.delete(
       request.user as VAuth.userId,

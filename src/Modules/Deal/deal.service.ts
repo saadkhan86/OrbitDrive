@@ -1,32 +1,32 @@
-import { db } from "../database";
-import { CustomError } from "../errorHandler/CustomError";
-import auditLogRepo from "../repositories/AuditLog.repo";
-import ClientRepo from "../repositories/Client.repo";
-import dealRepo from "../repositories/Deal.repo";
-import { VAuth } from "../validators/auth.validator";
-import type { VDeal } from "../validators/deal.validator";
+import { db } from "../../Database";
+import { CustomError } from "../../ErrorHandler/CustomError";
+import AuditLogRepo from "../AuditLog/AuditLog.repo";
+import { VAuth } from "../Auth/auth.validator";
+import ClientRepo from "../Clients/Client.repo";
+import DealRepo from "./Deal.repo";
+import { VDeal } from "./deal.validator";
 
 class DealService {
   public async create(
     user: VAuth.userId,
-    organization: VDeal.organizationId,
-    data: VDeal.create,
+    param: VDeal.organizationId,
+    body: VDeal.create,
   ) {
     const client = await ClientRepo.getById({
-      organizationId: organization.organizationId,
-      clientId: data.clientId,
+      organizationId: param.organizationId,
+      clientId: body.clientId,
     });
 
     if (!client) {
       throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
     }
     const deal = await db.transaction(async (tx) => {
-      const createdDeal: NonNullable<any> = await dealRepo.create(tx, {
-        ...data,
-        organizationId: organization.organizationId,
+      const createdDeal: NonNullable<any> = await DealRepo.create(tx, {
+        ...body,
+        organizationId: param.organizationId,
       });
 
-      await auditLogRepo.create(tx, {
+      await AuditLogRepo.create(tx, {
         organizationId: createdDeal.organizationId,
         userId: user.userId,
         action: "create",
@@ -43,10 +43,10 @@ class DealService {
     return deal;
   }
 
-  public async findById(deal: VDeal.dealId & VDeal.organizationId) {
-    const foundDeal = await dealRepo.findById({
-      dealId: deal.dealId,
-      organizationId: deal.organizationId,
+  public async findById(param: VDeal.dealId & VDeal.organizationId) {
+    const foundDeal = await DealRepo.findById({
+      dealId: param.dealId,
+      organizationId: param.organizationId,
     });
 
     if (!foundDeal) {
@@ -56,9 +56,9 @@ class DealService {
     return foundDeal;
   }
 
-  public async query(organization: VDeal.organizationId, query: VDeal.query) {
-    const deals = await dealRepo.query({
-      ...organization,
+  public async query(param: VDeal.organizationId, query: VDeal.query) {
+    const deals = await DealRepo.query({
+      ...param,
       ...query
     });
     return deals
@@ -66,19 +66,19 @@ class DealService {
 
   public async update(
     user: VAuth.userId,
-    deal: VDeal.dealId & VDeal.organizationId,
-    data: VDeal.update,
+    param: VDeal.dealId & VDeal.organizationId,
+    body: VDeal.update,
   ) {
-    const found = await dealRepo.findById({ dealId: deal.dealId, organizationId: deal.organizationId })
+    const found = await DealRepo.findById({ dealId: param.dealId, organizationId: param.organizationId })
     if (!found) throw new CustomError(404, "Deal not found", "NOT_FOUND");
     const updatedDeal = await db.transaction(async (tx) => {
-      const updated = await dealRepo.update(tx, {
-        dealId: deal.dealId,
-        organizationId: deal.organizationId,
-        ...(data as VDeal.update),
+      const updated = await DealRepo.update(tx, {
+        dealId: param.dealId,
+        organizationId: param.organizationId,
+        ...body,
       });
       if (!updated) throw new CustomError(500, "deal not updated", "SOMETHING_WENT_WRONG")
-      await auditLogRepo.create(tx, {
+      await AuditLogRepo.create(tx, {
         organizationId: updated.organizationId,
         userId: user.userId,
         action: "update",
@@ -105,16 +105,16 @@ class DealService {
 
   public async delete(
     user: VAuth.userId,
-    deal: VDeal.organizationId & VDeal.dealId,
+    param: VDeal.organizationId & VDeal.dealId,
   ) {
-    const foundDeal = await this.findById(deal);
+    const foundDeal = await DealRepo.findById(param);
     const deletedDeal = await db.transaction(async (tx) => {
-      await dealRepo.delete(tx, {
-        dealId: deal.dealId,
-        organizationId: deal.organizationId,
+      await DealRepo.delete(tx, {
+        dealId: param.dealId,
+        organizationId: param.organizationId,
       });
-      await auditLogRepo.create(tx, {
-        organizationId: deal.organizationId,
+      await AuditLogRepo.create(tx, {
+        organizationId: param.organizationId,
         userId: user.userId,
         action: "delete",
         entityType: "deal",

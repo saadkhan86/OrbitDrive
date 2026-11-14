@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
-import { auditLogController } from "../controller/auditLog.controller";
-import { authenticate } from "../hooks/authentication.hook";
-import { authorize } from "../hooks/authorization.hook";
+import { authenticate } from "../../Hooks/authentication.hook";
+import { authorize } from "../../Hooks/authorization.hook";
+import { auditLogController } from "./auditLog.controller";
 
 export const auditLogRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {

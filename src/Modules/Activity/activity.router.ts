@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import { activityValidator } from "../validators/activity.validator";
-import { authenticate } from "../hooks/authentication.hook";
-import { activityController } from "../controller/activity.controller";
-import { authorize } from "../hooks/authorization.hook";
+import { authorize } from "../../Hooks/authorization.hook";
+import { authenticate } from "../../Hooks/authentication.hook";
+import { activityValidator } from "./activity.validator";
+import { activityController } from "./activity.controller";
 
 export const activityRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {

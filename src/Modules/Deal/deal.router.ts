@@ -1,9 +1,9 @@
 import type { FastifyInstance } from "fastify";
+import { authenticate } from "../../Hooks/authentication.hook";
+import { dealValidator } from "./deal.validator";
+import dealController from "./deal.controller";
+import { authorize } from "../../Hooks/authorization.hook";
 
-import dealController from "../controller/deal.controller";
-import { dealValidator } from "../validators/deal.validator";
-import { authenticate } from "../hooks/authentication.hook";
-import { authorize } from "../hooks/authorization.hook";
 
 export const dealRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {

@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import dealService from "./deal.service";
+import { VAuth } from "../Auth/auth.validator";
+import { VDeal } from "./deal.validator";
 
-import type { VDeal } from "../validators/deal.validator";
-import dealService from "../services/deal.service";
-import { VAuth } from "../validators/auth.validator";
 
 class DealController {
   public async create(request: FastifyRequest, reply: FastifyReply) {

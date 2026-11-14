@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { authenticate } from "../hooks/authentication.hook";
-import { authorize } from "../hooks/authorization.hook";
-import { clientValidator } from "../validators/clients.validator";
-import { clientController } from "../controller/client.controller";
+import { authenticate } from "../../Hooks/authentication.hook";
+import { authorize } from "../../Hooks/authorization.hook";
+import { clientValidator } from "./clients.validator";
+import { clientController } from "./client.controller";
 
 export const clientsRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {

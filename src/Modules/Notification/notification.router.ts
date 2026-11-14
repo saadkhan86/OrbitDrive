@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { notificationController } from "../controller/notification.controller";
-import { authenticate } from "../hooks/authentication.hook";
-import { notificationValidator } from "../validators/notification.validator";
+import { authenticate } from "../../Hooks/authentication.hook";
+import { notificationController } from "./notification.controller";
+import { notificationValidator } from "./notification.validator";
 
 export const notificationRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (routeOptions) => {
@@ -14,7 +14,7 @@ export const notificationRouter = async (app: FastifyInstance) => {
   app.get(
     "/",
     { preHandler: [authenticate.user] },
-    notificationController.findAll,
+    notificationController.query,
   );
   app.get(
     "/:notificationId",
