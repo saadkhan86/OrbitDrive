@@ -1,0 +1,61 @@
+import { Constants } from "../../Constants/constants";
+import { CustomError } from "../../ErrorHandler/CustomError";
+import { addEmailJob } from "../../Queues/email.queue";
+import { tokenUtils } from "../../Utils/authToken.utils";
+import { redisUtils } from "../../Utils/redis.utils";
+import AuthRepo from "../Auth/Auth.repo";
+import UserRepo from "../User/User.repo";
+import { VVerification } from "./verification.validator";
+
+export const verificationService = {
+  verifyEmailVerification: async (data: VVerification.query) => {
+    const hashedToken = await tokenUtils.hashToken(data.token!);
+    const userId = await redisUtils.getRedis("verify-email", hashedToken);
+    if (!userId)
+      throw new CustomError(
+        410,
+        "Email verification link has been expired",
+        "LINK_EXPIRED",
+      );
+    const updatedUser = await AuthRepo.updateIsEmailVerified({ userId });
+    if (!updatedUser)
+      throw new CustomError(
+        500,
+        "something went wrong while verifying email",
+        "COULD_NOT_VERIFY",
+      );
+    await redisUtils.deleteRedis("verify-email", hashedToken);
+    await redisUtils.deleteRedis("verify-email", userId);
+    return true;
+  },
+  resendEmailVerification: async (data: VVerification.query) => {
+    const user = await UserRepo.findByEmail({ email: data.email! });
+    if (!user)
+      throw new CustomError(
+        404,
+        "User not found associated with this email",
+        "USER_NOT_FOUND",
+      );
+
+    if (user.isEmailVerified)
+      throw new CustomError(409, "Email already verified", "ALREADY_VERIFIED");
+    let hashedToken = await redisUtils.getRedis("verify-email", user.id);
+    if (hashedToken)
+      throw new CustomError(
+        409,
+        "email verification link already sent",
+        "ALREADY_SENT",
+      );
+    const token = await tokenUtils.generateToken();
+    hashedToken = await tokenUtils.hashToken(token);
+    await redisUtils.setRedis("verify-email", hashedToken, user.id);
+    await redisUtils.setRedis("verify-email", user.id, hashedToken);
+    await addEmailJob("verify-email", {
+      email: user.email,
+      fullName: user.fullName,
+      verificationToken: token,
+      expiresIn: Constants.tokenExpireTime,
+    });
+    return true;
+  },
+};

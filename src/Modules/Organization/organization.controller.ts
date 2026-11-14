@@ -1,0 +1,59 @@
+import { FastifyReply, FastifyRequest } from "fastify";
+import { organizationService } from "./organization.service";
+import { VAuth } from "../Auth/auth.validator";
+import { VOrganization } from "./organization.validator";
+
+export const organizationController = {
+  create: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organization = await organizationService.create(
+      request.user as VAuth.userId,
+      request.body as VOrganization.create,
+    )
+    return reply.code(201).send({
+      success: true,
+      message: "organization created successfully",
+      data: {
+        organization
+      },
+    });
+  },
+  update: async (request: FastifyRequest, reply: FastifyReply) => {
+    return reply.status(200).send({
+      success: true,
+      message: "Organization updated successfully",
+      data: {
+        organization: await organizationService.update(
+          request.user as VAuth.userId,
+          request.params as VOrganization.organizationId,
+          request.body as VOrganization.update,
+        ),
+      },
+    });
+  },
+  getById: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organization = await organizationService.getById(
+      request.params as VOrganization.organizationId,
+    )
+    return reply.status(200).send({
+      success: true,
+      message: "Organization fetched successfully",
+      data: {
+        organization
+      },
+    });
+  },
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organizations = await organizationService.query(request.user, request.query as VOrganization.query);
+    reply.status(200).send({ success: true, message: "Ogranizations fetched successfully", data: { result: organizations } })
+  },
+  delete: async (request: FastifyRequest, reply: FastifyReply) => {
+    await organizationService.delete(
+      request.user as VAuth.userId,
+      request.params as VOrganization.organizationId,
+    );
+    return reply.status(200).send({
+      success: true,
+      message: "Organization deleted successfully",
+    });
+  },
+};
