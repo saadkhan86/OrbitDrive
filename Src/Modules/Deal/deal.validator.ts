@@ -1,0 +1,93 @@
+import z from "zod";
+
+export const dealValidator = {
+  create: z.object({
+    clientId: z.uuid({ message: "invalid type of  clientId" }),
+
+    title: z
+      .string({ message: "title must be of type string" })
+      .min(5, { message: "title must be greater than 5 characters" })
+      .max(150, { message: "title must be less than 150 characters" }),
+
+    value: z
+      .number({ message: "value must be type of number" })
+      .nonnegative({ message: "value cannot be negative" }),
+
+    currency: z
+      .string()
+      .length(3, { message: "invalid type of currency" })
+      .default("USD"),
+
+    stage: z
+      .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"], {
+        message: "invalid stage passed",
+      })
+      .default("lead"),
+
+    expectedCloseDate: z.coerce.date().optional(),
+
+    description: z.string().max(1000).optional(),
+  }),
+
+  update: z
+    .object({
+      title: z
+        .string()
+        .min(5, { message: "title must between 5-150 characters" })
+        .max(150, { message: "title must between 5-150 characters" })
+        .optional(),
+
+      value: z
+        .number()
+        .nonnegative({ message: "value can not be negative" })
+        .optional(),
+
+      currency: z
+        .string()
+        .length(3, { message: "invalid type of currency" })
+        .optional(),
+
+      stage: z
+        .enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"], {
+          message: "invalid stage passed",
+        })
+        .optional(),
+
+      expectedCloseDate: z.coerce.date().optional(),
+
+      description: z.string().max(1000).optional(),
+    })
+    .refine((data) => Object.keys.length > 0, {
+      abort: true,
+      message: "At least one field is required",
+    }),
+
+  dealId: z.object({
+    dealId: z.uuid({ message: "invalid type of dealId" }),
+    organizationId: z.uuid({ message: "invalid type of organizationId" }),
+  }),
+
+  clientId: z.object({
+    clientId: z.uuid({ message: "invalid type of clientId" }),
+  }),
+  organizationId: z.object({
+    organizationId: z.uuid({ message: "invalid type of organizationId" }),
+  }),
+  query: z.object({
+    search: z.string().optional(),
+    createdBy: z.uuid({ message: "Invalid type of createdBy" }).optional(),
+    stage: z.enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"]).optional(),
+    page: z.coerce.number().optional().default(1),
+    limit: z.coerce.number().optional().default(10),
+
+  })
+};
+
+export declare namespace VDeal {
+  type create = z.infer<typeof dealValidator.create>;
+  type update = z.infer<typeof dealValidator.update>;
+  type dealId = z.infer<typeof dealValidator.dealId>;
+  type clientId = z.infer<typeof dealValidator.clientId>;
+  type organizationId = z.infer<typeof dealValidator.organizationId>;
+  type query = z.infer<typeof dealValidator.query>
+}

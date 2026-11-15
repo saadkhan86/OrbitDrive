@@ -1,0 +1,110 @@
+import { eq, and, ilike, or, count, desc, getTableColumns, SQL, sql } from "drizzle-orm";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { VDeal } from "./deal.validator";
+import { deals } from "../../Database/schemas/deals.Schema";
+import { db } from "../../Database";
+import { clients } from "../../Database/schemas/clients.Schema";
+import { VAuth } from "../Auth/auth.validator";
+
+class DealRepo {
+  public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId & VAuth.userId) {
+    return (
+      await tx
+        .insert(deals)
+        .values({
+          organizationId: data.organizationId,
+          createdBy: data.userId,
+          clientId: data.clientId,
+          title: data.title,
+          value: data.value.toString(),
+          currency: data.currency,
+          stage: data.stage,
+          expectedCloseDate: data.expectedCloseDate,
+          description: data.description,
+        })
+        .returning()
+    )[0];
+  }
+
+  public async findById(data: VDeal.dealId) {
+    return (
+      await db
+        .select({
+          ...getTableColumns(deals),
+          client: { id: clients.id, name: clients.name, email: clients.email }
+        })
+        .from(deals)
+        .innerJoin(clients, eq(clients.id, deals.clientId))
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        ).limit(1)
+    )[0];
+  }
+
+  public async query(data: VDeal.organizationId & VDeal.query) {
+    const { page, limit } = data
+    const _query: SQL[] = [eq(deals.organizationId, data.organizationId)]
+    if (data.createdBy) _query.push(eq(deals.createdBy, data.createdBy))
+    if (data.stage) _query.push(eq(deals.stage, data.stage));
+    if (data.search) {
+      const searchPattern = `%${data.search}%`
+      _query.push(
+        or(
+          ilike(deals.title, searchPattern),
+          ilike(deals.value, searchPattern),
+          ilike(deals.currency, searchPattern)
+        ) as SQL
+      )
+    }
+    const [foundDeals, total] = await Promise.all([
+      db.select().from(deals).where(and(..._query)).orderBy(desc(deals.createdAt)).limit(limit).offset((page - 1) * limit),
+      db.select({ count: count() }).from(deals).where(and(..._query))
+    ])
+    return { deals: foundDeals, count: total[0]?.count ?? 0 }
+  }
+
+  public async update(
+    tx: NodePgDatabase,
+    data: VDeal.update & VDeal.dealId & VDeal.organizationId,
+  ) {
+    let newData: Partial<typeof deals.$inferInsert> = {};
+    if (data.currency) newData.currency = data.currency;
+    if (data.description) newData.description = data.description;
+    if (data.expectedCloseDate)
+      newData.expectedCloseDate = data.expectedCloseDate;
+    if (data.stage) newData.stage = data.stage;
+    if (data.title) newData.title = data.title;
+    if (data.value) newData.value = data.value.toString();
+    return (
+      await tx
+        .update(deals)
+        .set(newData)
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
+  }
+
+  public async delete(tx: NodePgDatabase, data: VDeal.dealId & VDeal.organizationId) {
+    return (
+      await tx
+        .delete(deals)
+        .where(
+          and(
+            eq(deals.id, data.dealId),
+            eq(deals.organizationId, data.organizationId),
+          ),
+        )
+        .returning()
+    )[0];
+  }
+}
+
+export default new DealRepo();

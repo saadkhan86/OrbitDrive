@@ -1,0 +1,83 @@
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { and, desc, eq, getTableColumns, ilike, SQL, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { conversations } from "../../Database/schemas/conversations.Schema";
+import { VConversation } from "./conversation.validator";
+import { VAuth } from "../Auth/auth.validator";
+import { conversation_members } from "../../Database/schemas/conversation_members.Schema";
+import { users } from "../../Database/schemas/users.Schema";
+import { db } from "../../Database";
+import { messages } from "../../Database/schemas/messages.Schema";
+class ConversationRepo {
+    public async create(tx: NodePgDatabase, data: VConversation.create & VAuth.userId) {
+        return (await tx.insert(conversations).values({
+            type: data.type,
+            name: data.name ?? "",
+            createdBy: data.userId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }).returning())[0]
+    }
+    public async query(data: VConversation.query & VAuth.userId) {
+        const { page = 1, limit = 15 } = data
+        const _query: SQL[] = [eq(conversation_members.userId, data.userId)]
+        if (data.search) _query.push(ilike(conversations.name, `%${data.search}%`))
+        const messageSender = alias(users, "message_sender")
+        const latestMessage = db.select({
+            id: messages.id,
+            content: messages.content,
+            senderId: messages.senderId,
+            createdAt: messages.createdAt
+        })
+            .from(messages)
+            .where(eq(messages.conversationId, conversations.id))
+            .orderBy(desc(messages.createdAt))
+            .limit(1).as("latest_message")
+
+        const result = await db.select({
+            ...getTableColumns(conversations),
+            lastMessage: {
+                id: latestMessage.id,
+                content: latestMessage.content,
+                createdAt: latestMessage.createdAt,
+                sender: { id: messageSender.id, name: messageSender.fullName } as any,
+            }
+        })
+            .from(conversations)
+            .innerJoin(conversation_members, eq(conversations.id, conversation_members.conversationId))
+            .leftJoinLateral(latestMessage, sql`true`)
+            .leftJoin(messageSender, eq(latestMessage.senderId, messageSender.id))
+            .where(and(..._query))
+            .orderBy(desc(conversations.createdAt))
+            .limit(limit)
+            .offset((page - 1) * limit)
+    }
+    public async getById(data: VConversation.conversationId & VConversation.conversationAndMessages & VAuth.userId) {
+        const [conversation, members, latestMessages] = await Promise.all([
+            db.select().from(conversations).where(eq(conversations.id, data.conversationId)),
+            db.select({
+                user: { id: users.id, name: users.fullName },
+                joinedAt: conversation_members.joinedAt
+            })
+                .from(conversation_members)
+                .innerJoin(users, eq(conversation_members.conversationId, data.conversationId))
+                .orderBy(desc(conversation_members.joinedAt))
+                .limit(data.members || 5),
+            db.select({
+                ...getTableColumns(messages),
+                sender: { id: users.id, name: users.fullName }
+            })
+                .from(messages).innerJoin(users, eq(users.id, messages.senderId))
+                .where(eq(messages.conversationId, data.conversationId))
+                .limit(data.messages || 30)
+        ])
+        const isMember = members.some(mbr => mbr.user.id == data.userId)
+        if (!isMember) return null
+        return { ...conversation[0], members, latestMessages }
+
+    }
+    public async update(data: { name: string, userId: string, conversationId: string }) {
+        return (await db.update(conversations).set({ name: data.name, updatedAt: new Date() }).where(eq(conversations.id, data.conversationId)).returning())[0]
+    }
+}
+export default new ConversationRepo()
