@@ -9,4 +9,4 @@ export const messages = pgTable("messages", {
     content: varchar("content").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
-}, (table) => [index("messages_conversation_created_idx").on(table.conversationId, table.createdAt)])
+}, (table) => [index("messages_conversation_created_idx").on(table.id, table.conversationId, table.createdAt)])

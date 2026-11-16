@@ -44,7 +44,7 @@ export const organizationInvitationService = {
     const tokenHash = await tokenUtils.hashToken(token);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const invitation = await db.transaction(async (tx) => {
-      const createdInvitation: NonNullable<any> = await OrganizationInvitationRepo.create(tx, {
+      const createdInvitation = await OrganizationInvitationRepo.create(tx, {
         organizationId: param.organizationId,
         email: body.email,
         role: body.role,
@@ -52,6 +52,7 @@ export const organizationInvitationService = {
         expiresAt,
         createdBy: user.userId,
       });
+      if (!createdInvitation) throw new CustomError(500, "something went wrong", "SOMETHING_WENT_WRONG")
       await AuditLogRepo.create(tx, {
         organizationId: param.organizationId,
         action: "invite",
@@ -68,13 +69,13 @@ export const organizationInvitationService = {
         const notification = await NotificationRepo.create(tx, {
           organizationId: param.organizationId,
           userId: targetUser.id,
-          title: "Invitation From Organization",
-          description: "New Invitation found.Check your email for further information",
+          title: "Invitation from organization",
+          description: "New invitation found. Check your email for further information",
           type: "invitation",
           isRead: false,
           readAt: null
         });
-        getIo().to(targetUser.id).emit("new-invitation", notification)
+        getIo().to(targetUser.id).emit("new-notification", notification)
       }
       return createdInvitation;
     })
@@ -95,7 +96,6 @@ export const organizationInvitationService = {
       organizationName: organization?.name,
       role: invitation!.role,
     });
-
     return {
       invitation,
     };
@@ -136,12 +136,10 @@ export const organizationInvitationService = {
       throw new CustomError(
         409,
         "Accepted invitation cannot be cancelled",
-
         "INVITATION_ALREADY_ACCEPTED",
       );
     }
     await db.transaction(async (tx) => {
-
       await AuditLogRepo.create(tx, {
         organizationId: foundInvitation.organizationId,
         action: "delete",
@@ -193,18 +191,17 @@ export const organizationInvitationService = {
       );
     }
     const member = await db.transaction(async (tx) => {
-      const createdMember =
-        await OrganizationMembersRepo.create(tx, {
-          organizationId: invitation.organizationId,
-          userId: user.userId,
-          role: invitation.role,
-        });
-
-      await OrganizationInvitationRepo.accept(tx, {
+      const accepted = await OrganizationInvitationRepo.accept(tx, {
         invitationId: invitation.id,
         organizationId: invitation.organizationId,
       });
-
+      if (!accepted) throw new CustomError(500, "something went wrong", "SOMETHING_WENT_WRONG")
+      const createdMember =
+        await OrganizationMembersRepo.create(tx, {
+          organizationId: accepted.organizationId,
+          userId: user.userId,
+          role: accepted.role,
+        });
       await AuditLogRepo.create(
         tx,
         {

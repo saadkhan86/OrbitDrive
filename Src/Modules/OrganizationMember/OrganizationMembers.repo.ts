@@ -9,10 +9,18 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 class OrganizationMembers {
   public async getForCurrentUser(data: VAuth.userId) {
-    const foundOrganizations = await db.select({
-      ...getTableColumns(organization_members),
-      organization: { name: organizations.name }
-    }).from(organization_members).innerJoin(organizations, eq(organizations.id, organization_members.organizationId)).where(eq(organization_members.userId, data.userId))
+    const { organizationId, ...memberColumns } = getTableColumns(organization_members)
+    const foundOrganizations = await db.
+      select({
+        ...memberColumns,
+        organization: { ...getTableColumns(organizations) }
+      })
+      .from(organization_members)
+      .innerJoin(
+        organizations,
+        eq(organizations.id, organization_members.organizationId)
+      ).where(eq(organization_members.userId, data.userId)
+      )
     return foundOrganizations;
   }
   public async query(data: VOrganizationMember.organizationId & VOrganizationMember.query) {
@@ -21,15 +29,11 @@ class OrganizationMembers {
     if (data.role) {
       _query.push(eq(organization_members.role, data.role))
     }
+    const { userId, ...organizationMemberColumns } = getTableColumns(organization_members)
     const [foundMembers, total] = await Promise.all([
       db.select({
-        id: organization_members.id,
-        organizationId: organization_members.organizationId,
-        user: users.fullName,
-        role: organization_members.role,
-        createdAt: organization_members.createdAt,
-        updatedAt: organization_members.updatedAt
-
+        ...organizationMemberColumns,
+        user: { id: users.id, name: users.fullName, profile: users.profile },
       })
         .from(organization_members)
         .innerJoin(users, eq(users.id, organization_members.userId))
@@ -76,15 +80,15 @@ class OrganizationMembers {
     tx: NodePgDatabase,
     data: VOrganizationMember.memberId,
   ) {
-    await tx
-      .delete(organization_members)
-      .where(
-        and(
-          eq(organization_members.organizationId, data.organizationId),
-          eq(organization_members.id, data.organizationMemberId),
-        ),
-      );
-    return;
+    return (
+      await tx
+        .delete(organization_members)
+        .where(
+          and(
+            eq(organization_members.organizationId, data.organizationId),
+            eq(organization_members.id, data.organizationMemberId),
+          ),
+        ).returning())[0]
   }
 
   public async getById(data: VOrganizationMember.memberId) {

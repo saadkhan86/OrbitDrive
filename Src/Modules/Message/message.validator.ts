@@ -8,7 +8,7 @@ export const messageValidator = {
         messageId: z.uuid({ message: "invalid message id" })
     }),
     query: z.object({
-        page: z.coerce.number().optional().default(1),
+        cursor: z.string().optional(),
         limit: z.coerce.number().optional().default(100)
     })
 

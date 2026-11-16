@@ -22,7 +22,7 @@ export const organizationInvitationValidator = {
 
   }),
   accept: z.object({
-    token: z.coerce.string({ message: "invalid token" }).length(32, { message: "invalid token passed" }),
+    token: z.coerce.string({ message: "invalid token" }).length(64, { message: "invalid token passed" }),
   }),
 };
 

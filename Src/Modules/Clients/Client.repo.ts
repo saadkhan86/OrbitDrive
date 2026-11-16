@@ -9,7 +9,6 @@ import { users } from "../../Database/schemas/users.Schema";
 class ClientRepo {
   public async create(tx: NodePgDatabase, data: typeof clients.$inferInsert) {
     return (await tx.insert(clients).values({
-      createdBy: data.createdBy,
       organizationId: data.organizationId,
       name: data.name,
       email: data.email,
@@ -49,11 +48,6 @@ class ClientRepo {
       await db
         .select({
           ...getTableColumns(clients),
-          createdBy: {
-            id: users.id,
-            name: users.fullName,
-            email: users.email
-          }
         })
         .from(clients)
         .where(
@@ -61,7 +55,7 @@ class ClientRepo {
             eq(clients.id, data.clientId),
             eq(clients.organizationId, data.organizationId),
           ),
-        ).innerJoin(users, eq(users.id, clients.createdBy))
+        )
     )[0];
   }
   public async update(

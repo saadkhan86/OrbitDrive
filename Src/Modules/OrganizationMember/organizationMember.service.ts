@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { getIo } from "../../Socket/server.socket";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
 import NotificationRepo from "../Notification/Notification.repo";
@@ -25,12 +26,15 @@ export const organizationMemberService = {
     param: VOrganizationMember.memberId,
     body: VOrganizationMember.role,
   ) => {
+
     const targetOrganizationMember = await OrganizationMembersRepo.getById({
       ...param,
     });
+
     if (!targetOrganizationMember) {
       throw new CustomError(404, "organization member not found", "NOT_FOUND");
     }
+
     const member = await db.transaction(async (tx) => {
 
       const updatedMember =
@@ -38,8 +42,9 @@ export const organizationMemberService = {
           ...param,
           ...body,
         });
+
       await AuditLogRepo.create(tx, {
-        organizationId: targetOrganizationMember.organizationId,
+        organizationId: targetOrganizationMember.organization.id,
         action: "create",
         entityType: "organization_member",
         entityId: targetOrganizationMember.id,
@@ -48,18 +53,21 @@ export const organizationMemberService = {
           changedBy: user.userId,
           newRole: body.role,
           previousRole: targetOrganizationMember.role,
-          targetMember: targetOrganizationMember.userId,
+          targetMember: targetOrganizationMember.user.id,
         },
       });
-      NotificationRepo.create(tx, {
+
+      const notification = NotificationRepo.create(tx, {
         type: "role",
-        userId: targetOrganizationMember.userId!,
-        organizationId: targetOrganizationMember.organizationId,
+        userId: targetOrganizationMember.user.id!,
+        organizationId: targetOrganizationMember.organization.id,
         title: `You role has been updated from ${targetOrganizationMember.role} to ${body.role}`,
       });
+
+      getIo().to(targetOrganizationMember.user.id).emit("new-notification", notification)
+
       return updatedMember;
     })
-
     return member;
   },
   delete: async (
@@ -72,7 +80,7 @@ export const organizationMemberService = {
     if (!targetOrganizationMember) {
       throw new CustomError(404, "organization member not found", "NOT_FOUND");
     }
-    if (targetOrganizationMember?.userId == user.userId) {
+    if (targetOrganizationMember.user.id == user.userId) {
       throw new CustomError(
         403,
         "You cannot delete yourself",
@@ -84,23 +92,24 @@ export const organizationMemberService = {
         ...param,
       });
       await AuditLogRepo.create(tx, {
-        organizationId: targetOrganizationMember.organizationId,
+        organizationId: targetOrganizationMember.organization.id,
         action: "delete",
         entityType: "organization_member",
         entityId: targetOrganizationMember.id,
         metadata: {
           deletedBy: user.userId,
           roleOfDeletedMember: targetOrganizationMember.role,
-          targetMember: targetOrganizationMember.userId,
+          targetMember: targetOrganizationMember.user.id,
         },
       });
 
-      NotificationRepo.create(tx, {
+      const notification = NotificationRepo.create(tx, {
         type: "role",
-        userId: targetOrganizationMember.userId!,
-        organizationId: targetOrganizationMember.organizationId,
+        userId: targetOrganizationMember.user.id,
+        organizationId: targetOrganizationMember.organization.id,
         title: "You are removed from organization",
       })
+      getIo().to(targetOrganizationMember.user.id).emit("new-notification", notification)
     });
     return true
   },

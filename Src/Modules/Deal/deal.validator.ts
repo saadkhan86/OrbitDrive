@@ -24,7 +24,7 @@ export const dealValidator = {
       })
       .default("lead"),
 
-    expectedCloseDate: z.coerce.date().optional(),
+    expectedCloseDate: z.date().optional(),
 
     description: z.string().max(1000).optional(),
   }),
@@ -53,7 +53,7 @@ export const dealValidator = {
         })
         .optional(),
 
-      expectedCloseDate: z.coerce.date().optional(),
+      expectedCloseDate: z.date().optional(),
 
       description: z.string().max(1000).optional(),
     })

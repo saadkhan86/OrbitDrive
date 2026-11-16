@@ -22,7 +22,6 @@ export const dealStageEnum = pgEnum("deal_stage", [
 
 export const deals = pgTable("deals", {
   id: uuid("id").defaultRandom().primaryKey(),
-  createdBy: uuid("created_by").references(() => users.id, { onDelete: "cascade" }).notNull(),
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id, {

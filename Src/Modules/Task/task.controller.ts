@@ -37,7 +37,6 @@ export const taskController = {
       data: { result: tasks },
     });
   },
-
   update: async (request: FastifyRequest, reply: FastifyReply) => {
     const task = await taskService.update(
       request.user as VAuth.userId,
@@ -50,7 +49,6 @@ export const taskController = {
       data: task,
     });
   },
-
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await taskService.delete(
       request.user as VAuth.userId,

@@ -7,13 +7,12 @@ import { clients } from "../../Database/schemas/clients.Schema";
 import { VAuth } from "../Auth/auth.validator";
 
 class DealRepo {
-  public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId & VAuth.userId) {
+  public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId ) {
     return (
       await tx
         .insert(deals)
         .values({
           organizationId: data.organizationId,
-          createdBy: data.userId,
           clientId: data.clientId,
           title: data.title,
           value: data.value.toString(),
@@ -43,11 +42,9 @@ class DealRepo {
         ).limit(1)
     )[0];
   }
-
   public async query(data: VDeal.organizationId & VDeal.query) {
     const { page, limit } = data
     const _query: SQL[] = [eq(deals.organizationId, data.organizationId)]
-    if (data.createdBy) _query.push(eq(deals.createdBy, data.createdBy))
     if (data.stage) _query.push(eq(deals.stage, data.stage));
     if (data.search) {
       const searchPattern = `%${data.search}%`

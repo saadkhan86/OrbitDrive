@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VActivity } from "./activity.validator";
 import { activities } from "../../Database/schemas/activity.Schema";
@@ -34,12 +34,12 @@ class ActivityRepo {
 
   public async query(data: VActivity.organizationId & VActivity.query) {
     const { page = 1, limit = 10 } = data
-    const _query: any[] = [eq(activities.organizationId, data.organizationId)];
+    const _query: SQL[] = [eq(activities.organizationId, data.organizationId)];
     if (data.type) {
       _query.push(eq(activities.type, data.type));
     }
     if (data.search) {
-      _query.push(or(ilike(activities.title, `%${data.search}%`)));
+      _query.push(or(ilike(activities.title, `%${data.search}%`)) as SQL);
     }
     const [foundActivities, total] = await Promise.all([
       db

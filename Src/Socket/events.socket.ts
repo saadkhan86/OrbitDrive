@@ -7,6 +7,7 @@ import MessageRepo from "../Modules/Message/Message.repo";
 export const RegisterSocketEvents = (io: Server) => {
     io.on("connection", (socket) => {
         const userSocket = socket as AuthenticatedSocket;
+        socket.join(userSocket.user.userId)
         console.log(`User connected ${userSocket.user.userId}`)
         socket.on("join_conversation", async (data: { conversationId: string }, callback: SocketCallback) => {
             const conversation = await ConversationRepo.getById({ userId: userSocket.user.userId, conversationId: data.conversationId })

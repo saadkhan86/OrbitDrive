@@ -23,7 +23,6 @@ export const dealService = {
     const deal = await db.transaction(async (tx) => {
       const createdDeal: NonNullable<any> = await DealRepo.create(tx, {
         ...body,
-        userId: user.userId,
         organizationId: param.organizationId,
       });
 
@@ -42,14 +41,12 @@ export const dealService = {
       return createdDeal
     })
     return deal;
-  }
-  ,
+  },
   findById: async (param: VDeal.dealId & VDeal.organizationId) => {
     const foundDeal = await DealRepo.findById({
       dealId: param.dealId,
       organizationId: param.organizationId,
     });
-
     if (!foundDeal) {
       throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
     }

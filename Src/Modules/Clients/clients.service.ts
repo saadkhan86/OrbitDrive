@@ -14,7 +14,6 @@ class ClientsService {
   ) {
     const client = await db.transaction(async (tx) => {
       const createdClient: NonNullable<any> = await ClientRepo.create(tx, {
-        createdBy: user.userId,
         organizationId: param.organizationId,
         name: body.name,
         email: body.email,

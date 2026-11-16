@@ -1,10 +1,11 @@
-import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VTask } from "./task.validator";
 import { tasks } from "../../Database/schemas/tasks.Schema";
 import { db } from "../../Database";
 import { clients } from "../../Database/schemas/clients.Schema";
 import { deals } from "../../Database/schemas/deals.Schema";
+import { users } from "../../Database/schemas/users.Schema";
 
 class TaskRepo {
   public async create(
@@ -31,15 +32,18 @@ class TaskRepo {
   }
 
   public async findById(data: VTask.taskId) {
+    const { clientId, dealId, assignedTo, ...taskColumns } = getTableColumns(tasks)
     const task = (await db
       .select({
-        ...getTableColumns(tasks),
-        client: { name: clients.name },
-        deal: { title: deals.title }
+        ...taskColumns,
+        assignedTo: { id: users.id, name: users.fullName, profile: users.profile },
+        client: { ...getTableColumns(clients) },
+        deal: { ...getTableColumns(deals) }
       })
       .from(tasks)
       .leftJoin(clients, eq(tasks.clientId, clients.id))
       .leftJoin(deals, eq(tasks.dealId, deals.id))
+      .leftJoin(users, eq(tasks.assignedTo, users.id))
       .where(
         and(
           eq(tasks.id, data.taskId),
@@ -51,9 +55,9 @@ class TaskRepo {
     return task ?? null;
   }
 
-  public async query(data: VTask.organizationId & VTask.query) {
-    const { page = 1, limit = 10 } = data;
-    const _query: any[] = [eq(tasks.organizationId, data.organizationId)]
+  public async query(data: VTask.organizationId & Omit<VTask.query, "cursor"> & { cursor: { id: string, createdAt: Date } | null }) {
+    const { cursor, limit = 10 } = data;
+    const _query: SQL[] = [eq(tasks.organizationId, data.organizationId)]
 
     if (data.status) _query.push(eq(tasks.status, data.status))
     if (data.priority) _query.push(eq(tasks.priority, data.priority))
@@ -62,21 +66,24 @@ class TaskRepo {
         or(
           ilike(tasks.title, `%${data.search}%`),
           ilike(tasks.description, `%${data.search}%`),
-        ),
+        ) as SQL,
       )
     }
-    const [foundTasks, total] = await Promise.all([
+    if (cursor) {
+      _query.push(or
+        (
+          lt(tasks.createdAt, cursor.createdAt),
+          and(
+            eq(tasks.createdAt, cursor.createdAt),
+            lt(tasks.id, cursor.id))
+        )!
+      )
+    }
+    return await
       db
         .select()
         .from(tasks)
-        .where(and(..._query)).orderBy(desc(tasks.createdAt)).limit(limit).offset((page - 1) * limit),
-
-      db
-        .select({ count: count() })
-        .from(tasks)
-        .where(and(..._query)),
-    ])
-    return { tasks: foundTasks, total: total[0]?.count ?? 0 };
+        .where(and(..._query)).orderBy(desc(tasks.createdAt), desc(tasks.id)).limit(limit + 1)
   }
 
   public async update(

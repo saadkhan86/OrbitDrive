@@ -58,7 +58,7 @@ class OrganizationInvitationRepo {
     }
 
   }
-
+  
   public async getPendingByEmail(
     data: VOrganizationInvitation.organizationId & VAuth.email,
   ) {
@@ -76,6 +76,7 @@ class OrganizationInvitationRepo {
     )[0];
   }
   public async getByTokenHash(data: VOrganizationInvitation.token) {
+    console.log(data.token)
     return (
       await db
         .select()

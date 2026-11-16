@@ -18,10 +18,6 @@ export const pgClientStatusEnum = pgEnum("client_status", [
 ]);
 export const clients = pgTable("clients", {
   id: uuid("id").defaultRandom().primaryKey(),
-  createdBy: uuid("created_by")
-    .references(() => users.id, {
-      onDelete: "cascade"
-    }).notNull(),
   organizationId: uuid("organization_id")
     .references(() => organizations.id, {
       onDelete: "cascade",

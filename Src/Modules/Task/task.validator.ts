@@ -119,8 +119,8 @@ export const taskValidator = {
         message: "Invalid priority",
       })
       .optional(),
-    page: z.coerce.number().optional().default(1),
-    limit: z.coerce.number().optional().default(10),
+    limit: z.coerce.number().int().default(10),
+    cursor: z.string().optional()
   }),
 };
 

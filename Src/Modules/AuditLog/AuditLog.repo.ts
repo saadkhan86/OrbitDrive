@@ -4,11 +4,9 @@ import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuditLog } from "./auditLog.validator";
 import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
+import { organizations } from "../../Database/schemas/organization.Schema";
 
 class AuditLogRepo {
-  //issue resolved
-  //if we keeps tx as a first parameter then we must have to pass it in every call
-  //i have changed the signature of the create method
   public async create(
     tx: NodePgDatabase,
     data: typeof audit_logs.$inferInsert,
@@ -42,14 +40,17 @@ class AuditLogRepo {
   }
 
   public async findById(data: VAuditLog.auditLogId) {
+    const { userId, organizationId, entityId, ...audiLogColumns } = getTableColumns(audit_logs)
     const auditLog = (
       await db
         .select({
-          ...getTableColumns(audit_logs),
-          user: { name: users.fullName, profile: users.profile },
+          ...audiLogColumns,
+          organization: { ...getTableColumns(organizations) },
+          user: { id: users.id, name: users.fullName, profile: users.profile },
         })
         .from(audit_logs)
         .innerJoin(users, eq(users.id, audit_logs.userId))
+        .innerJoin(organizations, eq(organizations.id, audit_logs.organizationId))
         .where(
           and(
             eq(audit_logs.id, data.auditLogId),

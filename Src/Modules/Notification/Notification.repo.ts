@@ -22,12 +22,14 @@ class NotificationRepo {
   }
 
   public async findById(data: VNotification.notificationId & VAuth.userId) {
+    const { organizationId, ...notificationColumns } = getTableColumns(notifications)
     return (
       (
         await db
           .select({
-            ...getTableColumns(notifications), organization: {
-              name: organizations.name
+            ...notificationColumns,
+            organization: {
+              ...getTableColumns(organizations)
             }
           })
           .from(notifications)

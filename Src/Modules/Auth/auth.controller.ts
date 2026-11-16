@@ -23,7 +23,7 @@ export const authController = {
       message: "User logged in successfully",
       data: {
         tokens: { accessToken, refreshToken },
-        user: { id: user.id, fullName: user.fullName, email: user.email },
+        user,
       },
     });
   },

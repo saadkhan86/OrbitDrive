@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { cusrorUtils } from "../../Utils/cursot.utils";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
 import ClientRepo from "../Clients/Client.repo";
@@ -82,8 +83,18 @@ export const taskService = {
   },
 
   query: async (param: VTask.organizationId, query: VTask.query) => {
-    const tasks = await TaskRepo.query({ ...param, ...query });
-    return tasks;
+    const decodedCursor = cusrorUtils.decode(query.cursor)
+    const cursor = decodedCursor ? { createdAt: new Date(decodedCursor.createdAt), id: decodedCursor.id } : null
+    const tasks = await TaskRepo.query({ ...param, ...query, cursor });
+    const hasNextPage = tasks.length > query.limit
+    const data = tasks.slice(0, query.limit)
+    const lastTask = data[data.length - 1]
+    const nextCursor = hasNextPage && lastTask ?
+      cusrorUtils.encode({
+        createdAt: lastTask.createdAt!.toISOString(),
+        id: lastTask.id
+      }) : null
+    return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } };
   },
 
   update: async (
@@ -144,8 +155,8 @@ export const taskService = {
         metadata: {
           title: existingTask.title,
           assignedTo: existingTask.assignedTo,
-          clientId: existingTask.clientId,
-          dealId: existingTask.dealId,
+          clientId: existingTask.client?.id,
+          dealId: existingTask.deal?.id,
           status: existingTask.status,
         },
       });
