@@ -1,10 +1,11 @@
+import { IReply } from "../../Interfaces/IReply"
 import { cusrorUtils } from "../../Utils/cursot.utils"
 import { VConversation } from "../Conversation/conversation.validator"
 import MessageRepo from "./Message.repo"
 import { VMessageValidator } from "./message.validator"
 
 export const messageService = {
-    query: async (param: VConversation.conversationId, query: VMessageValidator.query) => {
+    query: async (param: VConversation.conversationId, query: VMessageValidator.query): Promise<IReply.queryReturn> => {
         const decodedCursor = cusrorUtils.decode(query.cursor)
         const cursor = decodedCursor ? { createdAt: new Date(decodedCursor.createdAt), id: decodedCursor.id } : null
         const messages = await MessageRepo.query({ ...param, ...query, cursor })

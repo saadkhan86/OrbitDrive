@@ -3,6 +3,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -24,11 +25,16 @@ export const clients = pgTable("clients", {
     })
     .notNull(),
   name: varchar("name", { length: 50 }).notNull(),
-  email: varchar("email", { length: 50 }).notNull().unique(),
+  email: varchar("email", { length: 50 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   company: varchar("company", { length: 255 }).notNull(),
   status: pgClientStatusEnum("status").notNull().default("active"),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+},
+  (table) => [
+    unique("org_client_email_unique").on(table.email, table.organizationId),
+    unique("clients_id_org_unique").on(table.id, table.organizationId)
+  ]
+);

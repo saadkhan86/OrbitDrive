@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { authenticate } from "../../Hooks/authentication.hook";
 import { authorize } from "../../Hooks/authorization.hook";
-import { clientValidator } from "./clients.validator";
+import { clientValidator } from "./client.validator";
 import { clientController } from "./client.controller";
 
 export const clientRouter = async (app: FastifyInstance) => {

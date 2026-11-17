@@ -16,7 +16,7 @@ export const organizationMemberValidator = {
       { message: "invalid choice of role" }
     ).optional(),
     page: z.coerce.number({ message: "page must be type of number" }).default(1),
-    limit: z.coerce.number({ message: "limit must be type of number" }).default(5)
+    limit: z.coerce.number({ message: "limit must be type of number" }).default(10)
   }),
 };
 export declare namespace VOrganizationMember {

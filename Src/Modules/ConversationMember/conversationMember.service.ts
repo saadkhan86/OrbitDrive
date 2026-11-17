@@ -1,5 +1,6 @@
 import { db } from "../../Database"
 import { CustomError } from "../../ErrorHandler/CustomError"
+import { IReply } from "../../Interfaces/IReply"
 import { cusrorUtils } from "../../Utils/cursot.utils"
 import { VAuth } from "../Auth/auth.validator"
 import ConversationRepo from "../Conversation/Conversation.repo"
@@ -8,7 +9,7 @@ import ConversationMemberRepo from "./ConversationMember.repo"
 import { VConversationMember } from "./conversationMember.validator"
 
 export const conversationMemberService = {
-    query: async (conversation: VConversation.conversationId, query: VConversationMember.query) => {
+    query: async (conversation: VConversation.conversationId, query: VConversationMember.query): Promise<IReply.queryReturn> => {
         const decodedCursor = cusrorUtils.decode(query.cursor)
         const cursor = decodedCursor ? { id: decodedCursor.id, createdAt: new Date(decodedCursor.createdAt) } : null
         const members = await ConversationMemberRepo.query({ ...conversation, ...query, cursor })

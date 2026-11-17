@@ -16,8 +16,8 @@ export const authorize = {
       if (!member)
         throw new CustomError(
           403,
-          "you are not a member of this organization",
-          "NOT_A_MEMBER",
+          "organization not found",
+          "NOT_FOUND",
         );
       if (!allowedRoles.includes(member.role))
         throw new CustomError(
@@ -35,7 +35,7 @@ export const authorize = {
       const params = request.params as VOrganizationMember.memberId;
       const targetMember = await OrganizationMembersRepo.getById({ ...params })
       if (!targetMember) throw new CustomError(404, "member not found", "NOT_FOUND")
-      if (targetMember.userId === request.user.userId) throw new CustomError(400, `you can not ${action} yourself`, `YOU_CANNOT_${action.toUpperCase()}_YOURSELF`)
+      if (targetMember.user.id === request.user.userId) throw new CustomError(400, `you can not ${action} yourself`, `YOU_CANNOT_${action.toUpperCase()}_YOURSELF`)
       const requestingMember = await OrganizationMembersRepo.getByUserId({ organizationId: params.organizationId, userId: request.user.userId })
       if (!requestingMember) throw new CustomError(403, "you are not authorized to perform this action", "NOT_AUTHORIZED")
       if (targetMember.role === "owner") throw new CustomError(403, `you can not ${action} owner`, `YOU_CANNOT_${action.toUpperCase()}_OWNER`)

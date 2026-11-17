@@ -1,10 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { auditLogService } from "./auditLog.service";
 import { VAuditLog } from "./auditLog.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const auditLogController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const auditLogs = await auditLogService.query(
+    const auditLogs:IReply.queryReturn = await auditLogService.query(
       request.params as VAuditLog.organizationId,
       request.query as VAuditLog.query
     );

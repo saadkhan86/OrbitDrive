@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
+import { and, desc, eq, ilike, lt, or, SQL } from "drizzle-orm";
 import { VAuth } from "../Auth/auth.validator";
 import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";

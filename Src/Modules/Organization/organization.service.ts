@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { IReply } from "../../Interfaces/IReply";
 import { generateSlug } from "../../Utils/slug.utils";
 import { VAuth } from "../Auth/auth.validator";
 import OrganizationMembersRepo from "../OrganizationMember/OrganizationMembers.repo";
@@ -25,12 +26,12 @@ export const organizationService = {
     });
     return organization;
   },
-  query: async (user: VAuth.userId, query: VOrganization.query) => {
+  query: async (user: VAuth.userId, query: VOrganization.query): Promise<IReply.queryReturn> => {
     const { organizations, count } =
       await OrganizationRepo
         .query({ ...query, ...user });
     const hasNextPage = count > query.limit
-    return { organizations, pagination: { limit: query.limit, hasNextPage, totalCount: count } };
+    return { data: organizations, pagination: { limit: query.limit, hasNextPage, totalCount: count } };
   },
   getById: async (param: VOrganization.organizationId) => {
     const organization = await OrganizationRepo.getById({ organizationId: param.organizationId });

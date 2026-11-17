@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { authController } from "./auth.controller";
 import { authValidator } from "./auth.validator";
-import { authenticate } from "../../Hooks/authentication.hook";
 
 export const authRouter = async (app: FastifyInstance) => {
   app.addHook("onRoute", (route) => {

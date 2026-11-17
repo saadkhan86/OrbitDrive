@@ -2,10 +2,11 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { VAuth } from "../Auth/auth.validator";
 import { notificationService } from "./notification.service";
 import { VNotification } from "./notification.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const notificationController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const notifications = await notificationService.query(
+    const notifications: IReply.queryReturn = await notificationService.query(
       request.user as VAuth.userId,
       request.query as VNotification.query
     );

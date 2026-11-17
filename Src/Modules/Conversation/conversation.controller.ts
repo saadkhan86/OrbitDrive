@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { conversationService } from "./conversation.service";
 import { VConversation } from "./conversation.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const conversationController = {
     create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -8,7 +9,7 @@ export const conversationController = {
         reply.status(201).send({ success: true, message: "conversation created successfully", data: { conversation } })
     },
     query: async (request: FastifyRequest, reply: FastifyReply) => {
-        const conversations = await conversationService.query(request.user, request.query as VConversation.query)
+        const conversations: IReply.queryReturn = await conversationService.query(request.user, request.query as VConversation.query)
         reply.status(200).send({ success: true, message: "conversation fetched successfully", data: { conversations } })
     },
     getById: async (request: FastifyRequest, reply: FastifyReply) => {

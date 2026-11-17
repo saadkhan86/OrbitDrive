@@ -6,6 +6,7 @@ import UserRepo from "./User.repo";
 import { cleanerUtils } from "../../Utils/cleaner.utils";
 import { cusrorUtils } from "../../Utils/cursot.utils";
 import { decode } from "punycode";
+import { IReply } from "../../Interfaces/IReply";
 export const userService = {
   me: async (user: VUser.userId) => {
     let foundUser = await redisCaching.get(user.userId)
@@ -29,7 +30,8 @@ export const userService = {
     await UserRepo.logout(user)
     await redisCaching.delete(user.userId)
     return true;
-  }, query: async (query: VUser.query) => {
+  }, 
+  query: async (query: VUser.query): Promise<IReply.queryReturn> => {
     const decodedCursor = cusrorUtils.decode(query.cursor)
     const cursor = decodedCursor ? { createdAt: new Date(decodedCursor.createdAt), id: decodedCursor.id } : null;
     const users = await UserRepo.query({ ...query, cursor })
@@ -37,7 +39,6 @@ export const userService = {
     const data = users.slice(0, query.limit)
     const lastUser = data[data.length - 1]
     const nextCursor = hasNextPage && lastUser ? cusrorUtils.encode({ createdAt: new Date(lastUser.createdAt).toISOString(), id: lastUser.id }) : null
-
     return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
   }
 

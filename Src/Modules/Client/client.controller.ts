@@ -1,11 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import clientsService from "./clients.service";
 import { VAuth } from "../Auth/auth.validator";
-import { VClient } from "./clients.validator";
+import { VClient } from "./client.validator";
+import { IReply } from "../../Interfaces/IReply";
+import { clientService } from "./client.service";
 
 export const clientController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
-    const client = await clientsService.create(
+    const client = await clientService.create(
       request.user as VAuth.userId,
       request.params as VClient.organizationId,
       request.body as VClient.create,
@@ -20,7 +21,7 @@ export const clientController = {
   },
 
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const clients = await clientsService.query(
+    const clients: IReply.queryReturn = await clientService.query(
       request.params as VClient.organizationId,
       request.query as VClient.query
     )
@@ -34,7 +35,7 @@ export const clientController = {
   },
 
   getById: async (request: FastifyRequest, reply: FastifyReply) => {
-    const client = await clientsService.getById(
+    const client = await clientService.getById(
       request.params as VClient.clientId,
     )
     return reply.code(200).send({
@@ -47,7 +48,7 @@ export const clientController = {
   },
 
   update: async (request: FastifyRequest, reply: FastifyReply) => {
-    const client = await clientsService.update(
+    const client = await clientService.update(
       request.user as VAuth.userId,
       request.params as VClient.clientId,
       request.body as VClient.update,
@@ -62,12 +63,12 @@ export const clientController = {
   },
 
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
-    await clientsService.delete(
+    await clientService.delete(
       request.user as VAuth.userId,
       request.params as VClient.clientId,
     );
 
-    return reply.code(204).send({
+    return reply.code(200).send({
       success: true,
       message: "client deleted successfully",
     });

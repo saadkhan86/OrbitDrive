@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { organizationMemberService } from "./organizationMember.service";
 import { VOrganizationMember } from "./organizationMember.validator";
 import { VAuth } from "../Auth/auth.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const organizationMemberController = {
   getForCurrentUser: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -9,7 +10,7 @@ export const organizationMemberController = {
     reply.status(200).send({ success: true, message: "Organizations fetched for current user", data: { organizations } })
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const members = await organizationMemberService.query(request.params as VOrganizationMember.organizationId, request.query as VOrganizationMember.query)
+    const members: IReply.queryReturn = await organizationMemberService.query(request.params as VOrganizationMember.organizationId, request.query as VOrganizationMember.query)
     reply.status(200).send({
       success: true, message: "organizations fetched successfully", data: {
         result: members
@@ -39,7 +40,6 @@ export const organizationMemberController = {
       data: organizationMember,
     });
   },
-
   delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationMemberService.delete(
       request.user as VAuth.userId,

@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { IReply } from "../../Interfaces/IReply";
 import { addEmailJob } from "../../Queues/email.queue";
 import { getIo } from "../../Socket/server.socket";
 import { tokenUtils } from "../../Utils/authToken.utils";
@@ -13,11 +14,11 @@ import OrganizationInvitationRepo from "./OrganizationInvitation.repo";
 import { VOrganizationInvitation } from "./organizationInvitation.validator";
 
 export const organizationInvitationService = {
-  async create(
+  create: async (
     user: VAuth.userId & VAuth.email,
     param: VOrganizationInvitation.organizationId,
     body: VOrganizationInvitation.create,
-  ) {
+  ) => {
     if (body.email.toLowerCase() == user.email.toLowerCase()) {
       throw new CustomError(
         409,
@@ -100,14 +101,12 @@ export const organizationInvitationService = {
       invitation,
     };
   },
-
-  async query(param: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
+  query: async (param: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query): Promise<IReply.queryReturn> => {
     const { invitations, count } = await OrganizationInvitationRepo.query({ ...param, ...query });
     const hasNextPage = count > query.limit
-    return { invitations, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
+    return { data: invitations, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
   },
-
-  async getById(param: VOrganizationInvitation.invitationId) {
+  getById: async (param: VOrganizationInvitation.invitationId) => {
     const foundInvitation = await OrganizationInvitationRepo.getById(param);
     if (!foundInvitation) {
       throw new CustomError(
@@ -118,11 +117,10 @@ export const organizationInvitationService = {
     }
     return foundInvitation;
   },
-
-  async delete(
+  delete: async (
     user: VAuth.userId,
     param: VOrganizationInvitation.invitationId,
-  ) {
+  ) => {
     const foundInvitation = await OrganizationInvitationRepo.getById(param);
 
     if (!foundInvitation) {
@@ -156,11 +154,10 @@ export const organizationInvitationService = {
     })
     return true;
   },
-
-  async accept(
+  accept: async (
     user: VAuth.userId & VAuth.email,
     param: VOrganizationInvitation.token,
-  ) {
+  ) => {
     const invitation = await OrganizationInvitationRepo.getByTokenHash({
       token: await tokenUtils.hashToken(param.token),
     });

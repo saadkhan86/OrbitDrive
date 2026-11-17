@@ -1,4 +1,5 @@
 import { db } from "../../Database"
+import { IReply } from "../../Interfaces/IReply"
 import { cusrorUtils } from "../../Utils/cursot.utils"
 import { VAuth } from "../Auth/auth.validator"
 import ConversationMemberRepo from "../ConversationMember/ConversationMember.repo"
@@ -17,7 +18,7 @@ export const conversationService = {
         })
         return conversationMember
     },
-    query: async (user: VAuth.userId, query: VConversation.query) => {
+    query: async (user: VAuth.userId, query: VConversation.query): Promise<IReply.queryReturn> => {
         const decodedCursor = cusrorUtils.decode(query.cursor)
         const cursor = decodedCursor ? { id: decodedCursor.id, createdAt: new Date(decodedCursor.createdAt) } : null
         const conversations = await ConversationRepo.query({ ...user, ...query, cursor })
@@ -25,7 +26,7 @@ export const conversationService = {
         const data = conversations.slice(0, query.limit)
         const lastConversation = data[data.length - 1]
         const nextCursor = hasNextPage && lastConversation ? cusrorUtils.encode({ id: lastConversation.id, createdAt: new Date(lastConversation.createdAt).toISOString() }) : null
-        return conversations
+        return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
     },
     getById: async (user: VAuth.userId, conversation: VConversation.conversationId, ConversationAndMessages: VConversation.conversationAndMessages) => {
         const foundConversation = await ConversationRepo.getById({ ...user, ...conversation, ...ConversationAndMessages })

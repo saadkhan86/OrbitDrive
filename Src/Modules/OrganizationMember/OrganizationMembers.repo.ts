@@ -124,7 +124,19 @@ class OrganizationMembers {
       await db
         .select()
         .from(organization_members)
-        .where(and(eq(organization_members.userId, data.userId), eq(organization_members.organizationId, data.organizationId)))
+        .where
+        (
+          and(
+            eq(
+              organization_members.userId,
+              data.userId
+            ),
+            eq(
+              organization_members.organizationId,
+              data.organizationId
+            )
+          )
+        )
     )[0];
   }
 }

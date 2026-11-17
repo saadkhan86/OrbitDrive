@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, getTableColumns, ilike, or, sql, SQL } from 
 
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { clients } from "../../Database/schemas/clients.Schema";
-import { VClient } from "./clients.validator";
+import { VClient } from "./client.validator";
 import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 

@@ -4,7 +4,7 @@ import { getIo } from "../../Socket/server.socket";
 import { cusrorUtils } from "../../Utils/cursot.utils";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
-import ClientRepo from "../Clients/Client.repo";
+import ClientRepo from "../Client/Client.repo";
 import DealRepo from "../Deal/Deal.repo";
 import OrganizationRepo from "../Organization/Organization.repo";
 import ActivityRepo from "./Activity.repo";

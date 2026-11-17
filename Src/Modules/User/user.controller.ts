@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { userService } from "./user.service";
 import { VUser } from "./user.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const userController = {
   me: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -32,7 +33,7 @@ export const userController = {
     })
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const users = await userService.query(request.query as VUser.query)
+    const users: IReply.queryReturn = await userService.query(request.query as VUser.query)
     return reply.status(200).send({
       success: true,
       message: "users fetched successfully",

@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { activityService } from "./activity.service";
 import { VAuth } from "../Auth/auth.validator";
 import { VActivity } from "./activity.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const activityController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -18,7 +19,7 @@ export const activityController = {
     });
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const activities = await activityService.query(
+    const activities: IReply.queryReturn = await activityService.query(
       request.params as VActivity.organizationId,
       request.query as VActivity.query
     );

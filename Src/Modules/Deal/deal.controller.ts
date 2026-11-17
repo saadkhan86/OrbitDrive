@@ -2,10 +2,11 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { VAuth } from "../Auth/auth.validator";
 import { VDeal } from "./deal.validator";
 import { dealService } from "./deal.service";
+import { IReply } from "../../Interfaces/IReply";
 
 
-class DealController {
-  public async create(request: FastifyRequest, reply: FastifyReply) {
+export const dealController = {
+  create: async (request: FastifyRequest, reply: FastifyReply) => {
     const deal = await dealService.create(
       request.user as VAuth.userId,
       request.params as VDeal.organizationId,
@@ -16,9 +17,9 @@ class DealController {
       message: "deal created successfully",
       data: { deal },
     });
-  }
-  public async query(request: FastifyRequest, reply: FastifyReply) {
-    const deals = await dealService.query(
+  },
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const deals: IReply.queryReturn = await dealService.query(
       request.params as VDeal.organizationId,
       request.query as VDeal.query
     );
@@ -27,8 +28,8 @@ class DealController {
       message: "deals fetched successfully",
       data: { result: deals },
     });
-  }
-  public async findById(request: FastifyRequest, reply: FastifyReply) {
+  },
+  findById: async (request: FastifyRequest, reply: FastifyReply) => {
     const deal = await dealService.findById(
       request.params as VDeal.organizationId & VDeal.dealId,
     );
@@ -38,9 +39,8 @@ class DealController {
       message: "deal fetched successfully",
       data: { deal },
     });
-  }
-
-  public async update(request: FastifyRequest, reply: FastifyReply) {
+  },
+  update: async (request: FastifyRequest, reply: FastifyReply) => {
     const deal = await dealService.update(
       request.user as VAuth.userId,
       request.params as VDeal.dealId & VDeal.organizationId,
@@ -52,9 +52,8 @@ class DealController {
       message: "deal updated successfully",
       data: { deal },
     });
-  }
-
-  public async delete(request: FastifyRequest, reply: FastifyReply) {
+  },
+  delete: async (request: FastifyRequest, reply: FastifyReply) => {
     const result = await dealService.delete(
       request.user as VAuth.userId,
       request.params as VDeal.organizationId & VDeal.dealId,
@@ -68,4 +67,3 @@ class DealController {
   }
 }
 
-export default new DealController();

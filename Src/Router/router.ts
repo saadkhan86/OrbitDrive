@@ -5,7 +5,7 @@ import { userRouter } from "../Modules/User/user.router";
 import { organizationRouter } from "../Modules/Organization/organization.router";
 import { organizationInvitationRouter } from "../Modules/OrganizationInvitations/organizationInvitation.router";
 import { organizationMemberRouter } from "../Modules/OrganizationMember/organizationMember.router";
-import { clientRouter } from "../Modules/Clients/clients.router";
+import { clientRouter } from "../Modules/Client/client.router";
 import { dealRouter } from "../Modules/Deal/deal.router";
 import { taskRouter } from "../Modules/Task/task.router";
 import { activityRouter } from "../Modules/Activity/activity.router";
@@ -29,7 +29,7 @@ export const router = async (app: FastifyInstance) => {
     prefix: "/organization-members",
   });
   app.register(organizationInvitationRouter, {
-    prefix: "/:organizationId/organization-invitations",
+    prefix: "/organization-invitations",
   });
   app.register(clientRouter, { prefix: "/:organizationId/clients" });
   app.register(dealRouter, { prefix: "/:organizationId/deals" }); //done

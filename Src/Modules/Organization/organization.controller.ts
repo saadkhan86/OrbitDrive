@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { organizationService } from "./organization.service";
 import { VAuth } from "../Auth/auth.validator";
 import { VOrganization } from "./organization.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const organizationController = {
   create: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -44,7 +45,7 @@ export const organizationController = {
     });
   },
   query: async (request: FastifyRequest, reply: FastifyReply) => {
-    const organizations = await organizationService.query(request.user, request.query as VOrganization.query);
+    const organizations: IReply.queryReturn = await organizationService.query(request.user, request.query as VOrganization.query);
     reply.status(200).send({ success: true, message: "Ogranizations fetched successfully", data: { result: organizations } })
   },
   delete: async (request: FastifyRequest, reply: FastifyReply) => {

@@ -1,4 +1,5 @@
 import {
+  foreignKey,
   numeric,
   pgEnum,
   pgTable,
@@ -59,4 +60,19 @@ export const deals = pgTable("deals", {
   })
     .defaultNow()
     .notNull(),
-});
+},
+  (table) => [
+    foreignKey({
+      columns: [
+        table.clientId,
+        table.organizationId
+      ],
+      foreignColumns: [
+        clients.id,
+        clients.organizationId
+      ],
+      name: "deals_client_org_fk",
+    })
+    .onDelete("restrict")
+  ]
+);

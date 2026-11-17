@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate } from "../../Hooks/authentication.hook";
 import { dealValidator } from "./deal.validator";
-import dealController from "./deal.controller";
 import { authorize } from "../../Hooks/authorization.hook";
+import { dealController } from "./deal.controller";
 
 
 export const dealRouter = async (app: FastifyInstance) => {
@@ -29,6 +29,7 @@ export const dealRouter = async (app: FastifyInstance) => {
     {
       schema: {
         params: dealValidator.organizationId,
+        querystring: dealValidator.query
       },
       preHandler: authorize.role(["admin", "member", "owner"]),
     },

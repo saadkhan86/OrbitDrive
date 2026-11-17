@@ -2,9 +2,10 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { organizationInvitationService } from "./organizationInvitation.service";
 import { VAuth } from "../Auth/auth.validator";
 import { VOrganizationInvitation } from "./organizationInvitation.validator";
+import { IReply } from "../../Interfaces/IReply";
 
 export const organizationInvitationController = {
-  async create(request: FastifyRequest, reply: FastifyReply) {
+  create: async (request: FastifyRequest, reply: FastifyReply) => {
     const invitation = await organizationInvitationService.create(
       request.user as VAuth.userId & VAuth.email,
       request.params as VOrganizationInvitation.organizationId,
@@ -17,9 +18,8 @@ export const organizationInvitationController = {
       data: invitation,
     });
   },
-
-  async query(request: FastifyRequest, reply: FastifyReply) {
-    const invitations =
+  query: async (request: FastifyRequest, reply: FastifyReply) => {
+    const invitations: IReply.queryReturn =
       await organizationInvitationService.query(
         request.params as VOrganizationInvitation.organizationId,
         request.query as VOrganizationInvitation.query,
@@ -30,7 +30,7 @@ export const organizationInvitationController = {
       data: { result: invitations },
     });
   },
-  async getById(request: FastifyRequest, reply: FastifyReply) {
+  getById: async (request: FastifyRequest, reply: FastifyReply) => {
     const invitation = await organizationInvitationService.getById(
       request.params as VOrganizationInvitation.invitationId,
     );
@@ -40,9 +40,7 @@ export const organizationInvitationController = {
       data: invitation,
     });
   },
-
-  // DELETE /organizations/:organizationId/invitations/:invitationId
-  async delete(request: FastifyRequest, reply: FastifyReply) {
+  delete: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationInvitationService.delete(
       request.user as VAuth.userId,
       request.params as VOrganizationInvitation.invitationId,
@@ -53,7 +51,7 @@ export const organizationInvitationController = {
       message: "Invitation cancelled successfully",
     });
   },
-  async accept(request: FastifyRequest, reply: FastifyReply) {
+  accept: async (request: FastifyRequest, reply: FastifyReply) => {
     await organizationInvitationService.accept(
       request.user as VAuth.userId & VAuth.email,
       request.params as VOrganizationInvitation.token,

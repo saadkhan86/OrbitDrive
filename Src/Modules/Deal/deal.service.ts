@@ -1,8 +1,9 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { IReply } from "../../Interfaces/IReply";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
-import ClientRepo from "../Clients/Client.repo";
+import ClientRepo from "../Client/Client.repo";
 import DealRepo from "./Deal.repo";
 import { VDeal } from "./deal.validator";
 
@@ -12,6 +13,13 @@ export const dealService = {
     param: VDeal.organizationId,
     body: VDeal.create,
   ) => {
+    const client = await ClientRepo.getById({ organizationId: param.organizationId, clientId: body.clientId })
+    if (!client) {
+      throw new CustomError(404, "client not found", "NOT_FOUND")
+    }
+    if (client && client.organizationId != param.organizationId) {
+      throw new CustomError(400, "invalid client seleted", "BAD_REQUEST")
+    }
     const deal = await db.transaction(async (tx) => {
       const createdDeal = await DealRepo.create(tx, {
         ...body,
@@ -47,13 +55,13 @@ export const dealService = {
 
     return foundDeal;
   },
-  query: async (param: VDeal.organizationId, query: VDeal.query) => {
+  query: async (param: VDeal.organizationId, query: VDeal.query): Promise<IReply.queryReturn> => {
     const { deals, count } = await DealRepo.query({
       ...param,
       ...query
     });
-    const hasNextPage = query.limit > count
-    return { deals, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
+    const hasNextPage = count > query.limit
+    return { data: deals, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
   },
   update: async (
     user: VAuth.userId,

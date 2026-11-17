@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { IReply } from "../../Interfaces/IReply";
 import { getIo } from "../../Socket/server.socket";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
@@ -12,10 +13,10 @@ export const organizationMemberService = {
     const organizations = await OrganizationMembersRepo.getForCurrentUser({ userId: user.userId })
     return organizations
   },
-  query: async (param: VOrganizationMember.organizationId, query: VOrganizationMember.query) => {
-    const members = await OrganizationMembersRepo.query({ ...param, ...query });
-    const hasNextPage = members.count > query.limit
-    return { members, pagination: { limit: query.limit, hasNextPage, totalCount: members.count } }
+  query: async (param: VOrganizationMember.organizationId, query: VOrganizationMember.query): Promise<IReply.queryReturn> => {
+    const { organizationMembers, count } = await OrganizationMembersRepo.query({ ...param, ...query });
+    const hasNextPage = count > query.limit
+    return { data: organizationMembers, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
   },
   getById: async (param: VOrganizationMember.memberId) => {
     const member = await OrganizationMembersRepo.getById({ ...param });
