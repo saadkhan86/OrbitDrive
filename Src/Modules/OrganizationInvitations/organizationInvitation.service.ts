@@ -102,8 +102,9 @@ export const organizationInvitationService = {
   },
 
   async query(param: VOrganizationInvitation.organizationId, query: VOrganizationInvitation.query) {
-    const invitations = await OrganizationInvitationRepo.query({ ...param, ...query });
-    return invitations
+    const { invitations, count } = await OrganizationInvitationRepo.query({ ...param, ...query });
+    const hasNextPage = count > query.limit
+    return { invitations, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
   },
 
   async getById(param: VOrganizationInvitation.invitationId) {

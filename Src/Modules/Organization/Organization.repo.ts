@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, or, SQL } from "drizzle-orm";
 import { organizations } from "../../Database/schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganization } from "./organization.validator";
@@ -29,23 +29,28 @@ class OrganizationRepo {
     const organization = (await db
       .select({
         ...getTableColumns(organizations),
-        owner: { name: users.fullName, profile: users.profile }
+        owner: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt }
       })
       .from(organizations)
+      .innerJoin(users, eq(organizations.ownerId, users.id))
       .where(
         and(
           eq(organizations.id, data.organizationId)
         ),
-      ).innerJoin(users, eq(organizations.ownerId, users.id))
+      )
     )[0]
     return organization
   }
   public async query(data: VAuth.userId & VOrganization.query) {
-    const { page = 1, limit = 10 } = data
-    const _query = [];
-    _query.push(eq(organizations.ownerId, data.userId))
+    const { page, limit } = data
+    const _query: SQL[] = [eq(organizations.ownerId, data.userId)];
     if (data.search) {
-      _query.push(or(ilike(organizations.name, `%${data.search}%`), ilike(organizations.slug, `%${data.search}%`)))
+      _query.push(
+        or(
+          ilike(organizations.name, `%${data.search}%`),
+          ilike(organizations.slug, `%${data.search}%`)
+        ) as SQL
+      )
     }
     const [foundOrganizations, total] = await Promise.all([
       db.select().from(organizations).where(and(..._query)).orderBy(desc(organizations.createdAt)).limit(limit).offset((page - 1) * limit),

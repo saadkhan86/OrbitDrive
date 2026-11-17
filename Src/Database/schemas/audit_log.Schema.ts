@@ -1,4 +1,5 @@
 import {
+  index,
   jsonb,
   pgEnum,
   pgTable,
@@ -34,4 +35,5 @@ export const audit_logs = pgTable("audit_logs", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}, (table) => [index("audit_log_created_at_id_idx").on(table.id, table.createdAt)]
+);

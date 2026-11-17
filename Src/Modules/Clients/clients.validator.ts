@@ -66,8 +66,8 @@ export const clientValidator = {
   query: z.object({
     search: z.string({ message: "search must be type of string" }).optional(),
     status: z.enum(["active", "inactive", "prospect", "customer", "lead", "vip"]).optional(),
-    page: z.coerce.number({ message: "page must be type of number" }).optional().default(1),
-    limit: z.coerce.number({ message: "limit must be type of number" }).optional().default(10),
+    page: z.coerce.number({ message: "page must be type of number" }).default(1),
+    limit: z.coerce.number({ message: "limit must be type of number" }).default(10),
   })
 };
 

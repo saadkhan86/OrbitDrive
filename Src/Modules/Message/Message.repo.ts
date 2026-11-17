@@ -6,6 +6,7 @@ import { VConversation } from "../Conversation/conversation.validator";
 import { VAuth } from "../Auth/auth.validator";
 import { cusrorUtils } from "../../Utils/cursot.utils";
 import { users } from "../../Database/schemas/users.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 class MessageRepo {
     public async create(data: VMessageValidator.messageContent & VConversation.conversationId & VAuth.userId) {
         return (
@@ -31,7 +32,7 @@ class MessageRepo {
                 ).returning()
         )[0]
     }
-    public async query(data: VConversation.conversationId & Omit<VMessageValidator.query, "cursor"> & { cursor: { createdAt: Date, id: string } | null }) {
+    public async query(data: VConversation.conversationId & Omit<VMessageValidator.query, "cursor"> & ICursor.query) {
         const { senderId, ...messagesColumns } = getTableColumns(messages)
         const _query: SQL[] = [eq(messages.conversationId, data.conversationId)]
         if (data.cursor) {

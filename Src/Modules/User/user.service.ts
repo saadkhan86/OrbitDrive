@@ -4,6 +4,8 @@ import { VUser } from "./user.validator";
 import redisCaching from "../../Caching/redis.caching";
 import UserRepo from "./User.repo";
 import { cleanerUtils } from "../../Utils/cleaner.utils";
+import { cusrorUtils } from "../../Utils/cursot.utils";
+import { decode } from "punycode";
 export const userService = {
   me: async (user: VUser.userId) => {
     let foundUser = await redisCaching.get(user.userId)
@@ -16,15 +18,9 @@ export const userService = {
     }
     return foundUser;
   },
-  update: async (user: VUser.userId, data: VUser.update) => {
-    let newData: Record<string, string> = {};
-    if (data.password && data.password !== undefined)
-      newData.password = await argon2.hash(data.password!);
-    if (data.fullName && data.fullName !== undefined)
-      newData.fullName = data.fullName;
-    if (data.profile && data.profile !== undefined)
-      newData.profile = data.profile
-    const updatedUser = await UserRepo.update({ userId: user.userId, ...newData });
+  update: async (user: VUser.userId, body: VUser.update) => {
+    body.password && body.password !== undefined ? body.password = await argon2.hash(body.password!) : null;
+    const updatedUser = await UserRepo.update({ ...user, ...body });
     await redisCaching.delete(user.userId)
     await redisCaching.set(user.userId, updatedUser, 5 * 60)
     return updatedUser;
@@ -34,8 +30,15 @@ export const userService = {
     await redisCaching.delete(user.userId)
     return true;
   }, query: async (query: VUser.query) => {
-    const users = await UserRepo.query(query)
-    return users;
+    const decodedCursor = cusrorUtils.decode(query.cursor)
+    const cursor = decodedCursor ? { createdAt: new Date(decodedCursor.createdAt), id: decodedCursor.id } : null;
+    const users = await UserRepo.query({ ...query, cursor })
+    const hasNextPage = users.length > query.limit
+    const data = users.slice(0, query.limit)
+    const lastUser = data[data.length - 1]
+    const nextCursor = hasNextPage && lastUser ? cusrorUtils.encode({ createdAt: new Date(lastUser.createdAt).toISOString(), id: lastUser.id }) : null
+
+    return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
   }
 
 };

@@ -17,8 +17,8 @@ export const organizationInvitationValidator = {
     search: z.coerce.string({ message: "search must be type of string" }).optional(),
     role: z.enum(["admin", "member", "viewer"], { message: "invalid role" }).optional(),
     createdBy: z.uuid({ message: "createdBy must be type of uuid" }).optional(),
-    page: z.coerce.number({ message: "page must be type of number" }).default(1).optional(),
-    limit: z.coerce.number({ message: "limit must be type of number" }).default(10).optional(),
+    page: z.coerce.number({ message: "page must be type of number" }).default(1),
+    limit: z.coerce.number({ message: "limit must be type of number" }).default(10),
 
   }),
   accept: z.object({

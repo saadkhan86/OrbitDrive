@@ -24,7 +24,7 @@ export const dealValidator = {
       })
       .default("lead"),
 
-    expectedCloseDate: z.date().optional(),
+    expectedCloseDate: z.coerce.date().optional(),
 
     description: z.string().max(1000).optional(),
   }),
@@ -77,8 +77,8 @@ export const dealValidator = {
     search: z.string().optional(),
     createdBy: z.uuid({ message: "Invalid type of createdBy" }).optional(),
     stage: z.enum(["lead", "qualified", "proposal", "negotiation", "won", "lost"]).optional(),
-    page: z.coerce.number().optional().default(1),
-    limit: z.coerce.number().optional().default(10),
+    page: z.coerce.number().default(1),
+    limit: z.coerce.number().default(10),
 
   })
 };

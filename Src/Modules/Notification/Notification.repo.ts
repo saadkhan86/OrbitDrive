@@ -1,24 +1,38 @@
-import { and, desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, lt, or, SQL } from "drizzle-orm";
 import { notifications } from "../../Database/schemas/notification.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuth } from "../Auth/auth.validator";
 import { db } from "../../Database";
 import { VNotification } from "./notification.validator";
 import { organizations } from "../../Database/schemas/organization.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 
 class NotificationRepo {
   public async create(tx: NodePgDatabase, data: typeof notifications.$inferInsert) {
     return (await tx.insert(notifications).values(data).returning())[0];
   }
 
-  public async query(data: VAuth.userId) {
+  public async query(data: VAuth.userId & Omit<VNotification.query, "cursor"> & ICursor.query) {
+    const _query: SQL[] = [eq(notifications.userId, data.userId)]
+    if (data.cursor) {
+      _query.push(
+        or(
+          lt(notifications.createdAt, data.cursor.createdAt),
+          and(
+            eq(notifications.createdAt, data.cursor.createdAt),
+            lt(notifications.id, data.cursor.id)
+          )
+        )!
+      )
+    }
     return await db
       .select()
       .from(notifications)
       .where(
-        eq(notifications.userId, data.userId)
+        and(..._query)
       )
-      .orderBy(desc(notifications.createdAt));
+      .orderBy(desc(notifications.createdAt), desc(notifications.id))
+      .limit(data.limit + 1);
   }
 
   public async findById(data: VNotification.notificationId & VAuth.userId) {
@@ -41,7 +55,7 @@ class NotificationRepo {
             ),
           )
           .limit(1)
-      )[0] ?? null
+      )[0]
     );
   }
 

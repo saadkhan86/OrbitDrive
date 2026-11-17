@@ -3,4 +3,10 @@ export declare namespace ICursor {
         createdAt: string
         id: string
     }
+    interface query {
+        cursor: {
+            createdAt: Date,
+            id: string
+        } | null
+    }
 }

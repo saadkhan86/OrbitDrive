@@ -5,7 +5,7 @@ export const conversationMemberValidator = {
         conversationId: z.uuid({ message: "Invalid conversationId" })
     }),
     query: z.object({
-        page: z.coerce.number().optional().default(1),
+        cursor: z.coerce.string().optional(),
         limit: z.coerce.number().optional().default(30)
     }),
     update: z.object({

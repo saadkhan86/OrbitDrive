@@ -7,8 +7,8 @@ export const userValidator = {
     query: z.object({
         search: z.string({ message: "search must be type of string" }).optional(),
         userId: z.uuid({ message: "invalid userId" }).optional(),
-        limit: z.coerce.number({ message: "limit must be type of number" }).optional().default(10),
-        page: z.coerce.number({ message: "page must be type of number" }).optional().default(1),
+        limit: z.coerce.number({ message: "limit must be type of number" }).default(10),
+        cursor: z.string().optional(),
     }).refine((data) => data.search || data.userId, {
         abort: true,
         message: "At least one of search or userId is required",

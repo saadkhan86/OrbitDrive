@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   pgEnum,
   pgTable,
   text,
@@ -38,4 +39,7 @@ export const notifications = pgTable("notifications", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}, (table) => [
+  index("notification_created_at_id_idx").on(table.id, table.createdAt)
+]
+);

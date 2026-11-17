@@ -1,10 +1,11 @@
-import { and, count, desc, eq, getTableColumns } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, lt, or, SQL } from "drizzle-orm";
 import { audit_logs } from "../../Database/schemas/audit_log.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VAuditLog } from "./auditLog.validator";
 import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 import { organizations } from "../../Database/schemas/organization.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 
 class AuditLogRepo {
   public async create(
@@ -14,29 +15,36 @@ class AuditLogRepo {
     return (await tx.insert(audit_logs).values(data).returning())[0];
   }
 
-  public async query(data: VAuditLog.organizationId & VAuditLog.query) {
-    const { page, limit } = data
-    const _query: any[] = [eq(audit_logs.organizationId, data.organizationId)];
+  public async query(data: VAuditLog.organizationId & Omit<VAuditLog.query, "cursor"> & ICursor.query) {
+    const _query: SQL[] = [eq(audit_logs.organizationId, data.organizationId)];
+    if (data.cursor) {
+      _query.push(
+        or(
+          lt(audit_logs.createdAt, data.cursor.createdAt),
+          and(
+            eq(audit_logs.createdAt, data.cursor.createdAt),
+            lt(audit_logs.id, data.cursor.id)
+          )
+        )! as SQL
+      )
+    }
     if (data.action) {
       _query.push(eq(audit_logs.action, data.action));
     }
     if (data.entityType) {
       _query.push(eq(audit_logs.entityType, data.entityType));
     }
-    const [foundAuditLogs, total] = await Promise.all([
-      db
-        .select()
-        .from(audit_logs)
-        .where(and(..._query))
-        .orderBy(desc(audit_logs.createdAt))
-        .limit(limit)
-        .offset((page - 1) * limit),
-      db
-        .select({ count: count() })
-        .from(audit_logs)
-        .where(and(..._query))
-    ])
-    return { auditLogs: foundAuditLogs, count: total[0]?.count ?? 0 }
+    return await db
+      .select()
+      .from(audit_logs)
+      .where(and(..._query))
+      .orderBy(
+        desc(
+          audit_logs.createdAt
+        ),
+        desc(audit_logs.id)
+      )
+      .limit(data.limit + 1)
   }
 
   public async findById(data: VAuditLog.auditLogId) {

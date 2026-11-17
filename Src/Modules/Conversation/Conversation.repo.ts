@@ -1,5 +1,5 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { and, desc, eq, getTableColumns, ilike, SQL, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, ilike, lt, or, SQL, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { conversations } from "../../Database/schemas/conversations.Schema";
 import { VConversation } from "./conversation.validator";
@@ -8,6 +8,7 @@ import { conversation_members } from "../../Database/schemas/conversation_member
 import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";
 import { messages } from "../../Database/schemas/messages.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 class ConversationRepo {
     public async create(tx: NodePgDatabase, data: VConversation.create & VAuth.userId) {
         return (await tx.insert(conversations).values({
@@ -18,10 +19,21 @@ class ConversationRepo {
             updatedAt: new Date()
         }).returning())[0]
     }
-    public async query(data: VConversation.query & VAuth.userId) {
-        const { page = 1, limit = 15 } = data
+    public async query(data: VAuth.userId & Omit<VConversation.query, "cursor"> & ICursor.query) {
         const _query: SQL[] = [eq(conversation_members.userId, data.userId)]
         if (data.search) _query.push(ilike(conversations.name, `%${data.search}%`))
+        if (data.cursor) {
+            _query.push(
+                or(
+                    lt
+                        (conversations.createdAt, data.cursor.createdAt),
+                    and(
+                        eq(conversations.createdAt, data.cursor.createdAt),
+                        lt(conversations.id, data.cursor.id)
+                    )
+                )! as SQL
+            )
+        }
         const messageSender = alias(users, "message_sender")
         const latestMessage = db.select({
             id: messages.id,
@@ -34,7 +46,7 @@ class ConversationRepo {
             .orderBy(desc(messages.createdAt))
             .limit(1).as("latest_message")
 
-        const result = await db.select({
+        return await db.select({
             ...getTableColumns(conversations),
             lastMessage: {
                 id: latestMessage.id,
@@ -48,9 +60,8 @@ class ConversationRepo {
             .leftJoinLateral(latestMessage, sql`true`)
             .leftJoin(messageSender, eq(latestMessage.senderId, messageSender.id))
             .where(and(..._query))
-            .orderBy(desc(conversations.createdAt))
-            .limit(limit)
-            .offset((page - 1) * limit)
+            .orderBy(desc(conversations.createdAt), desc(conversations.id))
+            .limit(data.limit + 1)
     }
     public async getById(data: VConversation.conversationId & VConversation.conversationAndMessages & VAuth.userId) {
         const [conversation, members, latestMessages] = await Promise.all([

@@ -1,5 +1,6 @@
 import { db } from "../../Database"
 import { CustomError } from "../../ErrorHandler/CustomError"
+import { cusrorUtils } from "../../Utils/cursot.utils"
 import { VAuth } from "../Auth/auth.validator"
 import ConversationRepo from "../Conversation/Conversation.repo"
 import { VConversation } from "../Conversation/conversation.validator"
@@ -8,8 +9,14 @@ import { VConversationMember } from "./conversationMember.validator"
 
 export const conversationMemberService = {
     query: async (conversation: VConversation.conversationId, query: VConversationMember.query) => {
-        const members = await ConversationMemberRepo.query({ ...conversation, ...query })
-        return members
+        const decodedCursor = cusrorUtils.decode(query.cursor)
+        const cursor = decodedCursor ? { id: decodedCursor.id, createdAt: new Date(decodedCursor.createdAt) } : null
+        const members = await ConversationMemberRepo.query({ ...conversation, ...query, cursor })
+        const hasNextPage = members.length > query.limit
+        const data = members.slice(0, query.limit)
+        const lastMember = data[data.length - 1]
+        const nextCursor = hasNextPage && lastMember ? cusrorUtils.encode({ id: lastMember.id, createdAt: new Date(lastMember.joinedAt!).toISOString() }) : null;
+        return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
     },
     update: async (user: VAuth.userId, conversation: VConversation.conversationId, members: VConversationMember.update) => {
         const isExist = await ConversationRepo.getById({ ...user, ...conversation })

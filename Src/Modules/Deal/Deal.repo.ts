@@ -4,7 +4,6 @@ import { VDeal } from "./deal.validator";
 import { deals } from "../../Database/schemas/deals.Schema";
 import { db } from "../../Database";
 import { clients } from "../../Database/schemas/clients.Schema";
-import { VAuth } from "../Auth/auth.validator";
 
 class DealRepo {
   public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId ) {

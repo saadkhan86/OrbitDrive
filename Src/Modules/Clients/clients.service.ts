@@ -1,4 +1,3 @@
-import { Client } from "pg";
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
@@ -13,7 +12,7 @@ class ClientsService {
     body: VClient.create,
   ) {
     const client = await db.transaction(async (tx) => {
-      const createdClient: NonNullable<any> = await ClientRepo.create(tx, {
+      const createdClient = await ClientRepo.create(tx, {
         organizationId: param.organizationId,
         name: body.name,
         email: body.email,
@@ -22,7 +21,9 @@ class ClientsService {
         status: body.status,
         notes: body.notes
       });
-
+      if (!createdClient) {
+        throw new CustomError(500, "client not created", "SERVER_ERROR")
+      }
       await AuditLogRepo.create(tx, {
         organizationId: createdClient.organizationId,
         action: "create",
@@ -40,7 +41,8 @@ class ClientsService {
   }
   public async query(param: VClient.organizationId, query: VClient.query) {
     const clients = await ClientRepo.query({ ...param, ...query });
-    return clients;
+    const hasNextPage = clients.count > query.limit
+    return { clients, pagination: { limit: query.limit, hasNextPage, totalCount: clients.count } };
   }
   public async getById(param: VClient.clientId) {
     const foundClient = await ClientRepo.getById({ ...param });
@@ -76,18 +78,18 @@ class ClientsService {
   }
   public async delete(user: VAuth.userId, data: VClient.clientId) {
     const client = await db.transaction(async (tx) => {
-      const foundClient = await ClientRepo.getById({ ...data });
-      if (!foundClient) throw new CustomError(404, "Client Not Found", "NOT_FOUND");
-      await ClientRepo.delete(tx, { ...data });
+      const deleted = await ClientRepo.delete(tx, { ...data });
+      if (!deleted) throw new CustomError(404, "Client Not Found", "NOT_FOUND");
+
       await AuditLogRepo.create(tx, {
-        organizationId: foundClient.organizationId,
+        organizationId: deleted.organizationId,
         action: "delete",
         userId: user.userId,
         entityType: "client",
         entityId: data.clientId,
         metadata: {
-          company: foundClient.company,
-          email: foundClient.email,
+          company: deleted.company,
+          email: deleted.email,
         },
       });
     });

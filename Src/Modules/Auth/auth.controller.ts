@@ -33,8 +33,8 @@ export const authController = {
       .status(201)
       .send({ success: true, message: "Password reset email has been sent" });
   },
-  passwordReset: async (request: FastifyRequest, reply: FastifyReply) => {
-    await authService.passwordReset(request.body as VAuth.passwordReset);
+  resetPassword: async (request: FastifyRequest, reply: FastifyReply) => {
+    await authService.resetPassword(request.body as VAuth.passwordReset);
     return reply
       .status(200)
       .send({ success: true, message: "Password reset successfully" });

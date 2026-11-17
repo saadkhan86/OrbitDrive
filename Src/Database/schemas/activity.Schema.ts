@@ -1,4 +1,5 @@
 import {
+  index,
   pgEnum,
   pgTable,
   text,
@@ -65,4 +66,7 @@ export const activities = pgTable("activities", {
   })
     .defaultNow()
     .notNull(),
-});
+}, (table) => [
+  index("activities_created_at_table_id_idx").on(table.createdAt, table.id)
+]
+);

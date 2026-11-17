@@ -6,6 +6,7 @@ import { db } from "../../Database";
 import { clients } from "../../Database/schemas/clients.Schema";
 import { deals } from "../../Database/schemas/deals.Schema";
 import { users } from "../../Database/schemas/users.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 
 class TaskRepo {
   public async create(
@@ -55,7 +56,7 @@ class TaskRepo {
     return task ?? null;
   }
 
-  public async query(data: VTask.organizationId & Omit<VTask.query, "cursor"> & { cursor: { id: string, createdAt: Date } | null }) {
+  public async query(data: VTask.organizationId & Omit<VTask.query, "cursor"> & ICursor.query) {
     const { cursor, limit = 10 } = data;
     const _query: SQL[] = [eq(tasks.organizationId, data.organizationId)]
 

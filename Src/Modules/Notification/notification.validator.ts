@@ -1,8 +1,9 @@
 import z from "zod";
 
 export const notificationValidator = {
-  query:z.object({
-    
+  query: z.object({
+    cursor: z.string().optional(),
+    limit: z.coerce.number().default(10)
   }),
   notificationId: z.object({
     notificationId: z
@@ -19,6 +20,6 @@ export const notificationValidator = {
 
 export declare namespace VNotification {
   type notificationId = z.infer<typeof notificationValidator.notificationId>;
-
+  type query = z.infer<typeof notificationValidator.query>
   type notificationArray = z.infer<typeof notificationValidator.notificationArray>;
 }

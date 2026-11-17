@@ -24,7 +24,7 @@ class OrganizationMembers {
     return foundOrganizations;
   }
   public async query(data: VOrganizationMember.organizationId & VOrganizationMember.query) {
-    const { page = 1, limit = 5 } = data
+    const { page, limit } = data
     const _query = [eq(organization_members.organizationId, data.organizationId)]
     if (data.role) {
       _query.push(eq(organization_members.role, data.role))
@@ -33,7 +33,7 @@ class OrganizationMembers {
     const [foundMembers, total] = await Promise.all([
       db.select({
         ...organizationMemberColumns,
-        user: { id: users.id, name: users.fullName, profile: users.profile },
+        user: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt },
       })
         .from(organization_members)
         .innerJoin(users, eq(users.id, organization_members.userId))
@@ -97,18 +97,12 @@ class OrganizationMembers {
         .select({
           id: organization_members.id,
           organization: { id: organizations.id, name: organizations.name },
-          user: { id: users.id, name: users.fullName, profile: users.profile },
+          user: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt },
           role: organization_members.role,
           createdAt: organization_members.createdAt,
           updatedAt: organization_members.updatedAt
         })
         .from(organization_members)
-        .where(
-          and(
-            eq(organization_members.id, data.organizationMemberId),
-            eq(organization_members.organizationId, data.organizationId),
-          ),
-        )
         .innerJoin(
           users,
           eq(users.id, organization_members.userId)
@@ -116,6 +110,12 @@ class OrganizationMembers {
         .innerJoin(
           organizations,
           eq(organizations.id, organization_members.organizationId)
+        )
+        .where(
+          and(
+            eq(organization_members.id, data.organizationMemberId),
+            eq(organization_members.organizationId, data.organizationId),
+          ),
         )
     )[0];
   }

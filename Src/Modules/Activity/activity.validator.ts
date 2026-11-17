@@ -103,8 +103,8 @@ export const activityValidator = {
         message: "Invalid activity type",
       })
       .optional(),
-    page: z.coerce.number().optional().default(1),
-    limit: z.coerce.number().optional().default(10)
+    cursor: z.coerce.string().optional(),
+    limit: z.coerce.number().default(10)
   })
 
 };

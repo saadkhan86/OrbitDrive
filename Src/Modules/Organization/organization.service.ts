@@ -26,13 +26,11 @@ export const organizationService = {
     return organization;
   },
   query: async (user: VAuth.userId, query: VOrganization.query) => {
-    const organization =
+    const { organizations, count } =
       await OrganizationRepo
-        .query({
-          userId: user.userId,
-          search: query.search
-        });
-    return organization;
+        .query({ ...query, ...user });
+    const hasNextPage = count > query.limit
+    return { organizations, pagination: { limit: query.limit, hasNextPage, totalCount: count } };
   },
   getById: async (param: VOrganization.organizationId) => {
     const organization = await OrganizationRepo.getById({ organizationId: param.organizationId });

@@ -4,9 +4,9 @@ import { notificationController } from "./notification.controller";
 import { notificationValidator } from "./notification.validator";
 
 export const notificationRouter = async (app: FastifyInstance) => {
-  app.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = {
-      ...routeOptions.schema,
+  app.addHook("onRoute", (route) => {
+    route.schema = {
+      ...route.schema,
       tags: ["Notifications"],
     };
   });

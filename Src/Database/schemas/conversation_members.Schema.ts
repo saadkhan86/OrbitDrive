@@ -10,5 +10,6 @@ export const conversation_members = pgTable("conversation_members", {
 },
     (table) => [uniqueIndex("conversation_member_unique_idx")
         .on(table.conversationId, table.userId),
-    index("conversation_member_user_idx")]
+    index("conversation_member_joined_at_idx").on(table.joinedAt, table.id)
+    ]
 )

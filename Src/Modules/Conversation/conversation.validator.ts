@@ -11,8 +11,8 @@ export const conversationValidator = {
     ),
     query: z.object({
         search: z.coerce.string().optional(),
-        page: z.coerce.number().optional(),
-        limit: z.coerce.number().optional()
+        cursor: z.coerce.string().optional(),
+        limit: z.coerce.number().default(10)
     }),
     conversationId: z.object({
         conversationId: z.uuid({ message: "invalid conversation id" }).nonempty()

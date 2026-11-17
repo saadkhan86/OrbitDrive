@@ -29,10 +29,19 @@ export const GlobalErrorHandler = (
       return reply.code(400).send({
         success: false,
         error: {
-          cause: (error.cause as any).code as string,
+          code: (error.cause as any).code as string,
           message: (error.cause as any).message,
         }
       });
+    }
+    if ((error.cause as any)?.code as string == "23503") {
+      return reply.code(400).send({
+        success: false,
+        error: {
+          code: (error.cause as any).code as string,
+          message: (error.cause as any).message
+        }
+      })
     }
     return reply.code(500).send({
       success: false,

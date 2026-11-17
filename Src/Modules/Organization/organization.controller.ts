@@ -18,15 +18,16 @@ export const organizationController = {
     });
   },
   update: async (request: FastifyRequest, reply: FastifyReply) => {
+    const organization = await organizationService.update(
+      request.user as VAuth.userId,
+      request.params as VOrganization.organizationId,
+      request.body as VOrganization.update,
+    )
     return reply.status(200).send({
       success: true,
       message: "Organization updated successfully",
       data: {
-        organization: await organizationService.update(
-          request.user as VAuth.userId,
-          request.params as VOrganization.organizationId,
-          request.body as VOrganization.update,
-        ),
+        organization,
       },
     });
   },

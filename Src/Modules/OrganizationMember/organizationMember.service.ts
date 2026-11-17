@@ -14,7 +14,8 @@ export const organizationMemberService = {
   },
   query: async (param: VOrganizationMember.organizationId, query: VOrganizationMember.query) => {
     const members = await OrganizationMembersRepo.query({ ...param, ...query });
-    return members
+    const hasNextPage = members.count > query.limit
+    return { members, pagination: { limit: query.limit, hasNextPage, totalCount: members.count } }
   },
   getById: async (param: VOrganizationMember.memberId) => {
     const member = await OrganizationMembersRepo.getById({ ...param });

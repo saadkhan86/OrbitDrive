@@ -6,6 +6,7 @@ import {
   boolean,
   pgEnum,
   unique,
+  index,
 } from "drizzle-orm/pg-core";
 export const authProviderEnum = pgEnum("auth_provider", ["password", "google"]);
 export const users = pgTable(
@@ -25,5 +26,6 @@ export const users = pgTable(
   },
   (table) => [
     unique("provider_user_unique").on(table.provider, table.pid),
+    index("user_createdAt_idx").on(table.id, table.createdAt)
   ],
 );

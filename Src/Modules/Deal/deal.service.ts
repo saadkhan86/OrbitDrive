@@ -12,20 +12,14 @@ export const dealService = {
     param: VDeal.organizationId,
     body: VDeal.create,
   ) => {
-    const client = await ClientRepo.getById({
-      organizationId: param.organizationId,
-      clientId: body.clientId,
-    });
-
-    if (!client) {
-      throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
-    }
     const deal = await db.transaction(async (tx) => {
-      const createdDeal: NonNullable<any> = await DealRepo.create(tx, {
+      const createdDeal = await DealRepo.create(tx, {
         ...body,
         organizationId: param.organizationId,
       });
-
+      if (!createdDeal) {
+        throw new CustomError(500, "deal not created", "SERVER_ERROR")
+      }
       await AuditLogRepo.create(tx, {
         organizationId: createdDeal.organizationId,
         userId: user.userId,
@@ -54,11 +48,12 @@ export const dealService = {
     return foundDeal;
   },
   query: async (param: VDeal.organizationId, query: VDeal.query) => {
-    const deals = await DealRepo.query({
+    const { deals, count } = await DealRepo.query({
       ...param,
       ...query
     });
-    return deals
+    const hasNextPage = query.limit > count
+    return { deals, pagination: { limit: query.limit, hasNextPage, totalCount: count } }
   },
   update: async (
     user: VAuth.userId,
@@ -103,23 +98,22 @@ export const dealService = {
     user: VAuth.userId,
     param: VDeal.organizationId & VDeal.dealId,
   ) => {
-    const foundDeal = await DealRepo.findById(param);
-    if (!foundDeal) throw new CustomError(404, "deal not found", "NOT_FOUND")
     const deletedDeal = await db.transaction(async (tx) => {
-      await DealRepo.delete(tx, {
+      const deleted = await DealRepo.delete(tx, {
         dealId: param.dealId,
         organizationId: param.organizationId,
       });
+      if (!deleted) throw new CustomError(404, "deal not found", "NOT_FOUND")
       await AuditLogRepo.create(tx, {
         organizationId: param.organizationId,
         userId: user.userId,
         action: "delete",
         entityType: "deal",
-        entityId: foundDeal.id,
+        entityId: deleted.id,
         metadata: {
-          title: foundDeal.title,
-          clientId: foundDeal.clientId,
-          value: foundDeal.value,
+          title: deleted.title,
+          clientId: deleted.clientId,
+          value: deleted.value,
         },
       });
     })

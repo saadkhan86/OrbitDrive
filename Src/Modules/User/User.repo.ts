@@ -1,8 +1,9 @@
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
 import { VAuth } from "../Auth/auth.validator";
 import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";
 import { VUser } from "./user.validator";
+import { ICursor } from "../../Interfaces/ICursor";
 
 
 class UserRepo {
@@ -30,28 +31,45 @@ class UserRepo {
           updatedAt: new Date(),
         })
         .where(eq(users.id, data.userId))
-        .returning({
-          id: users.id,
-          fullName: users.fullName,
-          email: users.email,
-          profile: users.profile,
-          updatedAt: users.updatedAt,
-        })
+        .returning()
     )[0];
   }
   public async logout(data: VUser.userId) {
     await db.update(users).set({ refreshToken: null }).where(eq(users.id, data.userId));
     return true;
   }
-  public async query(data: VUser.query) {
-    const { page = 1, limit = 5 } = data
-    const _query = []
+  public async query(data: Omit<VUser.query, "cursor"> & ICursor.query) {
+    const _query: SQL[] = []
     if (data.userId) _query.push(eq(users.id, data.userId))
-    if (data.search) _query.push(or(ilike(users.fullName, `%${data.search}%`), ilike(users.email, `%${data.search}%`)))
-    const [foundUsers, total] = await Promise.all([
-      db.select({ id: users.id, fullName: users.fullName, email: users.email, profile: users.profile }).from(users).where(and(..._query)).orderBy(desc(users.createdAt)).offset((page - 1) * limit).limit(limit),
-      db.select({ count: count() }).from(users).where(and(..._query))])
-    return { users: foundUsers, count: total[0]?.count ?? 0 }
+    if (data.search) _query.push(
+      or(
+        ilike(users.fullName, `%${data.search}%`),
+        ilike(users.email, `%${data.search}%`)
+      ) as SQL
+    )
+    if (data.cursor) {
+      _query.push(
+        or(
+          lt(users.createdAt, data.cursor.createdAt),
+          and(
+            lt(users.id, data.cursor.id),
+            eq(users.createdAt, data.cursor.createdAt)
+          )
+        )! as SQL
+      )
+    }
+    return await db.select(
+      {
+        id: users.id,
+        fullName: users.fullName,
+        profile: users.profile,
+        createdAt: users.createdAt,
+      }
+    )
+      .from(users)
+      .where(and(..._query))
+      .orderBy(desc(users.createdAt), desc(users.id))
+      .limit(data.limit + 1)
   }
 }
 

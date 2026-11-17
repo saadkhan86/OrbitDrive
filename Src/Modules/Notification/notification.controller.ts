@@ -7,6 +7,7 @@ export const notificationController = {
   query: async (request: FastifyRequest, reply: FastifyReply) => {
     const notifications = await notificationService.query(
       request.user as VAuth.userId,
+      request.query as VNotification.query
     );
 
     return reply.status(200).send({

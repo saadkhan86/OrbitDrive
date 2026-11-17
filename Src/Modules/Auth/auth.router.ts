@@ -26,17 +26,16 @@ export const authRouter = async (app: FastifyInstance) => {
     authController.forgotPassword,
   );
   app.patch(
-    "/password-reset",
+    "/reset-password",
     {
       config: { rateLimit: { max: 1, timeWindow: "5 minute", } },
       schema: { body: authValidator.passwordReset },
     },
-    authController.passwordReset,
+    authController.resetPassword,
   );
   app.post(
     "/refresh",
     {
-      preHandler: [authenticate.user],
       config: {
         rateLimit: { max: 2, timeWindow: '1 minute' }
       },

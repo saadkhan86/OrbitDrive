@@ -15,6 +15,13 @@
       "when": 1794738757755,
       "tag": "0001_easy_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794845456656,
+      "tag": "0002_clever_ben_urich",
+      "breakpoints": true
     }
   ]
 }

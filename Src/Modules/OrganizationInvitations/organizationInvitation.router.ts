@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify";
 import { authenticate } from "../../Hooks/authentication.hook";
-import { organizationValidator } from "../Organization/organization.validator";
 import { organizationInvitationValidator } from "./organizationInvitation.validator";
 import { organizationInvitationController } from "./organizationInvitation.controller";
 import { authorize } from "../../Hooks/authorization.hook";

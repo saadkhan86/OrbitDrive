@@ -13,8 +13,8 @@ export const auditLogValidator = {
   query: z.object({
     action: z.enum(["create", "update", "delete", "invite", "join"]).optional(),
     entityType: z.enum(["organization_member", "organization_invite", "deal", "client", "task", "activity"]).optional(),
-    page: z.coerce.number().optional().default(1),
-    limit: z.coerce.number().optional().default(10)
+    cursor: z.coerce.string().optional(),
+    limit: z.coerce.number().default(10)
   })
 };
 

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, or, SQL } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VActivity } from "./activity.validator";
 import { activities } from "../../Database/schemas/activity.Schema";
@@ -6,6 +6,7 @@ import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 import { clients } from "../../Database/schemas/clients.Schema";
 import { deals } from "../../Database/schemas/deals.Schema";
+import { ICursor } from "../../Interfaces/ICursor";
 
 class ActivityRepo {
   public async create(
@@ -32,8 +33,7 @@ class ActivityRepo {
     )[0];
   }
 
-  public async query(data: VActivity.organizationId & VActivity.query) {
-    const { page = 1, limit = 10 } = data
+  public async query(data: VActivity.organizationId & Omit<VActivity.query, "cursor"> & ICursor.query) {
     const _query: SQL[] = [eq(activities.organizationId, data.organizationId)];
     if (data.type) {
       _query.push(eq(activities.type, data.type));
@@ -41,18 +41,27 @@ class ActivityRepo {
     if (data.search) {
       _query.push(or(ilike(activities.title, `%${data.search}%`)) as SQL);
     }
-    const [foundActivities, total] = await Promise.all([
+    if (data.cursor) {
+      _query.push(
+        or(
+          lt(activities.createdAt, data.cursor.createdAt),
+          and(
+            eq
+              (activities.createdAt, data.cursor.createdAt),
+            lt
+              (activities.id, data.cursor.id)
+          )
+        )!
+      )
+    }
+    return await
       db
         .select()
         .from(activities)
         .where(and(..._query))
-        .orderBy(desc(activities.occurredAt)).limit(limit).offset((page - 1) * limit),
-      db
-        .select({ count: count() })
-        .from(activities)
-        .where(and(..._query))
-    ])
-    return { activities: foundActivities, count: total[0]?.count ?? 0 }
+        .orderBy(desc(activities.createdAt), desc(activities.id))
+        .limit(data.limit + 1)
+
   }
 
   public async findById(data: VActivity.activityId) {

@@ -1,9 +1,12 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { getIo } from "../../Socket/server.socket";
+import { cusrorUtils } from "../../Utils/cursot.utils";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
 import ClientRepo from "../Clients/Client.repo";
 import DealRepo from "../Deal/Deal.repo";
+import OrganizationRepo from "../Organization/Organization.repo";
 import ActivityRepo from "./Activity.repo";
 import { VActivity } from "./activity.validator";
 
@@ -13,42 +16,13 @@ export const activityService = {
     param: VActivity.organizationId,
     body: VActivity.create,
   ) => {
-    if (body.clientId) {
-      const client = await ClientRepo.getById({
-        clientId: body.clientId,
-        organizationId: param.organizationId,
-      });
-
-      if (!client) {
-        throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
-      }
-    }
-
-    if (body.dealId) {
-      const deal = await DealRepo.findById({
-        dealId: body.dealId,
-        organizationId: param.organizationId,
-      });
-
-      if (!deal) {
-        throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
-      }
-
-      if (body.clientId && deal.clientId !== body.clientId) {
-        throw new CustomError(
-          400,
-          "Deal does not belong to the specified client",
-          "DEAL_CLIENT_MISMATCH",
-        );
-      }
-    }
-
     const createdActivity = await db.transaction(async (tx) => {
-      const created: NonNullable<any> = await ActivityRepo.create(tx, {
+      const created = await ActivityRepo.create(tx, {
         ...body,
         organizationId: param.organizationId,
         userId: user.userId,
       })
+      if (!created) throw new CustomError(500, "activity not created", "SERVER_ERROR")
       await AuditLogRepo.create(tx, {
         organizationId: param.organizationId,
         userId: user.userId,
@@ -62,16 +36,20 @@ export const activityService = {
           dealId: created.dealId,
         },
       })
+      return created
     })
-
     return createdActivity;
   },
   query: async (organization: VActivity.organizationId, query: VActivity.query) => {
-    const activities = await ActivityRepo.query({
-      ...organization,
-      ...query
-    })
-    return activities
+    const decodedCursor = cusrorUtils.decode(query.cursor)
+    const cursor = decodedCursor ? { id: decodedCursor.id, createdAt: new Date(decodedCursor.createdAt) } : null
+    const activities = await ActivityRepo.query({ ...organization, ...query, cursor })
+    const hasNextPage = activities.length > query.limit
+    const data = activities.slice(0, query.limit - 1)
+    const lastActivity = data[data.length - 1]
+    const nextCursor = hasNextPage && lastActivity ? cusrorUtils.encode({ id: lastActivity.id, createdAt: new Date(lastActivity.createdAt).toISOString() }) : null
+
+    return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
   },
   findById: async (param: VActivity.activityId) => {
     const foundActivity = await ActivityRepo.findById({ ...param });

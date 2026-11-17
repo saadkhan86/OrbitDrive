@@ -99,7 +99,7 @@ export const authService = {
     await redisUtils.setRedis("password-reset", user.id, hashedToken);
     return true;
   },
-  passwordReset: async (body: VAuth.passwordReset) => {
+  resetPassword: async (body: VAuth.passwordReset) => {
     const hashedToken = await tokenUtils.hashToken(body.token);
     const userId = await redisUtils.getRedis("password-reset", hashedToken);
     if (!userId)

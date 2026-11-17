@@ -37,7 +37,7 @@ class OrganizationInvitationRepo {
   public async query(
     data: VOrganizationInvitation.organizationId & VOrganizationInvitation.query,
   ) {
-    const { page = 1, limit = 10 } = data
+    const { page, limit } = data
     const _query = [eq(organization_invitations.organizationId, data.organizationId)]
     if (data.role) {
       _query.push(eq(organization_invitations.role, data.role))
@@ -58,7 +58,7 @@ class OrganizationInvitationRepo {
     }
 
   }
-  
+
   public async getPendingByEmail(
     data: VOrganizationInvitation.organizationId & VAuth.email,
   ) {

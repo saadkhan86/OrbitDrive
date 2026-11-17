@@ -1,5 +1,6 @@
 import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
+import { getIo } from "../../Socket/server.socket";
 import { cusrorUtils } from "../../Utils/cursot.utils";
 import AuditLogRepo from "../AuditLog/AuditLog.repo";
 import { VAuth } from "../Auth/auth.validator";
@@ -15,31 +16,6 @@ export const taskService = {
     param: VTask.organizationId,
     body: VTask.create,
   ) => {
-    if (body.clientId) {
-      const client = await ClientRepo.getById({
-        clientId: body.clientId,
-        organizationId: param.organizationId,
-      });
-      if (!client) {
-        throw new CustomError(404, "Client not found", "CLIENT_NOT_FOUND");
-      }
-    }
-    if (body.dealId) {
-      const deal = await DealRepo.findById({
-        dealId: body.dealId,
-        organizationId: param.organizationId,
-      });
-      if (!deal) {
-        throw new CustomError(404, "Deal not found", "DEAL_NOT_FOUND");
-      }
-      if (body.clientId && deal.clientId !== body.clientId) {
-        throw new CustomError(
-          400,
-          "Deal does not belong to the specified client",
-          "DEAL_CLIENT_MISMATCH",
-        );
-      }
-    }
     const createdTask = await db.transaction(async (tx) => {
       const task = await TaskRepo.create(tx, {
         ...body,
@@ -69,6 +45,7 @@ export const taskService = {
       })
       return task
     })
+    getIo().to(createdTask.assignedTo).emit("new-notification", createdTask)
     return createdTask;
   },
 
@@ -138,26 +115,21 @@ export const taskService = {
   },
 
   delete: async (user: VAuth.userId, param: VTask.taskId) => {
-    const existingTask = await TaskRepo.findById({ ...param });
-
-    if (!existingTask) {
-      throw new CustomError(404, "Task not found", "TASK_NOT_FOUND");
-    }
-
     await db.transaction(async (tx) => {
-      await TaskRepo.delete(tx, { ...param });
+      const deleted = await TaskRepo.delete(tx, { ...param });
+      if (!deleted) throw new CustomError(404, "task not found", "NOT_FOUND")
       await AuditLogRepo.create(tx, {
-        organizationId: existingTask.organizationId,
+        organizationId: deleted.organizationId,
         userId: user.userId,
         action: "delete",
         entityType: "task",
-        entityId: existingTask.id,
+        entityId: deleted.id,
         metadata: {
-          title: existingTask.title,
-          assignedTo: existingTask.assignedTo,
-          clientId: existingTask.client?.id,
-          dealId: existingTask.deal?.id,
-          status: existingTask.status,
+          title: deleted.title,
+          assignedTo: deleted.assignedTo,
+          clientId: deleted.clientId,
+          dealId: deleted.dealId,
+          status: deleted.status,
         },
       });
     })

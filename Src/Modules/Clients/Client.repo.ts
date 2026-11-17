@@ -21,7 +21,7 @@ class ClientRepo {
     }).returning())[0];
   }
   public async query(data: VClient.organizationId & VClient.query) {
-    const { page = 1, limit = 5 } = data;
+    const { page, limit } = data;
     const _query: SQL[] = [eq(clients.organizationId, data.organizationId)];
     if (data.status) {
       _query.push(eq(clients.status, data.status))
