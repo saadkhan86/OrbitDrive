@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1794670148246,
-      "tag": "0000_flashy_luckman",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1794738757755,
-      "tag": "0001_easy_princess_powerful",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1794845456656,
-      "tag": "0002_clever_ben_urich",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1794935844439,
-      "tag": "0003_deep_paibok",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1794935982850,
-      "tag": "0004_smart_blizzard",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1794936975766,
-      "tag": "0005_sticky_chimera",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1794942928146,
-      "tag": "0006_shocking_terror",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1794956450272,
-      "tag": "0007_groovy_loa",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1794984761149,
-      "tag": "0008_early_wither",
+      "when": 1794997756261,
+      "tag": "0000_right_hulk",
       "breakpoints": true
     }
   ]

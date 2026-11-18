@@ -1,10 +1,12 @@
-import { and, count, desc, eq, getTableColumns, ilike, or, SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import { organizations } from "../../Database/schemas/organization.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VOrganization } from "./organization.validator";
 import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 import { VAuth } from "../Auth/auth.validator";
+import organizationRefColumns from "./organization.refrence";
+import userRefColumns from "../User/user.reference";
 
 class OrganizationRepo {
   public async create(
@@ -14,22 +16,21 @@ class OrganizationRepo {
     return (
       await tx
         .insert(organizations)
-        .values({ ownerId: data.ownerId, name: data.name, slug: data.slug })
-        .returning({
-          id: organizations.id,
-          name: organizations.name,
-          slug: organizations.slug,
-          ownerId: organizations.ownerId,
-          createdAt: organizations.createdAt,
-          updatedAt: organizations.updatedAt,
+        .values({
+          ownerId: data.ownerId,
+          name: data.name,
+          slug: data.slug,
         })
+        .returning()
     )[0];
   }
   public async getById(data: VOrganization.organizationId) {
     const organization = (await db
       .select({
-        ...getTableColumns(organizations),
-        owner: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt }
+        ...organizationRefColumns,
+        owner: {
+          ...userRefColumns
+        }
       })
       .from(organizations)
       .innerJoin(users, eq(organizations.ownerId, users.id))
@@ -53,8 +54,17 @@ class OrganizationRepo {
       )
     }
     const [foundOrganizations, total] = await Promise.all([
-      db.select().from(organizations).where(and(..._query)).orderBy(desc(organizations.createdAt)).limit(limit).offset((page - 1) * limit),
-      db.select({ count: count() }).from(organizations).where(and(..._query))
+      db
+        .select()
+        .from(organizations)
+        .where(and(..._query))
+        .orderBy(desc(organizations.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit),
+      db
+        .select({ count: count() })
+        .from(organizations)
+        .where(and(..._query))
     ]);
     return { organizations: foundOrganizations, count: total[0]?.count ?? 0 };
   }
@@ -86,14 +96,6 @@ class OrganizationRepo {
           ),
         )
         .returning()
-    )[0];
-  }
-  public async getByOrganizationId(data: VOrganization.organizationId) {
-    return (
-      await db
-        .select()
-        .from(organizations)
-        .where(eq(organizations.id, data.organizationId))
     )[0];
   }
 }

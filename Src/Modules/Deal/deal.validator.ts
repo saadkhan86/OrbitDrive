@@ -57,7 +57,7 @@ export const dealValidator = {
 
       description: z.string().max(1000).optional(),
     })
-    .refine((data) => Object.keys.length > 0, {
+    .refine((data) => Object.keys(data).length > 0, {
       abort: true,
       message: "At least one field is required",
     }),

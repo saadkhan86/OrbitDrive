@@ -7,9 +7,7 @@ import { cleanerUtils } from "../../Utils/cleaner.utils";
 import { cusrorUtils } from "../../Utils/cursot.utils";
 import { IReply } from "../../Interfaces/IReply";
 import { uploaderUtils } from "../../Utils/uploader.utils";
-import { UserTypes } from "./user.types";
 import { CustomError } from "../../ErrorHandler/CustomError";
-import { cloudinaryService } from "../../Services/cloudinary.utils";
 export const userService = {
   me: async (user: VUser.userId) => {
     let foundUser = await redisCaching.get(user.userId)
@@ -26,30 +24,11 @@ export const userService = {
     if (body.password) {
       body.password = await argon2.hash(body.password)
     }
-    if (body.profile?.avatar?.publicId) {
-      try {
-        await cloudinaryService.delete(body.profile.avatar.publicId)
-      } catch (error) {
-        console.log("profile avatar deletion failed")
-      }
+    if (body.profile?.avatar) {
+      const url = await uploaderUtils.convertToUrl(user.userId, body.profile.avatar)
+      url ? body.profile.avatar = url : body.profile.avatar = undefined
     }
-    if (body.profile?.avatar?.url) {
-      // const uploaded = await uploaderUtils.convertToUrl(user.userId, body.profile.avatar.url)
-      // if (typeof uploaded == "object") {
-      //   body.profile.avatar.url = uploaded?.url as string
-      //   body.profile.avatar.publicId = uploaded?.publicId as string
-      // } else if (typeof uploaded == "string") {
-      //   body.profile.avatar.url = uploaded
-      // } else {
-      //   throw new CustomError(500, "profile upload failed", "SERVER_ERROR")
-      // }
-      body.profile.avatar.publicId="123"
-      body.profile.avatar.url="hhhsdhfhsd"
-    }
-    if (body.profile?.bio) {
-      body.profile.bio = body.profile.bio
-    }
-    const updatedUser = await UserRepo.update2({ ...body, userId: user.userId })
+    const updatedUser = await UserRepo.update({ ...body, userId: user.userId })
     await redisCaching.delete(user.userId)
     await redisCaching.set(user.userId, updatedUser, 5 * 60)
     return updatedUser;

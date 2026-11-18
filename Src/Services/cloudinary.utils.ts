@@ -1,11 +1,12 @@
 import cloudinary from "../Config/coudinary.config"
 
 export const cloudinaryService = {
-    upload: async (userId: string, base64: string) => {
+    upload: async (id: string, base64: string): Promise<string> => {
         const upload = await cloudinary.uploader.upload(base64, {
             folder: "OrbitDrive/users",
-            public_id: `${userId}/profile`,
+            public_id: `${id}/profile`,
             overwrite: true,
+            invalidate: true,
             resource_type: "image",
             transformation: {
                 width: 500,
@@ -14,9 +15,6 @@ export const cloudinaryService = {
                 gravity: "face:auto"
             }
         })
-        return { url: upload.url, publicId: upload.public_id }
+        return upload.url
     },
-    delete: async (publicId: string) => {
-        await cloudinary.uploader.destroy(publicId, { resource_type: "image" })
-    }
 }

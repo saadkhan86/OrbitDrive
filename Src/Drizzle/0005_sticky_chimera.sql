@@ -1,2 +1,0 @@
-ALTER TABLE "deals" ADD CONSTRAINT "deals_client_org_fk" FOREIGN KEY ("client_id","organization_id") REFERENCES "public"."clients"("id","organization_id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_id_org_unique" UNIQUE("id","organization_id");

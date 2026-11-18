@@ -31,14 +31,12 @@ export const userValidator = {
             })
             .optional(),
         profile: z.object({
-            avatar: z.object({
-                url: z.string({ message: "image must be type of string" }),
-                publicId: z.string({ message: "pub" })
-
-            }),
-            bio: z.coerce.string().max(300)
+            avatar: z.string({ message: "image must be type of string" }).optional(),
+            bio: z.coerce.string().max(300).optional()
         })
             .optional()
+    }).refine((data) => Object.keys(data).length > 0, {
+        message: "atleast one field is required for update"
     }),
 }
 export declare namespace VUser {

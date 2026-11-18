@@ -6,6 +6,6 @@ export default defineConfig({
   out: "./Src/Drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URI!,
+    url: "postgresql://postgres:sk8613013@localhost:5432/orbitdrive",
   },
 });

@@ -6,17 +6,16 @@ export const organizationValidator = {
       .string({ message: "invalid name of organization" })
       .min(5, { message: "name must be greater than 5 characters" })
       .max(100, { message: "name must be smaller than 100 characters" }),
+    logo: z.string({ message: "logo must be type of string" }).optional()
   }),
 
   update: z
     .object({
       name: z
         .coerce
-        .string({
-          message: "invalid name of organization",
-        })
+        .string()
         .min(3, { message: "name must be greater than 3 characters" })
-        .max(100, { message: "name must be smaller than 100 characters" })
+        .max(100, { message: "name must be smaller than 100 characters" }),
     }),
 
   organizationId: z.object({

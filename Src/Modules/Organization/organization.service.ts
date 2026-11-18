@@ -2,6 +2,7 @@ import { db } from "../../Database";
 import { CustomError } from "../../ErrorHandler/CustomError";
 import { IReply } from "../../Interfaces/IReply";
 import { generateSlug } from "../../Utils/slug.utils";
+import { uploaderUtils } from "../../Utils/uploader.utils";
 import { VAuth } from "../Auth/auth.validator";
 import OrganizationMembersRepo from "../OrganizationMember/OrganizationMembers.repo";
 import OrganizationRepo from "./Organization.repo";

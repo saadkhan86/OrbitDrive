@@ -79,15 +79,15 @@ export const tasks = pgTable("tasks", {
   foreignKey({
     columns: [
       table.organizationId,
-      table.assignedTo
+      table.assignedTo,
     ],
     foreignColumns: [
-      organization_members.id,
-      organization_members.userId
+      organization_members.organizationId,
+      organization_members.userId,
     ],
     name: "assigned_usr_org_id_fk",
   })
-    .onDelete("set null")
+    .onDelete("cascade")
 ]
 )
 

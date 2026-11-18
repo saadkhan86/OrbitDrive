@@ -1,1 +1,0 @@
-ALTER TABLE "users" ALTER COLUMN "profile" SET DEFAULT '{"avatar":{"url":null,"publicId":null},"bio":null}'::jsonb;

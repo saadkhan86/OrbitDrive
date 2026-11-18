@@ -36,7 +36,6 @@ CREATE TABLE "audit_logs" (
 --> statement-breakpoint
 CREATE TABLE "clients" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"created_by" uuid NOT NULL,
 	"organization_id" uuid NOT NULL,
 	"name" varchar(50) NOT NULL,
 	"email" varchar(50) NOT NULL,
@@ -46,7 +45,8 @@ CREATE TABLE "clients" (
 	"notes" text,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
-	CONSTRAINT "clients_email_unique" UNIQUE("email")
+	CONSTRAINT "org_client_email_unique" UNIQUE("email","organization_id"),
+	CONSTRAINT "clients_id_org_unique" UNIQUE("id","organization_id")
 );
 --> statement-breakpoint
 CREATE TABLE "conversation_members" (
@@ -76,7 +76,8 @@ CREATE TABLE "deals" (
 	"expected_close_date" timestamp with time zone,
 	"description" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "deals_id_org_unique" UNIQUE("id","organization_id")
 );
 --> statement-breakpoint
 CREATE TABLE "messages" (
@@ -156,7 +157,7 @@ CREATE TABLE "users" (
 	"full_name" varchar(50) NOT NULL,
 	"email" varchar(50) NOT NULL,
 	"password_hash" varchar(255) NOT NULL,
-	"profile" varchar DEFAULT '',
+	"profile" jsonb DEFAULT '{"avatar":{"url":null,"publicId":null},"bio":null}'::jsonb,
 	"is_email_verified" boolean DEFAULT false NOT NULL,
 	"refresh_token" varchar DEFAULT '',
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -171,13 +172,13 @@ ALTER TABLE "activities" ADD CONSTRAINT "activities_deal_id_deals_id_fk" FOREIGN
 ALTER TABLE "activities" ADD CONSTRAINT "activities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "clients" ADD CONSTRAINT "clients_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversation_members" ADD CONSTRAINT "conversation_members_conversation_id_chats_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."chats"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversation_members" ADD CONSTRAINT "conversation_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "chats" ADD CONSTRAINT "chats_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "deals" ADD CONSTRAINT "deals_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "deals" ADD CONSTRAINT "deals_client_id_clients_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "deals" ADD CONSTRAINT "deals_client_org_fk" FOREIGN KEY ("client_id","organization_id") REFERENCES "public"."clients"("id","organization_id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_chats_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."chats"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_sender_id_users_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -188,9 +189,18 @@ ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_organiza
 ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "organizations" ADD CONSTRAINT "organizations_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "tasks" ADD CONSTRAINT "tasks_client_id_clients_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_assigned_to_users_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_deal_id_deals_id_fk" FOREIGN KEY ("deal_id") REFERENCES "public"."deals"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_client_org_fk" FOREIGN KEY ("client_id","organization_id") REFERENCES "public"."clients"("id","organization_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_deal_org_fk" FOREIGN KEY ("deal_id","organization_id") REFERENCES "public"."deals"("id","organization_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tasks" ADD CONSTRAINT "assigned_usr_org_id_fk" FOREIGN KEY ("organization_id","assigned_to") REFERENCES "public"."organization_members"("organization_id","user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "activities_created_at_table_id_idx" ON "activities" USING btree ("created_at","id");--> statement-breakpoint
+CREATE INDEX "audit_log_created_at_id_idx" ON "audit_logs" USING btree ("id","created_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "conversation_member_unique_idx" ON "conversation_members" USING btree ("conversation_id","user_id");--> statement-breakpoint
+CREATE INDEX "conversation_member_joined_at_idx" ON "conversation_members" USING btree ("joined_at","id");--> statement-breakpoint
 CREATE INDEX "conversation_created_by_idx" ON "chats" USING btree ("created_by");--> statement-breakpoint
-CREATE INDEX "messages_conversation_created_idx" ON "messages" USING btree ("conversation_id","created_at");
+CREATE INDEX "conversation_id_created_at_idx" ON "chats" USING btree ("id","created_at");--> statement-breakpoint
+CREATE INDEX "messages_conversation_created_idx" ON "messages" USING btree ("id","conversation_id","created_at");--> statement-breakpoint
+CREATE INDEX "notification_created_at_id_idx" ON "notifications" USING btree ("id","created_at");--> statement-breakpoint
+CREATE INDEX "tasks_org_createdAt_idx" ON "tasks" USING btree ("created_at","organization_id","id");--> statement-breakpoint
+CREATE INDEX "user_createdAt_idx" ON "users" USING btree ("id","created_at");

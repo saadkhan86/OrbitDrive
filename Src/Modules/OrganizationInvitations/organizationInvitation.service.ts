@@ -81,7 +81,7 @@ export const organizationInvitationService = {
       return createdInvitation;
     })
 
-    const organization = await OrganizationRepo.getByOrganizationId({ organizationId: invitation?.organizationId! });
+    const organization = await OrganizationRepo.getById({ organizationId: invitation.organizationId });
     if (!organization) {
       throw new CustomError(
         404,
@@ -91,11 +91,11 @@ export const organizationInvitationService = {
     }
 
     await addEmailJob("organization-invitation", {
-      email: invitation!.email,
+      email: invitation.email,
       verificationToken: token,
       expiresIn: 24,
-      organizationName: organization?.name,
-      role: invitation!.role,
+      organizationName: organization.name,
+      role: invitation.role,
     });
     return {
       invitation,

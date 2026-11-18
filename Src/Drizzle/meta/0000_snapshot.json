@@ -1,5 +1,5 @@
 {
-  "id": "a875376c-bc7d-41d8-b11d-95ba50b1c8d6",
+  "id": "8abfa9f7-597e-4a57-b7b8-a537bde09549",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -80,7 +80,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "activities_created_at_table_id_idx": {
+          "name": "activities_created_at_table_id_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "activities_organization_id_organizations_id_fk": {
           "name": "activities_organization_id_organizations_id_fk",
@@ -199,7 +221,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "audit_log_created_at_id_idx": {
+          "name": "audit_log_created_at_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "audit_logs_organization_id_organizations_id_fk": {
           "name": "audit_logs_organization_id_organizations_id_fk",
@@ -244,12 +288,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
         },
         "organization_id": {
           "name": "organization_id",
@@ -312,19 +350,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "clients_created_by_users_id_fk": {
-          "name": "clients_created_by_users_id_fk",
-          "tableFrom": "clients",
-          "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "clients_organization_id_organizations_id_fk": {
           "name": "clients_organization_id_organizations_id_fk",
           "tableFrom": "clients",
@@ -341,11 +366,20 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "clients_email_unique": {
-          "name": "clients_email_unique",
+        "org_client_email_unique": {
+          "name": "org_client_email_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "email"
+            "email",
+            "organization_id"
+          ]
+        },
+        "clients_id_org_unique": {
+          "name": "clients_id_org_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "organization_id"
           ]
         }
       },
@@ -402,6 +436,27 @@
             }
           ],
           "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "conversation_member_joined_at_idx": {
+          "name": "conversation_member_joined_at_idx",
+          "columns": [
+            {
+              "expression": "joined_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -493,6 +548,27 @@
           "columns": [
             {
               "expression": "created_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "conversation_id_created_at_idx": {
+          "name": "conversation_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -629,10 +705,34 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "deals_client_org_fk": {
+          "name": "deals_client_org_fk",
+          "tableFrom": "deals",
+          "tableTo": "clients",
+          "columnsFrom": [
+            "client_id",
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id",
+            "organization_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "deals_id_org_unique": {
+          "name": "deals_id_org_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "organization_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -685,6 +785,12 @@
         "messages_conversation_created_idx": {
           "name": "messages_conversation_created_idx",
           "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
             {
               "expression": "conversation_id",
               "isExpression": false,
@@ -808,7 +914,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "notification_created_at_id_idx": {
+          "name": "notification_created_at_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "notifications_organization_id_organizations_id_fk": {
           "name": "notifications_organization_id_organizations_id_fk",
@@ -1196,7 +1324,35 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "tasks_org_createdAt_idx": {
+          "name": "tasks_org_createdAt_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "tasks_organization_id_organizations_id_fk": {
           "name": "tasks_organization_id_organizations_id_fk",
@@ -1209,19 +1365,6 @@
             "id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "tasks_client_id_clients_id_fk": {
-          "name": "tasks_client_id_clients_id_fk",
-          "tableFrom": "tasks",
-          "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "tasks_assigned_to_users_id_fk": {
@@ -1248,6 +1391,51 @@
             "id"
           ],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tasks_client_org_fk": {
+          "name": "tasks_client_org_fk",
+          "tableFrom": "tasks",
+          "tableTo": "clients",
+          "columnsFrom": [
+            "client_id",
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id",
+            "organization_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tasks_deal_org_fk": {
+          "name": "tasks_deal_org_fk",
+          "tableFrom": "tasks",
+          "tableTo": "deals",
+          "columnsFrom": [
+            "deal_id",
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id",
+            "organization_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "assigned_usr_org_id_fk": {
+          "name": "assigned_usr_org_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "organization_members",
+          "columnsFrom": [
+            "organization_id",
+            "assigned_to"
+          ],
+          "columnsTo": [
+            "organization_id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1302,10 +1490,10 @@
         },
         "profile": {
           "name": "profile",
-          "type": "varchar",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false,
-          "default": "''"
+          "default": "'{\"avatar\":{\"url\":null,\"publicId\":null},\"bio\":null}'::jsonb"
         },
         "is_email_verified": {
           "name": "is_email_verified",
@@ -1336,7 +1524,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_createdAt_idx": {
+          "name": "user_createdAt_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
