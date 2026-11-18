@@ -52,7 +52,7 @@ export const authValidator = {
           "Password must contain uppercase, lowercase, number and special character",
       })
       .optional(),
-    profile: z.string().startsWith("data:image/", "Invalid image format").optional()
+    profileImage: z.string().startsWith("data:image/", "Invalid image format").optional()
   }),
   passwordReset: z.object({
     token: z.string({ message: "invalid token" }).length(64, {

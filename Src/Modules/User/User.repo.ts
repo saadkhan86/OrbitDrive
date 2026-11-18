@@ -4,6 +4,7 @@ import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";
 import { VUser } from "./user.validator";
 import { ICursor } from "../../Interfaces/ICursor";
+import { UserTypes } from "./user.types";
 
 
 class UserRepo {
@@ -18,21 +19,54 @@ class UserRepo {
     return foundUser
   }
 
-  public async update(data: VUser.userId & VUser.update) {
+  public async update(data:
+    VAuth.userId &
+    Omit<VUser.update, "profile"> &
+    {
+      profile: Omit<VUser.update["profile"], "base64Image"> &
+      UserTypes.UserProfile;
+    }) {
     const newData: Partial<typeof users.$inferInsert> = {};
     if (data.fullName) newData.fullName = data.fullName;
     if (data.password) newData.passwordHash = data.password;
-    if (data.profile) newData.profile = data.profile
+    if (data.profile?.avatar?.publicId) {
+      newData.profile!.avatar!.publicId = data.profile.avatar.publicId
+    }
     return (
       await db
         .update(users)
         .set({
-          ...newData,
+          fullName: newData.fullName,
+          passwordHash: newData.passwordHash,
+          profile: {
+            avatar: {
+              url: newData.profile?.avatar?.url as string,
+              publicId: newData.profile?.avatar?.publicId as string
+            },
+            bio: newData.profile?.bio as string
+          },
           updatedAt: new Date(),
         })
         .where(eq(users.id, data.userId))
         .returning()
     )[0];
+  }
+  public async update2(data: VUser.update & VAuth.userId) {
+    console.log(data)
+    let newData: Omit<UserTypes.UpdateUser, "password"> & { passwordHash?: string } = { userId: data.userId }
+    if (data.fullName) {
+      newData.fullName = data.fullName
+    }
+    if (data.password) {
+      newData.passwordHash = data.password
+    }
+    if (data.profile?.avatar) {
+      newData.profile!.avatar = data.profile.avatar
+    }
+    if (data.profile?.bio) {
+      newData.profile!.bio = data.profile.bio
+    }
+    return (await db.update(users).set(newData).where(eq(users.id, data.userId)).returning())[0]
   }
   public async logout(data: VUser.userId) {
     await db.update(users).set({ refreshToken: null }).where(eq(users.id, data.userId));

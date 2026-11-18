@@ -43,6 +43,27 @@
       "when": 1794936975766,
       "tag": "0005_sticky_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794942928146,
+      "tag": "0006_shocking_terror",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794956450272,
+      "tag": "0007_groovy_loa",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794984761149,
+      "tag": "0008_early_wither",
+      "breakpoints": true
     }
   ]
 }

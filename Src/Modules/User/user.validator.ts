@@ -30,7 +30,15 @@ export const userValidator = {
                     "Password must contain uppercase, lowercase, number and special character",
             })
             .optional(),
-        profile: z.string().startsWith("data:image/", "Invalid image format").optional()
+        profile: z.object({
+            avatar: z.object({
+                url: z.string({ message: "image must be type of string" }),
+                publicId: z.string({ message: "pub" })
+
+            }),
+            bio: z.coerce.string().max(300)
+        })
+            .optional()
     }),
 }
 export declare namespace VUser {

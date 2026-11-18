@@ -7,7 +7,9 @@ import {
   pgEnum,
   unique,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
+import { UserTypes } from "../../Modules/User/user.types";
 export const authProviderEnum = pgEnum("auth_provider", ["password", "google"]);
 export const users = pgTable(
   "users",
@@ -18,7 +20,7 @@ export const users = pgTable(
     fullName: varchar("full_name", { length: 50 }).notNull(),
     email: varchar("email", { length: 50 }).notNull().unique(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-    profile: varchar("profile").default(""),
+    profile: jsonb("profile").$type<UserTypes.UserProfile>().default({ avatar: { url: null, publicId: null }, bio: null }),
     isEmailVerified: boolean("is_email_verified").default(false).notNull(),
     refreshToken: varchar("refresh_token").default(""),
     createdAt: timestamp("created_at").defaultNow().notNull(),

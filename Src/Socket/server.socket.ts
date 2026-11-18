@@ -9,7 +9,7 @@ export const SocketServer = (server: FastifyInstance) => {
         cors: {
             origin: ["*"],
             methods: ["POST", "GET"],
-            credentials: true
+            credentials: false
         }
     })
     io.use(SocketAuth(server))

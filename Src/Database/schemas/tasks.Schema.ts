@@ -1,4 +1,5 @@
 import {
+  foreignKey,
   index,
   pgEnum,
   pgTable,
@@ -11,6 +12,7 @@ import { organizations } from "./organization.Schema";
 import { users } from "./users.Schema";
 import { clients } from "./clients.Schema";
 import { deals } from "./deals.Schema";
+import { organization_members } from "./organization_members.Schema";
 
 export const pgTaskPriorityEnum = pgEnum("task_priority", [
   "high",
@@ -31,9 +33,7 @@ export const tasks = pgTable("tasks", {
       onDelete: "cascade",
     })
     .notNull(),
-  clientId: uuid("client_id").references(() => clients.id, {
-    onDelete: "set null",
-  }),
+  clientId: uuid("client_id"),
   assignedTo: uuid("assigned_to")
     .references(() => users.id, {
       onDelete: "cascade",
@@ -49,6 +49,45 @@ export const tasks = pgTable("tasks", {
   dueDate: timestamp("due_date", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-}, (table) => [index("tasks_org_createdAt_idx").on(table.createdAt, table.organizationId, table.id)]
+}, (table) => [
+  index("tasks_org_createdAt_idx")
+    .on(table.createdAt, table.organizationId, table.id),
+  foreignKey({
+    columns: [
+      table.clientId,
+      table.organizationId,
+    ],
+    foreignColumns: [
+      clients.id,
+      clients.organizationId,
+    ],
+    name: "tasks_client_org_fk",
+  })
+    .onDelete("set null"),
+  foreignKey({
+    columns: [
+      table.dealId,
+      table.organizationId,
+    ],
+    foreignColumns: [
+      deals.id,
+      deals.organizationId,
+    ],
+    name: "tasks_deal_org_fk",
+  })
+    .onDelete("set null"),
+  foreignKey({
+    columns: [
+      table.organizationId,
+      table.assignedTo
+    ],
+    foreignColumns: [
+      organization_members.id,
+      organization_members.userId
+    ],
+    name: "assigned_usr_org_id_fk",
+  })
+    .onDelete("set null")
+]
 )
 

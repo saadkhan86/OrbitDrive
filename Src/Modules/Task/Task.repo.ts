@@ -116,7 +116,7 @@ class TaskRepo {
           eq(tasks.organizationId, data.organizationId),
         ),
       )
-      .returning())[0] ?? null
+      .returning())[0]
   }
 }
 

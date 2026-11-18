@@ -1,10 +1,12 @@
 import {
   foreignKey,
+  index,
   numeric,
   pgEnum,
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -62,6 +64,10 @@ export const deals = pgTable("deals", {
     .notNull(),
 },
   (table) => [
+    unique("deals_id_org_unique").on(
+      table.id,
+      table.organizationId
+    ),
     foreignKey({
       columns: [
         table.clientId,
@@ -73,6 +79,6 @@ export const deals = pgTable("deals", {
       ],
       name: "deals_client_org_fk",
     })
-    .onDelete("restrict")
+      .onDelete("restrict")
   ]
 );
