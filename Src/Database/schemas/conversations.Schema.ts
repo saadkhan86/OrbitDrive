@@ -3,7 +3,7 @@ import { users } from "./users.Schema";
 
 export const conversationTypeEnum = pgEnum("conversation_type_enum", ["direct", "group"])
 
-export const conversations = pgTable("chats", {
+export const conversations = pgTable("conversations", {
     id: uuid().defaultRandom().primaryKey(),
     type: conversationTypeEnum("type").notNull().default("direct"),
     name: varchar("name", { length: 100 }),
@@ -11,5 +11,10 @@ export const conversations = pgTable("chats", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 }, (table) =>
-    [index("conversation_created_by_idx").on(table.createdBy), index("conversation_id_created_at_idx").on(table.id, table.createdAt)]
+    [
+        index("conversation_created_by_idx")
+            .on(table.createdBy),
+        index("conversation_id_created_at_idx")
+            .on(table.id, table.createdAt)
+    ]
 ) 

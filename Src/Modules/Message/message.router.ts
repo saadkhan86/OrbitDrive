@@ -5,7 +5,7 @@ import { messageValidator } from "./message.validator"
 import { messageController } from "./message.controller"
 export const messageRouter = (app: FastifyInstance) => {
     app.addHook("onRoute", (route) => {
-        route.schema = { ...route.schema, tags: ["Chat"] }
+        route.schema = { ...route.schema, tags: ["Messages"] }
     })
     app.addHook("preHandler", authenticate.user)
     app.get("/", { schema: { params: conversationValidator.conversationId, querystring: messageValidator.query } }, messageController.query)

@@ -16,22 +16,16 @@ export const entityTypeEnum = pgEnum("audit_log_entity_type", ["organization_mem
 
 export const audit_logs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
-
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
-
   userId: uuid("user_id").references(() => users.id, {
     onDelete: "set null",
   }),
-
   entityType: entityTypeEnum("entity_type").notNull(),
   action: actionEnum("action").notNull(),
-
   entityId: uuid("entity_id").notNull(),
-
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
-
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

@@ -1,10 +1,10 @@
-import { and, asc, count, desc, eq, getTableColumns, ilike, or, sql, SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { clients } from "../../Database/schemas/clients.Schema";
 import { VClient } from "./client.validator";
 import { db } from "../../Database";
-import { users } from "../../Database/schemas/users.Schema";
+import clientRefColumns from "./client.refrence";
 
 class ClientRepo {
   public async create(tx: NodePgDatabase, data: typeof clients.$inferInsert) {
@@ -38,8 +38,17 @@ class ClientRepo {
       )
     }
     const [foundClients, total] = await Promise.all([
-      db.select().from(clients).where(and(..._query)).orderBy(desc(clients.createdAt)).limit(limit).offset((page - 1) * limit),
-      db.select({ count: count() }).from(clients).where(and(..._query))
+      db
+        .select()
+        .from(clients)
+        .where(and(..._query))
+        .orderBy(desc(clients.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit),
+      db
+        .select({ count: count() })
+        .from(clients)
+        .where(and(..._query))
     ])
     return { clients: foundClients, count: total[0]?.count ?? 0 }
   }
@@ -47,7 +56,7 @@ class ClientRepo {
     return (
       await db
         .select({
-          ...getTableColumns(clients),
+          ...clientRefColumns,
         })
         .from(clients)
         .where(

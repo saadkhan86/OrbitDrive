@@ -5,11 +5,16 @@ import { VConversationMember } from "./conversationMember.validator";
 import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
-import { da } from "zod/v4/locales";
 
 class ConversationMember {
     public async create(tx: NodePgDatabase, data: { conversationId: string, userId: string }[]) {
-        return (await tx.insert(conversation_members).values(data).returning())[0]
+        console.log(data)
+        return (
+            await tx
+                .insert(conversation_members)
+                .values(data)
+                .returning()
+        )[0]
 
     }
     public async query(data: VConversationMember.conversationId & Omit<VConversationMember.query, "cursor"> & ICursor.query) {

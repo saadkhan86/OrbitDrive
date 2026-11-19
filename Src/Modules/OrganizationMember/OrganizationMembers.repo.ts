@@ -6,6 +6,9 @@ import { organizations } from "../../Database/schemas/organization.Schema";
 import { VOrganizationMember } from "./organizationMember.validator";
 import { users } from "../../Database/schemas/users.Schema";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import organizationRefColumns from "../Organization/organization.refrence";
+import userRefColumns from "../User/user.reference";
+import organizationMemberRefColumns from "./organizationMember.refrence";
 
 class OrganizationMembers {
   public async getForCurrentUser(data: VAuth.userId) {
@@ -13,7 +16,7 @@ class OrganizationMembers {
     const foundOrganizations = await db.
       select({
         ...memberColumns,
-        organization: { ...getTableColumns(organizations) }
+        organization: { ...organizationRefColumns }
       })
       .from(organization_members)
       .innerJoin(
@@ -33,7 +36,9 @@ class OrganizationMembers {
     const [foundMembers, total] = await Promise.all([
       db.select({
         ...organizationMemberColumns,
-        user: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt },
+        user: {
+          ...userRefColumns
+        },
       })
         .from(organization_members)
         .innerJoin(users, eq(users.id, organization_members.userId))
@@ -95,12 +100,10 @@ class OrganizationMembers {
     return (
       await db
         .select({
-          id: organization_members.id,
-          organization: { id: organizations.id, name: organizations.name },
-          user: { id: users.id, name: users.fullName, profile: users.profile, createdAt: users.createdAt },
-          role: organization_members.role,
-          createdAt: organization_members.createdAt,
-          updatedAt: organization_members.updatedAt
+          ...organizationMemberRefColumns,
+          user: {
+            ...userRefColumns
+          }
         })
         .from(organization_members)
         .innerJoin(

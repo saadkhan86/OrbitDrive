@@ -6,12 +6,13 @@ import { db } from "../../Database";
 import { VNotification } from "./notification.validator";
 import { organizations } from "../../Database/schemas/organization.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
+import notificationRefColumns from "./notification.refrence";
+import organizationRefColumns from "../Organization/organization.refrence";
 
 class NotificationRepo {
   public async create(tx: NodePgDatabase, data: typeof notifications.$inferInsert) {
     return (await tx.insert(notifications).values(data).returning())[0];
   }
-
   public async query(data: VAuth.userId & Omit<VNotification.query, "cursor"> & ICursor.query) {
     const _query: SQL[] = [eq(notifications.userId, data.userId)]
     if (data.cursor) {
@@ -34,16 +35,14 @@ class NotificationRepo {
       .orderBy(desc(notifications.createdAt), desc(notifications.id))
       .limit(data.limit + 1);
   }
-
   public async findById(data: VNotification.notificationId & VAuth.userId) {
-    const { organizationId, ...notificationColumns } = getTableColumns(notifications)
     return (
       (
         await db
           .select({
-            ...notificationColumns,
+            ...notificationRefColumns,
             organization: {
-              ...getTableColumns(organizations)
+              ...organizationRefColumns
             }
           })
           .from(notifications)
@@ -58,7 +57,6 @@ class NotificationRepo {
       )[0]
     );
   }
-
   public async markAsRead(
     data: VNotification.notificationArray & VAuth.userId,
   ) {
@@ -76,8 +74,6 @@ class NotificationRepo {
       )
       .returning();
   }
-
-  // Delete notification
   public async delete(data: VNotification.notificationArray & VAuth.userId) {
     return (
       (
@@ -90,7 +86,7 @@ class NotificationRepo {
             ),
           )
           .returning()
-      )[0] ?? null
+      )[0]
     );
   }
 }

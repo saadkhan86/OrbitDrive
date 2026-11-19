@@ -4,11 +4,28 @@ export const conversationValidator = {
     create: z.object({
         type: z.enum(["direct", "group"]).default("direct"),
         name: z.coerce.string().optional(),
-        participants: z.array(z.uuid({ message: "invalid participant id" }).min(1, { message: "atleast one participant is required" }).nonempty())
-    }).refine((data) =>
-        data.type == "group" && data.name == "",
-        { abort: true, message: "group name is required" }
-    ),
+        participants: z.array(
+            z.uuid(
+                {
+                    message: "invalid participant id"
+                }
+            )
+                .min(
+                    1, {
+                    message: "atleast one participant is required"
+                }
+                )
+                .nonempty()
+        )
+    })
+        .refine((data) => {
+            if (data.type == "group") {
+                return !!data.name
+            }
+            return true
+        },
+            { abort: true, message: "group name is required", path: ["name"] }
+        ),
     query: z.object({
         search: z.coerce.string().optional(),
         cursor: z.coerce.string().optional(),
@@ -18,8 +35,8 @@ export const conversationValidator = {
         conversationId: z.uuid({ message: "invalid conversation id" }).nonempty()
     }),
     membersAndmessages: z.object({
-        members: z.coerce.number().default(5).optional(),
-        messages: z.coerce.number().default(30).optional()
+        members: z.coerce.number().default(10).optional(),
+        messages: z.coerce.number().default(10).optional()
     }),
     update: z.object({
         name: z.coerce.string(),

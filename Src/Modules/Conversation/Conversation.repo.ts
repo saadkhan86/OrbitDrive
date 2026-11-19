@@ -9,15 +9,24 @@ import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";
 import { messages } from "../../Database/schemas/messages.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
+import conversationRefColumns from "./conversation.refrence";
+import userRefColumns from "../User/user.reference";
 class ConversationRepo {
     public async create(tx: NodePgDatabase, data: VConversation.create & VAuth.userId) {
-        return (await tx.insert(conversations).values({
-            type: data.type,
-            name: data.name ?? "",
-            createdBy: data.userId,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }).returning())[0]
+        return (
+            await tx
+                .insert(conversations)
+                .values(
+                    {
+                        type: data.type,
+                        name: data.name ?? "",
+                        createdBy: data.userId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }
+                )
+                .returning()
+        )[0]
     }
     public async query(data: VAuth.userId & Omit<VConversation.query, "cursor"> & ICursor.query) {
         const _query: SQL[] = [eq(conversation_members.userId, data.userId)]
@@ -35,28 +44,39 @@ class ConversationRepo {
             )
         }
         const messageSender = alias(users, "message_sender")
-        const latestMessage = db.select({
-            id: messages.id,
-            content: messages.content,
-            senderId: messages.senderId,
-            createdAt: messages.createdAt
-        })
+        const latestMessage = db
+            .select(
+                {
+                    id: messages.id,
+                    content: messages.content,
+                    senderId: messages.senderId,
+                    createdAt: messages.createdAt
+                }
+            )
             .from(messages)
             .where(eq(messages.conversationId, conversations.id))
             .orderBy(desc(messages.createdAt))
-            .limit(1).as("latest_message")
+            .limit(1)
+            .as("latest_message")
 
-        return await db.select({
-            ...getTableColumns(conversations),
-            lastMessage: {
-                id: latestMessage.id,
-                content: latestMessage.content,
-                createdAt: latestMessage.createdAt,
-                sender: { id: messageSender.id, name: messageSender.fullName } as any,
-            }
-        })
+        return await db
+            .select({
+                ...getTableColumns(conversations),
+                lastMessage: {
+                    id: latestMessage.id,
+                    content: latestMessage.content,
+                    createdAt: latestMessage.createdAt,
+                    sender: { id: messageSender.id, name: messageSender.fullName } as any,
+                }
+            })
             .from(conversations)
-            .innerJoin(conversation_members, eq(conversations.id, conversation_members.conversationId))
+            .innerJoin(
+                conversation_members,
+                eq(
+                    conversations.id,
+                    conversation_members.conversationId
+                )
+            )
             .leftJoinLateral(latestMessage, sql`true`)
             .leftJoin(messageSender, eq(latestMessage.senderId, messageSender.id))
             .where(and(..._query))
@@ -64,27 +84,24 @@ class ConversationRepo {
             .limit(data.limit + 1)
     }
     public async getById(data: VConversation.conversationId & VConversation.conversationAndMessages & VAuth.userId) {
-        const [conversation, members, latestMessages] = await Promise.all([
-            db.select().from(conversations).where(eq(conversations.id, data.conversationId)),
-            db.select({
-                user: { id: users.id, name: users.fullName },
-                joinedAt: conversation_members.joinedAt
-            })
-                .from(conversation_members)
-                .innerJoin(users, eq(conversation_members.conversationId, data.conversationId))
-                .orderBy(desc(conversation_members.joinedAt))
-                .limit(data.members || 5),
-            db.select({
-                ...getTableColumns(messages),
-                sender: { id: users.id, name: users.fullName }
-            })
-                .from(messages).innerJoin(users, eq(users.id, messages.senderId))
-                .where(eq(messages.conversationId, data.conversationId))
-                .limit(data.messages || 30)
-        ])
-        const isMember = members.some(mbr => mbr.user.id == data.userId)
-        if (!isMember) return null
-        return { ...conversation[0], members, latestMessages }
+        return (
+            await db
+                .select({
+                    ...conversationRefColumns,
+                    createdBy: {
+                        ...userRefColumns
+                    }
+                })
+                .from(conversations)
+                .innerJoin(users, eq(users.id, conversations.createdBy))
+                .where(
+                    eq(
+                        conversations.id,
+                        data.conversationId
+                    )
+                )
+                .limit(1)
+        )[0]
 
     }
     public async update(data: { name: string, userId: string, conversationId: string }) {

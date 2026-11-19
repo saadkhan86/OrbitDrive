@@ -8,8 +8,10 @@ export const conversation_members = pgTable("conversation_members", {
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow()
 },
-    (table) => [uniqueIndex("conversation_member_unique_idx")
-        .on(table.conversationId, table.userId),
-    index("conversation_member_joined_at_idx").on(table.joinedAt, table.id)
+    (table) => [
+        uniqueIndex("conversation_member_unique_idx")
+            .on(table.conversationId, table.userId),
+        index("conversation_member_joined_at_idx")
+            .on(table.joinedAt, table.id)
     ]
 )

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, or, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VTask } from "./task.validator";
 import { tasks } from "../../Database/schemas/tasks.Schema";
@@ -7,6 +7,10 @@ import { clients } from "../../Database/schemas/clients.Schema";
 import { deals } from "../../Database/schemas/deals.Schema";
 import { users } from "../../Database/schemas/users.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
+import userRefColumns from "../User/user.reference";
+import clientRefColumns from "../Client/client.refrence";
+import dealRefColumns from "../Deal/deal.refrence";
+import taskRefColumns from "./task.refrence";
 
 class TaskRepo {
   public async create(
@@ -31,15 +35,13 @@ class TaskRepo {
       .returning())[0];
 
   }
-
   public async findById(data: VTask.taskId) {
-    const { clientId, dealId, assignedTo, ...taskColumns } = getTableColumns(tasks)
-    const task = (await db
+    return (await db
       .select({
-        ...taskColumns,
-        assignedTo: { id: users.id, name: users.fullName, profile: users.profile },
-        client: { ...getTableColumns(clients) },
-        deal: { ...getTableColumns(deals) }
+        ...taskRefColumns,
+        assignedTo: { ...userRefColumns },
+        client: { ...clientRefColumns },
+        deal: { ...dealRefColumns }
       })
       .from(tasks)
       .leftJoin(clients, eq(tasks.clientId, clients.id))
@@ -53,9 +55,7 @@ class TaskRepo {
       )
       .limit(1))[0]
 
-    return task ?? null;
   }
-
   public async query(data: VTask.organizationId & Omit<VTask.query, "cursor"> & ICursor.query) {
     const { cursor, limit = 10 } = data;
     const _query: SQL[] = [eq(tasks.organizationId, data.organizationId)]
@@ -84,9 +84,13 @@ class TaskRepo {
       db
         .select()
         .from(tasks)
-        .where(and(..._query)).orderBy(desc(tasks.createdAt), desc(tasks.id)).limit(limit + 1)
+        .where(and(..._query))
+        .orderBy(
+          desc(tasks.createdAt),
+          desc(tasks.id)
+        )
+        .limit(limit + 1)
   }
-
   public async update(
     tx: NodePgDatabase,
     data: VTask.taskId & VTask.update & VTask.organizationId,
@@ -106,7 +110,6 @@ class TaskRepo {
       .returning())[0] ?? null;
 
   }
-
   public async delete(tx: NodePgDatabase, data: VTask.taskId) {
     return (await tx
       .delete(tasks)

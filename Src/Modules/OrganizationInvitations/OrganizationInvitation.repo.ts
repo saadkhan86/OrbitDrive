@@ -5,6 +5,8 @@ import { VOrganizationInvitation } from "./organizationInvitation.validator";
 import { users } from "../../Database/schemas/users.Schema";
 import { db } from "../../Database";
 import { VAuth } from "../Auth/auth.validator";
+import organizationInvitationRefColumns from "./organizationInvitation.refrence";
+import userRefColumns from "../User/user.reference";
 class OrganizationInvitationRepo {
   public async create(tx: NodePgDatabase, data: typeof organization_invitations.$inferInsert) {
     return (
@@ -14,13 +16,12 @@ class OrganizationInvitationRepo {
         .returning()
     )[0];
   }
-
   public async getById(data: VOrganizationInvitation.invitationId) {
     return (
       await db
         .select({
-          ...getTableColumns(organization_invitations),
-          createdBy: { name: users.fullName, profile: users.profile }
+          ...organizationInvitationRefColumns,
+          createdBy: { ...userRefColumns }
         })
         .from(organization_invitations)
         .innerJoin(users, eq(organization_invitations.createdBy, users.id))
@@ -33,7 +34,6 @@ class OrganizationInvitationRepo {
         .limit(1)
     )[0];
   }
-
   public async query(
     data: VOrganizationInvitation.organizationId & VOrganizationInvitation.query,
   ) {
@@ -49,16 +49,24 @@ class OrganizationInvitationRepo {
       _query.push(ilike(organization_invitations.email, `%${data.search}%`))
     }
     const [invitations, totalCount] = await Promise.all([
-      db.select().from(organization_invitations).where(and(..._query)).orderBy(desc(organization_invitations.createdAt)).limit(limit).offset((page - 1) * limit),
-      db.select({ count: count() }).from(organization_invitations).where(and(..._query))
+      db
+        .select()
+        .from(organization_invitations)
+        .where(and(..._query))
+        .orderBy(
+          desc(organization_invitations.createdAt)
+        ).limit(limit)
+        .offset((page - 1) * limit),
+      db
+        .select({ count: count() })
+        .from(organization_invitations)
+        .where(and(..._query))
     ]);
     return {
       invitations,
       count: totalCount[0]?.count || 0
     }
-
   }
-
   public async getPendingByEmail(
     data: VOrganizationInvitation.organizationId & VAuth.email,
   ) {
@@ -99,7 +107,6 @@ class OrganizationInvitationRepo {
         .returning()
     )[0];
   }
-
   public async delete(tx: NodePgDatabase, data: VOrganizationInvitation.invitationId) {
     return (
       await tx

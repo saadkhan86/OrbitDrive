@@ -6,6 +6,9 @@ import { db } from "../../Database";
 import { users } from "../../Database/schemas/users.Schema";
 import { organizations } from "../../Database/schemas/organization.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
+import auditLogRefColumns from "./audit.refrence";
+import organizationRefColumns from "../Organization/organization.refrence";
+import userRefColumns from "../User/user.reference";
 
 class AuditLogRepo {
   public async create(
@@ -14,7 +17,6 @@ class AuditLogRepo {
   ) {
     return (await tx.insert(audit_logs).values(data).returning())[0];
   }
-
   public async query(data: VAuditLog.organizationId & Omit<VAuditLog.query, "cursor"> & ICursor.query) {
     const _query: SQL[] = [eq(audit_logs.organizationId, data.organizationId)];
     if (data.cursor) {
@@ -46,15 +48,13 @@ class AuditLogRepo {
       )
       .limit(data.limit + 1)
   }
-
   public async findById(data: VAuditLog.auditLogId) {
-    const { userId, organizationId, entityId, ...audiLogColumns } = getTableColumns(audit_logs)
-    const auditLog = (
+    return (
       await db
         .select({
-          ...audiLogColumns,
-          organization: { ...getTableColumns(organizations) },
-          user: { id: users.id, name: users.fullName, profile: users.profile },
+          ...auditLogRefColumns,
+          organization: { ...organizationRefColumns },
+          user: { ...userRefColumns },
         })
         .from(audit_logs)
         .innerJoin(users, eq(users.id, audit_logs.userId))
@@ -66,8 +66,7 @@ class AuditLogRepo {
           ),
         )
         .limit(1)
-    )[0] ?? null
-    return auditLog
+    )[0]
   }
 }
 

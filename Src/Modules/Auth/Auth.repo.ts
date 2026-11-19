@@ -27,12 +27,14 @@ class AuthRepo {
       await db.select().from(users).where(eq(users.email, data.email)).limit(1)
     )[0];
   }
-
   public async findById(user: VAuth.userId) {
-    const foundUser = (await db.select().from(users).where(eq(users.id, user.userId)).limit(1))[0]
-    return foundUser
+    return (
+      await db.
+        select().
+        from(users)
+        .where(eq(users.id, user.userId))
+        .limit(1))[0]
   }
-
   public async updateIsEmailVerified(data: VAuth.userId) {
     return (
       await db
@@ -52,11 +54,18 @@ class AuthRepo {
     )[0];
   }
   public async findByRefreshToken(data: VAuth.refreshToken) {
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.refreshToken, data.refreshToken));
-    return user ? user[0] : null;
+    return (
+      await db
+        .select()
+        .from(users)
+        .where(
+          eq(
+            users.refreshToken,
+            data.refreshToken
+          )
+        )
+    )[0];
+
   }
 }
 export default new AuthRepo();

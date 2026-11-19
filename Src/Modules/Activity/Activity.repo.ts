@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, lt, or, SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, or, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VActivity } from "./activity.validator";
 import { activities } from "../../Database/schemas/activity.Schema";
@@ -7,6 +7,10 @@ import { users } from "../../Database/schemas/users.Schema";
 import { clients } from "../../Database/schemas/clients.Schema";
 import { deals } from "../../Database/schemas/deals.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
+import activityRefColumns from "./activity.refrence";
+import userRefColumns from "../User/user.reference";
+import clientRefColumns from "../Client/client.refrence";
+import dealRefColumns from "../Deal/deal.refrence";
 
 class ActivityRepo {
   public async create(
@@ -32,7 +36,6 @@ class ActivityRepo {
         .returning()
     )[0];
   }
-
   public async query(data: VActivity.organizationId & Omit<VActivity.query, "cursor"> & ICursor.query) {
     const _query: SQL[] = [eq(activities.organizationId, data.organizationId)];
     if (data.type) {
@@ -63,38 +66,45 @@ class ActivityRepo {
         .limit(data.limit + 1)
 
   }
-
   public async findById(data: VActivity.activityId) {
     return (
-      (
-        await db
-          .select({
-            ...getTableColumns(activities),
-            user: { name: users.fullName, profile: users.profile },
-            client: { name: clients.name },
-            deal: { name: deals.title },
-          })
-          .from(activities)
-          .leftJoin(users, eq(activities.userId, users.id))
-          .leftJoin(clients, eq(activities.clientId, clients.id))
-          .leftJoin(deals, eq(activities.dealId, deals.id))
-          .where(
-            and(
-              eq(activities.id, data.activityId),
-              eq(activities.organizationId, data.organizationId),
-            ),
-          )
-          .limit(1)
-      )[0] ?? null
-    );
-  }
+      await db
+        .select({
+          ...activityRefColumns,
+          user: { ...userRefColumns },
+          client: { ...clientRefColumns },
+          deal: { ...dealRefColumns },
+        })
+        .from(activities)
+        .leftJoin(users, eq(activities.userId, users.id))
+        .leftJoin(clients, eq(activities.clientId, clients.id))
+        .leftJoin(deals, eq(activities.dealId, deals.id))
+        .where(
+          and(
+            eq(activities.id, data.activityId),
+            eq(activities.organizationId, data.organizationId),
+          ),
+        )
+        .limit(1)
+    )[0]
 
+  }
   public async findByClient(
     data: VActivity.clientId & VActivity.organizationId,
   ) {
     return await db
-      .select()
+      .select({
+        ...activityRefColumns,
+        client: {
+          ...clientRefColumns
+        },
+        user: {
+          ...userRefColumns
+        }
+      })
       .from(activities)
+      .innerJoin(clients, eq(clients.id, activities.clientId))
+      .innerJoin(users, eq(users.id, activities.userId))
       .where(
         and(
           eq(activities.clientId, data.clientId),
@@ -103,11 +113,20 @@ class ActivityRepo {
       )
       .orderBy(desc(activities.occurredAt));
   }
-
   public async findByDeal(data: VActivity.dealId & VActivity.organizationId) {
     return await db
-      .select()
+      .select({
+        ...dealRefColumns,
+        deal: {
+          ...dealRefColumns
+        },
+        user: {
+          ...userRefColumns
+        }
+      })
       .from(activities)
+      .innerJoin(deals, eq(deals.id, activities.dealId))
+      .innerJoin(users, eq(users.id, activities.userId))
       .where(
         and(
           eq(activities.dealId, data.dealId),
@@ -116,7 +135,6 @@ class ActivityRepo {
       )
       .orderBy(desc(activities.occurredAt));
   }
-
   public async update(tx: NodePgDatabase, data: VActivity.activityId & VActivity.update) {
     const newData: Partial<typeof activities.$inferInsert> = {
       updatedAt: new Date(),
@@ -142,7 +160,6 @@ class ActivityRepo {
       )[0] ?? null
     );
   }
-
   public async delete(tx: NodePgDatabase, data: VActivity.activityId) {
     return (await tx
       .delete(activities)

@@ -1,21 +1,47 @@
 import { db } from "../../Database"
+import { CustomError } from "../../ErrorHandler/CustomError"
 import { IReply } from "../../Interfaces/IReply"
 import { cusrorUtils } from "../../Utils/cursot.utils"
 import { VAuth } from "../Auth/auth.validator"
 import ConversationMemberRepo from "../ConversationMember/ConversationMember.repo"
+import MessageRepo from "../Message/Message.repo"
 import ConversationRepo from "./Conversation.repo"
 import { VConversation } from "./conversation.validator"
 
 export const conversationService = {
-    create: async (user: VAuth.userId, conversation: VConversation.create) => {
-        const conversationMember = await db.transaction(async (tx) => {
-            const createdConversation: NonNullable<any> = await ConversationRepo.create(tx, { ...conversation, userId: user.userId })
-            const allParticipants = [user.userId, ...conversation.participants]
-            const participantsArray: { conversationId: string, userId: string }[] = allParticipants.map((participant) => ({ conversationId: createdConversation.id, userId: participant }))
-            participantsArray.push({ userId: user.userId, conversationId: createdConversation.id })
-            const createdConversationMembers = await ConversationMemberRepo.create(tx, participantsArray)
-            return createdConversationMembers
-        })
+    create: async (user: VAuth.userId, body: VConversation.create) => {
+        const conversationMember = await db
+            .transaction(async (tx) => {
+                const createdConversation = await
+                    ConversationRepo
+                        .create(tx, {
+                            ...body,
+                            userId: user.userId
+                        })
+                if (!createdConversation) {
+                    throw new CustomError(500, "conversation not created", "SERVER_ERROR")
+                }
+                const participantsArray: {
+                    conversationId: string,
+                    userId: string
+                }[] = body.participants
+                    .map(
+                        (participant) => ({
+                            conversationId: createdConversation.id,
+                            userId: participant
+                        })
+                    )
+                participantsArray
+                    .push(
+                        {
+                            userId: user.userId,
+                            conversationId: createdConversation.id
+                        }
+                    )
+                const createdConversationMembers = await ConversationMemberRepo
+                    .create(tx, participantsArray)
+                return createdConversationMembers
+            })
         return conversationMember
     },
     query: async (user: VAuth.userId, query: VConversation.query): Promise<IReply.queryReturn> => {
@@ -28,9 +54,12 @@ export const conversationService = {
         const nextCursor = hasNextPage && lastConversation ? cusrorUtils.encode({ id: lastConversation.id, createdAt: new Date(lastConversation.createdAt).toISOString() }) : null
         return { data, pagination: { limit: query.limit, hasNextPage, nextCursor } }
     },
-    getById: async (user: VAuth.userId, conversation: VConversation.conversationId, ConversationAndMessages: VConversation.conversationAndMessages) => {
-        const foundConversation = await ConversationRepo.getById({ ...user, ...conversation, ...ConversationAndMessages })
-        return foundConversation
+    getById: async (user: VAuth.userId, param: VConversation.conversationId, query: VConversation.conversationAndMessages) => {
+        const conversation = await ConversationRepo.getById({ ...user, ...param, ...query })
+        if (!conversation) throw new CustomError(404, "conversation not found", "NOT_FOUND")
+        const latestMessages = await MessageRepo.query({ conversationId: conversation.id, limit: 1, cursor: null })
+        const latestMembers = await ConversationMemberRepo.query({ conversationId: conversation.id, limit: 1, cursor: null })
+        return { conversation, latestMessages, latestMembers }
     },
     update: async (user: VAuth.userId, conversation: VConversation.update & VConversation.conversationId) => {
         const updatedConversation = await ConversationRepo.update({ name: conversation.name, userId: user.userId, conversationId: conversation.conversationId })

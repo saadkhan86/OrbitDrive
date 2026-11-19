@@ -1,12 +1,14 @@
-import { eq, and, ilike, or, count, desc, getTableColumns, SQL, sql } from "drizzle-orm";
+import { eq, and, ilike, or, count, desc, SQL } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { VDeal } from "./deal.validator";
 import { deals } from "../../Database/schemas/deals.Schema";
 import { db } from "../../Database";
 import { clients } from "../../Database/schemas/clients.Schema";
+import clientRefColumns from "../Client/client.refrence";
+import dealRefColumns from "./deal.refrence";
 
 class DealRepo {
-  public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId ) {
+  public async create(tx: NodePgDatabase, data: VDeal.create & VDeal.organizationId) {
     return (
       await tx
         .insert(deals)
@@ -23,13 +25,12 @@ class DealRepo {
         .returning()
     )[0];
   }
-
   public async findById(data: VDeal.dealId) {
     return (
       await db
         .select({
-          ...getTableColumns(deals),
-          client: { id: clients.id, name: clients.name, email: clients.email }
+          ...dealRefColumns,
+          client: { ...clientRefColumns }
         })
         .from(deals)
         .innerJoin(clients, eq(clients.id, deals.clientId))
@@ -56,12 +57,20 @@ class DealRepo {
       )
     }
     const [foundDeals, total] = await Promise.all([
-      db.select().from(deals).where(and(..._query)).orderBy(desc(deals.createdAt)).limit(limit).offset((page - 1) * limit),
-      db.select({ count: count() }).from(deals).where(and(..._query))
+      db
+        .select()
+        .from(deals)
+        .where(and(..._query))
+        .orderBy(desc(deals.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit),
+      db
+        .select({ count: count() })
+        .from(deals)
+        .where(and(..._query))
     ])
     return { deals: foundDeals, count: total[0]?.count ?? 0 }
   }
-
   public async update(
     tx: NodePgDatabase,
     data: VDeal.update & VDeal.dealId & VDeal.organizationId,
@@ -87,7 +96,6 @@ class DealRepo {
         .returning()
     )[0];
   }
-
   public async delete(tx: NodePgDatabase, data: VDeal.dealId & VDeal.organizationId) {
     return (
       await tx
