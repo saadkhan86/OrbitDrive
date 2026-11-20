@@ -1,5 +1,5 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { and, desc, eq, getTableColumns, inArray, lt, or, SQL } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, lt, or, sql, SQL } from "drizzle-orm";
 import { conversation_members } from "../../Database/schemas/conversation_members.Schema";
 import { VConversationMember } from "./conversationMember.validator";
 import { db } from "../../Database";
@@ -7,10 +7,10 @@ import { users } from "../../Database/schemas/users.Schema";
 import { ICursor } from "../../Interfaces/ICursor";
 
 class ConversationMember {
-    public async create(tx: NodePgDatabase, data: { conversationId: string, userId: string }[]) {
-        console.log(data)
+    public async create(data: { conversationId: string, userId: string }[]) {
+
         return (
-            await tx
+            await db
                 .insert(conversation_members)
                 .values(data)
                 .returning()
@@ -58,6 +58,18 @@ class ConversationMember {
                     .where(inArray(conversation_members.userId, data.participants))
                     .returning()
         )[0] ?? null;
+    }
+    public async findExisting(data: { members: string[] }) {
+        return await db
+            .select({
+                conversationId: conversation_members.conversationId
+            })
+            .from(conversation_members)
+            .where(inArray(conversation_members.userId, data.members))
+            .groupBy(conversation_members.conversationId)
+            .having(
+                sql`COUNT(DISTINCT ${conversation_members.userId}) = ${data.members.length}`
+            );
     }
 }
 export default new ConversationMember()

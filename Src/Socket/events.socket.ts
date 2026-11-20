@@ -1,9 +1,7 @@
 import { Server } from "socket.io";
-import { AuthenticatedSocket, CallBack, CreateMessage } from "./types.socket";
-import { SocketCallback, SocketResponse, response } from "./response.socket";
-import ConversationRepo from "../Modules/Conversation/Conversation.repo";
-import MessageRepo from "../Modules/Message/Message.repo";
-import { db } from "../Database";
+import { AuthenticatedSocket, CreateMessage } from "./types.socket";
+import { SocketCallback, response } from "./response.socket";
+import SocketRepo from "./Socket.Repo";
 
 export const RegisterSocketEvents = (io: Server) => {
     io.on("connection", (socket) => {
@@ -19,30 +17,18 @@ export const RegisterSocketEvents = (io: Server) => {
             })
         socket
             .on("send_message", async (data: CreateMessage, callback: SocketCallback) => {
-                let finalConversationId;
-                let newMessage;
-                if (data.conversationId) {
-                    newMessage = await MessageRepo.create({
-                        conversationId: data.conversationId,
-                        content: data.content,
-                        userId: userSocket.user.userId
-                    })
-                } else {
-                    const conversationResult = db.transaction(async (tx) => {
-                        const existing = await 
-                    })
-                }
-                socket.to(data.conversationId)
-                    .emit("receive_message",
-                        response({ success: true, message: "message received", data: { user: userSocket.user, message: message as any } })
-                    )
+                const message = await SocketRepo.create(userSocket.user, data)
+                const conversationId = message?.conversationId
+                const receiverId = data.receiverId
+                const room = io.sockets.adapter.rooms.get(conversationId!)
+                socket.to(data.receiverId).emit("receive_message", message)
                 callback(response({
                     success: true,
-                    message: "new message received",
-                    data: { user: userSocket.user, message: message as any }
+                    message: "message created",
+                    data: { user: userSocket.user, message }
                 }))
             })
-        socket.on("leave_conversation", (conversationId: string) => {
+        socket.on("leave", (conversationId: string) => {
             socket.leave(conversationId)
         })
         socket.on("disconnect", () => {

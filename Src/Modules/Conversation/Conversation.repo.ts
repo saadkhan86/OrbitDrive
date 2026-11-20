@@ -12,14 +12,13 @@ import { ICursor } from "../../Interfaces/ICursor";
 import conversationRefColumns from "./conversation.refrence";
 import userRefColumns from "../User/user.reference";
 class ConversationRepo {
-    public async create(tx: NodePgDatabase, data: VConversation.create & VAuth.userId) {
+    public async create(data: VAuth.userId) {
         return (
-            await tx
+            await db
                 .insert(conversations)
                 .values(
                     {
-                        type: data.type,
-                        name: data.name ?? "",
+                        type: "direct",
                         createdBy: data.userId,
                         createdAt: new Date(),
                         updatedAt: new Date()
