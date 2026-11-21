@@ -18,10 +18,15 @@ export const RegisterSocketEvents = (io: Server) => {
         socket
             .on("send_message", async (data: CreateMessage, callback: SocketCallback) => {
                 const message = await SocketRepo.create(userSocket.user, data)
-                const conversationId = message?.conversationId
+                const conversationId = message?.conversationId!
                 const receiverId = data.receiverId
-                const room = io.sockets.adapter.rooms.get(conversationId!)
-                socket.to(data.receiverId).emit("receive_message", message)
+                const receiverSockets = await io.in(receiverId).fetchSockets()
+                const isReceiverInConversation = receiverSockets.some((receiverSocket) => receiverSocket.rooms.has(conversationId!))
+                if (isReceiverInConversation) {
+                    socket.to(conversationId).emit("receive_message", message)
+                } else {
+                    socket.to(data.receiverId).emit("receive_message", message)
+                }
                 callback(response({
                     success: true,
                     message: "message created",
