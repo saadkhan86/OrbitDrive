@@ -1,31 +1,6 @@
 import z from "zod";
 
 export const conversationValidator = {
-    create: z.object({
-        type: z.enum(["direct", "group"]).default("direct"),
-        name: z.coerce.string().optional(),
-        participants: z.array(
-            z.uuid(
-                {
-                    message: "invalid participant id"
-                }
-            )
-                .min(
-                    1, {
-                    message: "atleast one participant is required"
-                }
-                )
-                .nonempty()
-        )
-    })
-        .refine((data) => {
-            if (data.type == "group") {
-                return !!data.name
-            }
-            return true
-        },
-            { abort: true, message: "group name is required", path: ["name"] }
-        ),
     query: z.object({
         search: z.coerce.string().optional(),
         cursor: z.coerce.string().optional(),
@@ -44,7 +19,6 @@ export const conversationValidator = {
 }
 
 export declare namespace VConversation {
-    type create = z.infer<typeof conversationValidator.create>
     type query = z.infer<typeof conversationValidator.query>
     type conversationId = z.infer<typeof conversationValidator.conversationId>
     type conversationAndMessages = z.infer<typeof conversationValidator.membersAndmessages>

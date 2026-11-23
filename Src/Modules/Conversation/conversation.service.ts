@@ -1,4 +1,3 @@
-import { db } from "../../Database"
 import { CustomError } from "../../ErrorHandler/CustomError"
 import { IReply } from "../../Interfaces/IReply"
 import { cusrorUtils } from "../../Utils/cursot.utils"
@@ -9,41 +8,6 @@ import ConversationRepo from "./Conversation.repo"
 import { VConversation } from "./conversation.validator"
 
 export const conversationService = {
-    create: async (user: VAuth.userId, body: VConversation.create) => {
-        const conversationMember = await db
-            .transaction(async (tx) => {
-                const createdConversation = await
-                    ConversationRepo
-                        .create(tx, {
-                            ...body,
-                            userId: user.userId
-                        })
-                if (!createdConversation) {
-                    throw new CustomError(500, "conversation not created", "SERVER_ERROR")
-                }
-                const participantsArray: {
-                    conversationId: string,
-                    userId: string
-                }[] = body.participants
-                    .map(
-                        (participant) => ({
-                            conversationId: createdConversation.id,
-                            userId: participant
-                        })
-                    )
-                participantsArray
-                    .push(
-                        {
-                            userId: user.userId,
-                            conversationId: createdConversation.id
-                        }
-                    )
-                const createdConversationMembers = await ConversationMemberRepo
-                    .create(tx, participantsArray)
-                return createdConversationMembers
-            })
-        return conversationMember
-    },
     query: async (user: VAuth.userId, query: VConversation.query): Promise<IReply.queryReturn> => {
         const decodedCursor = cusrorUtils.decode(query.cursor)
         const cursor = decodedCursor ? { id: decodedCursor.id, createdAt: new Date(decodedCursor.createdAt) } : null

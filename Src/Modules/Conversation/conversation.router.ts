@@ -7,13 +7,6 @@ export const conversationRouter = (app: FastifyInstance) => {
     app.addHook("onRoute", (route) => {
         route.schema = { ...route.schema, tags: ["conversations"] }
     })
-    app.post("/", {
-        schema:
-        {
-            body: conversationValidator.create
-        }
-    }, conversationController.create
-    )
     app.get("/", {
         schema:
         {

@@ -53,6 +53,7 @@ class MessageRepo {
             }
         })
             .from(messages)
+            .innerJoin(users, eq(users.id, messages.senderId))
             .where(and(..._query))
             .orderBy(desc(messages.createdAt), desc(messages.id))
             .limit(data.limit + 1)
