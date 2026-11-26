@@ -20,10 +20,4 @@ export const conversationRouter = (app: FastifyInstance) => {
             querystring: conversationValidator.membersAndmessages
         }
     }, conversationController.getById)
-    app.patch("/:conversationId", {
-        schema: {
-            params: conversationValidator.conversationId,
-            body: conversationValidator.update
-        }
-    }, conversationController.update)
 }

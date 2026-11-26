@@ -1,4 +1,3 @@
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { and, desc, eq, getTableColumns, ilike, lt, or, SQL, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { conversations } from "../../Database/schemas/conversations.Schema";
@@ -102,9 +101,6 @@ class ConversationRepo {
                 .limit(1)
         )[0]
 
-    }
-    public async update(data: { name: string, userId: string, conversationId: string }) {
-        return (await db.update(conversations).set({ name: data.name, updatedAt: new Date() }).where(eq(conversations.id, data.conversationId)).returning())[0]
     }
 }
 export default new ConversationRepo()

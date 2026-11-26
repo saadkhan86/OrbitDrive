@@ -13,14 +13,10 @@ export const conversationValidator = {
         members: z.coerce.number().default(10).optional(),
         messages: z.coerce.number().default(10).optional()
     }),
-    update: z.object({
-        name: z.coerce.string(),
-    })
 }
 
 export declare namespace VConversation {
     type query = z.infer<typeof conversationValidator.query>
     type conversationId = z.infer<typeof conversationValidator.conversationId>
     type conversationAndMessages = z.infer<typeof conversationValidator.membersAndmessages>
-    type update = z.infer<typeof conversationValidator.update>
 }

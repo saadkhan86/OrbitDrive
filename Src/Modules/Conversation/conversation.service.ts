@@ -25,8 +25,4 @@ export const conversationService = {
         const latestMembers = await ConversationMemberRepo.query({ conversationId: conversation.id, limit: 1, cursor: null })
         return { conversation, latestMessages, latestMembers }
     },
-    update: async (user: VAuth.userId, conversation: VConversation.update & VConversation.conversationId) => {
-        const updatedConversation = await ConversationRepo.update({ name: conversation.name, userId: user.userId, conversationId: conversation.conversationId })
-        return updatedConversation
-    }
 }
