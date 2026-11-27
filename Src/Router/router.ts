@@ -37,7 +37,7 @@ export const router = async (app: FastifyInstance) => {
   app.register(activityRouter, { prefix: "/:organizationId/activities" });
   app.register(auditLogRouter, { prefix: "/:organizationId/audit-log" });
   app.register(conversationRouter, { prefix: "/conversations" })
-  app.register(conversationMemberRouter, { prefix: "/:conversationId/conversation-members" })
+  // app.register(conversationMemberRouter, { prefix: "/:conversationId/conversation-members" })
   app.register(messageRouter, { prefix: "/:conversationId/messages" })
   app.register(notificationRouter, { prefix: "/notifications" })
 };
